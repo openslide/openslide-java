@@ -1,11 +1,13 @@
 package edu.cmu.cs.diamond.wholeslide;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.io.File;
 
 import javax.swing.JFrame;
@@ -16,10 +18,26 @@ public class Test extends JPanel {
 
     final private Wholeslide wsd;
 
+    private double downsample = 1.0;
+
     public Test(Wholeslide w) {
         wsd = w;
-        setMinimumSize(wsd.getBaselineDimension());
-        setPreferredSize(wsd.getBaselineDimension());
+        
+        updateSize();
+    }
+
+    private void updateSize() {
+        Dimension d = wsd.getBaselineDimension();
+        d.height /= downsample;
+        d.width /= downsample;
+
+        System.out.println(downsample);
+        System.out.println(d);
+        
+        setMinimumSize(d);
+        setPreferredSize(d);
+        setMaximumSize(d);
+        revalidate();
     }
 
     public static void main(String[] args) {
@@ -29,11 +47,13 @@ public class Test extends JPanel {
 
         JFrame j = new JFrame("OMG");
 
-        Test t = new Test(w);
+        final Test t = new Test(w);
         final JScrollPane jsp = new JScrollPane(t);
+        jsp.setWheelScrollingEnabled(false);
 
         MouseAdapter m = new MouseAdapter() {
             private int x;
+
             private int y;
 
             @Override
@@ -42,28 +62,46 @@ public class Test extends JPanel {
                 x = e.getXOnScreen();
                 y = e.getYOnScreen();
             }
-        
+
             @Override
             public void mouseDragged(MouseEvent e) {
                 System.out.println(e);
-                
+
                 int newX = e.getXOnScreen();
                 int newY = e.getYOnScreen();
                 int relX = newX - x;
                 int relY = newY - y;
                 x = newX;
                 y = newY;
-                
+
                 Point p = jsp.getViewport().getViewPosition();
                 System.out.println(p);
                 p.x -= relX;
                 p.y -= relY;
                 jsp.getViewport().setViewPosition(p);
             }
+
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                int amount = -e.getWheelRotation();
+
+                if (amount > 0) {
+                    t.downsample /= (amount * 1.2);
+                } else {
+                    t.downsample *= (-amount * 1.2);
+                }
+                
+                if (t.downsample < 1) {
+                    t.downsample = 1;
+                }
+                
+                t.updateSize();
+            }
         };
-        
+
         t.addMouseListener(m);
         t.addMouseMotionListener(m);
+        t.addMouseWheelListener(m);
 
         j.getContentPane().add(jsp);
         j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -79,6 +117,6 @@ public class Test extends JPanel {
 
         Rectangle clip = g2.getClipBounds();
         wsd.paintRegion(g2, clip.x, clip.y, clip.x, clip.y, clip.width,
-                clip.height, 1.0);
+                clip.height, downsample);
     }
 }

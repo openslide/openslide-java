@@ -1,4 +1,5 @@
 package edu.cmu.cs.diamond.wholeslide;
+
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -49,23 +50,35 @@ public class Wholeslide {
                 .ws_get_comment(wsd);
     }
 
-    public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy, int w, int h,
-            double downsample) {
+    public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
+            int w, int h, double downsample) {
         int layer = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_best_layer_for_downsample(wsd, downsample);
 
         double actualDownsample = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_layer_downsample(wsd, layer);
 
-        BufferedImage img = new BufferedImage(w, h,
+        double newDownsample = downsample / actualDownsample;
+
+        System.out.println("newDownsample " + newDownsample);
+
+        int newW = (int) (newDownsample * w);
+        int newH = (int) (newDownsample * h);
+        int newX = (int) (newDownsample * sx);
+        int newY = (int) (newDownsample * sy);
+
+        System.out.println("newW " + newW + ", newH " + newH + ", newX " + newX
+                + ", newY " + newY);
+
+        BufferedImage img = new BufferedImage(newW, newH,
                 BufferedImage.TYPE_INT_ARGB_PRE);
 
         int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                 .getData();
 
         edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_read_region(wsd, data,
-                sx, sy, layer, w, h);
-        
-        g.drawImage(img, dx, dy, null);
+                newX, newY, layer, newW, newH);
+
+        g.drawImage(img, dx, dy, w, h, null);
     }
 }
