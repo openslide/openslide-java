@@ -24,10 +24,8 @@
 
 %newobject ws_open;
 
-typedef unsigned int uint32_t;
-typedef signed char uint8_t;  // hah
-
-%apply uint8_t[] {uint8_t *};
+typedef int uint32_t;  // hah
+%apply uint32_t[] {uint32_t *};
 
 
 void ws_get_baseline_dimensions(wholeslide_t *wsd,
