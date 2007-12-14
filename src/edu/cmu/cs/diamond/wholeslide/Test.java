@@ -6,10 +6,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.io.File;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 
 public class Test extends JPanel {
 
@@ -21,7 +18,7 @@ public class Test extends JPanel {
 
     final private int maxDownsampleFactor;
 
-    final private double DOWNSAMPLE_BASE = 1.2;
+    private static final double DOWNSAMPLE_BASE = 1.2;
 
     private void adjustDownsample(int amount) {
         downsampleFactor += amount;
