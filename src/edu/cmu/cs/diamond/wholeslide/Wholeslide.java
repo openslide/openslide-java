@@ -68,9 +68,6 @@ public class Wholeslide {
 
         double newDownsample = downsample / actualDownsample;
 
-        g.setColor(getBackgroundColor());
-        g.fillRect(dx, dy, w, h);
-
         if (sx < 0) {
             dx -= sx;
             w += sx;
@@ -106,7 +103,7 @@ public class Wholeslide {
         g.drawImage(img, dx, dy, w, h, null);
     }
 
-    private Color getBackgroundColor() {
+    public Color getBackgroundColor() {
         int color = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_background_color(wsd);
         return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF,

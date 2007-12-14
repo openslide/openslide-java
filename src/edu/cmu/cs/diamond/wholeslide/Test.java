@@ -22,6 +22,8 @@ public class Test extends JPanel {
 
     public Test(Wholeslide w) {
         wsd = w;
+        
+        setBackground(wsd.getBackgroundColor());
 
         updateSize();
     }
