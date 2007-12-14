@@ -1,9 +1,6 @@
 package edu.cmu.cs.diamond.wholeslide;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -16,18 +13,41 @@ import javax.swing.JScrollPane;
 
 public class Test extends JPanel {
 
+    private static final int MIN_SIZE = 100;
+
     final private Wholeslide wsd;
-    
+
     private int downsampleFactor = 0;
-    
+
+    final private int maxDownsampleFactor;
+
+    final private double DOWNSAMPLE_BASE = 1.2;
+
+    private void adjustDownsample(int amount) {
+        downsampleFactor += amount;
+
+        if (downsampleFactor < 0) {
+            downsampleFactor = 0;
+        } else if (downsampleFactor > maxDownsampleFactor) {
+            downsampleFactor = maxDownsampleFactor;
+        }
+
+        updateSize();
+    }
+
     private double getDownsample() {
-        return Math.pow(1.2, downsampleFactor);
+        return Math.pow(DOWNSAMPLE_BASE, downsampleFactor);
     }
 
     public Test(Wholeslide w) {
         wsd = w;
-        
+
         setBackground(wsd.getBackgroundColor());
+
+        Dimension d = wsd.getBaselineDimension();
+        maxDownsampleFactor = (int) Math.max(Math.log(d.getHeight() / MIN_SIZE)
+                / Math.log(DOWNSAMPLE_BASE), Math.log(d.getWidth() / MIN_SIZE)
+                / Math.log(DOWNSAMPLE_BASE));
 
         updateSize();
     }
@@ -39,11 +59,11 @@ public class Test extends JPanel {
         d.width /= downsample;
 
         System.out.println(downsample);
-//        System.out.println(d);
-        
+        // System.out.println(d);
+
         setMinimumSize(d);
         setPreferredSize(d);
-//        setMaximumSize(d);
+        // setMaximumSize(d);
         revalidate();
         repaint();
     }
@@ -63,13 +83,14 @@ public class Test extends JPanel {
             private int x;
 
             private int y;
-            
+
             private int sbx;
+
             private int sby;
 
             @Override
             public void mousePressed(MouseEvent e) {
-//                System.out.println(e);
+                // System.out.println(e);
                 x = e.getX();
                 y = e.getY();
                 sbx = jsp.getHorizontalScrollBar().getValue();
@@ -78,7 +99,7 @@ public class Test extends JPanel {
 
             @Override
             public void mouseDragged(MouseEvent e) {
-//                System.out.println(e);
+                // System.out.println(e);
 
                 int newX = e.getX();
                 int newY = e.getY();
@@ -96,12 +117,7 @@ public class Test extends JPanel {
             public void mouseWheelMoved(MouseWheelEvent e) {
                 int amount = -e.getWheelRotation();
 
-                t.downsampleFactor -= amount;
-                if (t.downsampleFactor < 0) {
-                    t.downsampleFactor = 0;
-                }
-                
-                t.updateSize();
+                t.adjustDownsample(-amount);
             }
         };
 
@@ -128,20 +144,25 @@ public class Test extends JPanel {
         double downsample = getDownsample();
         d.width /= downsample;
         d.height /= downsample;
-        
+
         int w = getWidth();
         int h = getHeight();
-        
+
         if (w > d.width) {
             offsetX = (w - d.width) / 2;
         }
         if (h > d.height) {
             offsetY = (h - d.height) / 2;
         }
-        
+
         Rectangle clip = g2.getClipBounds();
-//        System.out.println(clip);
-        wsd.paintRegion(g2, clip.x, clip.y, clip.x - offsetX, clip.y - offsetY, clip.width,
-                clip.height, downsample);
+
+        g2.setColor(Color.BLACK);
+        int rectVal = 3;
+        g2.fillRect(offsetX + rectVal, offsetY + rectVal, d.width, d.height);
+
+        // System.out.println(clip);
+        wsd.paintRegion(g2, clip.x, clip.y, clip.x - offsetX, clip.y - offsetY,
+                clip.width, clip.height, downsample);
     }
 }
