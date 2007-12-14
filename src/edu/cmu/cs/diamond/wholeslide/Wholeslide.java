@@ -81,4 +81,11 @@ public class Wholeslide {
 
         g.drawImage(img, dx, dy, w, h, null);
     }
+
+    private Color getBackgroundColor() {
+        int color = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
+                .ws_get_background_color(wsd);
+        return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF,
+                (color >> 0) & 0xFF, (color >> 24) & 0xFF);
+    }
 }
