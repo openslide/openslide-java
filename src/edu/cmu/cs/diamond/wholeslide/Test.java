@@ -58,12 +58,17 @@ public class Test extends JPanel {
             private int x;
 
             private int y;
+            
+            private int sbx;
+            private int sby;
 
             @Override
             public void mousePressed(MouseEvent e) {
 //                System.out.println(e);
                 x = e.getX();
                 y = e.getY();
+                sbx = jsp.getHorizontalScrollBar().getValue();
+                sby = jsp.getVerticalScrollBar().getValue();
             }
 
             @Override
@@ -72,16 +77,14 @@ public class Test extends JPanel {
 
                 int newX = e.getX();
                 int newY = e.getY();
-                int relX = newX - x;
-                int relY = newY - y;
-                x = newX;
-                y = newY;
+                int relX = sbx + x - newX;
+                int relY = sby + y - newY;
 
                 JScrollBar h = jsp.getHorizontalScrollBar();
                 JScrollBar v = jsp.getVerticalScrollBar();
 
-                h.setValue(h.getValue() - relX);
-                v.setValue(v.getValue() - relY);
+                h.setValue(relX);
+                v.setValue(relY);
             }
 
             @Override
@@ -102,9 +105,9 @@ public class Test extends JPanel {
             }
         };
 
-        jsp.addMouseListener(m);
-        jsp.addMouseMotionListener(m);
-        jsp.addMouseWheelListener(m);
+        jsp.getViewport().addMouseListener(m);
+        jsp.getViewport().addMouseMotionListener(m);
+        jsp.getViewport().addMouseWheelListener(m);
 
         j.getContentPane().add(jsp);
         j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
