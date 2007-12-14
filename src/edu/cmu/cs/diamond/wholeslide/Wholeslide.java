@@ -70,23 +70,32 @@ public class Wholeslide {
 
         if (sx < 0) {
             dx -= sx;
-            w += sx;
+            w += sx; // shrink w
             sx = 0;
         }
         if (sy < 0) {
             dy -= sy;
-            h += sy;
+            h += sy; // shrink h
             sy = 0;
         }
-        
-//        System.out.println("newDownsample " + newDownsample);
 
-        getLayerDimension(layer);
+        // System.out.println("newDownsample " + newDownsample);
 
         int newW = (int) (newDownsample * w);
         int newH = (int) (newDownsample * h);
         int newX = (int) (downsample * sx);
         int newY = (int) (downsample * sy);
+
+        Dimension d = getLayerDimension(layer);
+
+        if (newW > d.width - sx) {
+            newW = d.width - sx;
+            w = (int) (newW / newDownsample);
+        }
+        if (newH > d.height - sy) {
+            newH = d.height - sy;
+            h = (int) (newH / newDownsample);
+        }
 
 //        System.out.println("newW " + newW + ", newH " + newH + ", newX " + newX
 //                + ", newY " + newY);
@@ -98,7 +107,7 @@ public class Wholeslide {
                 .getData();
 
         edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_read_region(wsd, data,
-                newX, newY, layer, newW, newH);
+                newX, newY, layer, img.getWidth(), img.getHeight());
 
         g.drawImage(img, dx, dy, w, h, null);
     }
