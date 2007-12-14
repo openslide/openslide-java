@@ -18,7 +18,11 @@ public class Test extends JPanel {
 
     final private Wholeslide wsd;
     
-    private double downsample = 1.0;
+    private int downsampleFactor = 0;
+    
+    private double getDownsample() {
+        return Math.pow(1.2, downsampleFactor);
+    }
 
     public Test(Wholeslide w) {
         wsd = w;
@@ -30,6 +34,7 @@ public class Test extends JPanel {
 
     private void updateSize() {
         Dimension d = wsd.getBaselineDimension();
+        double downsample = getDownsample();
         d.height /= downsample;
         d.width /= downsample;
 
@@ -91,14 +96,9 @@ public class Test extends JPanel {
             public void mouseWheelMoved(MouseWheelEvent e) {
                 int amount = -e.getWheelRotation();
 
-                if (amount > 0) {
-                    t.downsample /= (amount * 1.2);
-                } else {
-                    t.downsample *= (-amount * 1.2);
-                }
-                
-                if (t.downsample < 1) {
-                    t.downsample = 1;
+                t.downsampleFactor -= amount;
+                if (t.downsampleFactor < 0) {
+                    t.downsampleFactor = 0;
                 }
                 
                 t.updateSize();
@@ -125,6 +125,7 @@ public class Test extends JPanel {
         int offsetY = 0;
 
         Dimension d = wsd.getBaselineDimension();
+        double downsample = getDownsample();
         d.width /= downsample;
         d.height /= downsample;
         
