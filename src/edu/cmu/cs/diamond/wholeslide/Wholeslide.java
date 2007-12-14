@@ -12,9 +12,21 @@ import edu.cmu.cs.diamond.wholeslide.glue.SWIGTYPE_p__wholeslide;
 public class Wholeslide {
     final private SWIGTYPE_p__wholeslide wsd;
 
+    final private int baselineW;
+
+    final private int baselineH;
+
     public Wholeslide(File file) {
         wsd = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_open(file
                 .getPath());
+
+        // store baseline
+        int w[] = new int[1];
+        int h[] = new int[1];
+        edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
+                .ws_get_baseline_dimensions(wsd, w, h);
+        baselineW = w[0];
+        baselineH = h[0];
     }
 
     @Override
@@ -29,12 +41,7 @@ public class Wholeslide {
     }
 
     public Dimension getBaselineDimension() {
-        int x[] = new int[1];
-        int y[] = new int[1];
-        edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
-                .ws_get_baseline_dimensions(wsd, x, y);
-
-        return new Dimension(x[0], y[0]);
+        return new Dimension(baselineW, baselineH);
     }
 
     public Dimension getLayerDimension(int layer) {
@@ -64,10 +71,21 @@ public class Wholeslide {
         g.setColor(getBackgroundColor());
         g.fillRect(dx, dy, w, h);
 
+        if (sx < 0) {
+            dx -= sx;
+            w += sx;
+            sx = 0;
+        }
+        if (sy < 0) {
+            dy -= sy;
+            h += sy;
+            sy = 0;
+        }
+        
         System.out.println("newDownsample " + newDownsample);
 
         getLayerDimension(layer);
-        
+
         int newW = (int) (newDownsample * w);
         int newH = (int) (newDownsample * h);
         int newX = (int) (downsample * sx);

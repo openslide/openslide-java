@@ -3,7 +3,6 @@ package edu.cmu.cs.diamond.wholeslide;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -12,17 +11,18 @@ import java.io.File;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
 public class Test extends JPanel {
 
     final private Wholeslide wsd;
-
+    
     private double downsample = 1.0;
 
     public Test(Wholeslide w) {
         wsd = w;
-        
+
         updateSize();
     }
 
@@ -36,7 +36,7 @@ public class Test extends JPanel {
         
         setMinimumSize(d);
         setPreferredSize(d);
-        setMaximumSize(d);
+//        setMaximumSize(d);
         revalidate();
         repaint();
     }
@@ -60,26 +60,26 @@ public class Test extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
 //                System.out.println(e);
-                x = e.getXOnScreen();
-                y = e.getYOnScreen();
+                x = e.getX();
+                y = e.getY();
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
 //                System.out.println(e);
 
-                int newX = e.getXOnScreen();
-                int newY = e.getYOnScreen();
+                int newX = e.getX();
+                int newY = e.getY();
                 int relX = newX - x;
                 int relY = newY - y;
                 x = newX;
                 y = newY;
 
-                Point p = jsp.getViewport().getViewPosition();
-                System.out.println(p);
-                p.x -= relX;
-                p.y -= relY;
-                jsp.getViewport().setViewPosition(p);
+                JScrollBar h = jsp.getHorizontalScrollBar();
+                JScrollBar v = jsp.getVerticalScrollBar();
+
+                h.setValue(h.getValue() - relX);
+                v.setValue(v.getValue() - relY);
             }
 
             @Override
@@ -100,9 +100,9 @@ public class Test extends JPanel {
             }
         };
 
-        t.addMouseListener(m);
-        t.addMouseMotionListener(m);
-        t.addMouseWheelListener(m);
+        jsp.addMouseListener(m);
+        jsp.addMouseMotionListener(m);
+        jsp.addMouseWheelListener(m);
 
         j.getContentPane().add(jsp);
         j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -116,9 +116,26 @@ public class Test extends JPanel {
 
         Graphics2D g2 = (Graphics2D) g;
 
+        int offsetX = 0;
+        int offsetY = 0;
+
+        Dimension d = wsd.getBaselineDimension();
+        d.width /= downsample;
+        d.height /= downsample;
+        
+        int w = getWidth();
+        int h = getHeight();
+        
+        if (w > d.width) {
+            offsetX = (w - d.width) / 2;
+        }
+        if (h > d.height) {
+            offsetY = (h - d.height) / 2;
+        }
+        
         Rectangle clip = g2.getClipBounds();
         System.out.println(clip);
-        wsd.paintRegion(g2, clip.x, clip.y, clip.x, clip.y, clip.width,
+        wsd.paintRegion(g2, clip.x, clip.y, clip.x - offsetX, clip.y - offsetY, clip.width,
                 clip.height, downsample);
     }
 }
