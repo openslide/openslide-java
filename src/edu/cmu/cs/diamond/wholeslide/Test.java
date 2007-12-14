@@ -112,9 +112,28 @@ public class Test extends JPanel {
 
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                int amount = -e.getWheelRotation();
+                MouseEvent e2 = SwingUtilities.convertMouseEvent(e
+                        .getComponent(), e, t);
 
-                t.adjustDownsample(-amount);
+                int amount = e.getWheelRotation();
+
+                double oldDS = t.getDownsample();
+
+                int bx = (int) (e2.getX() * oldDS);
+                int by = (int) (e2.getY() * oldDS);
+
+                t.adjustDownsample(amount);
+
+                double newDS = t.getDownsample();
+
+                System.out.println("oldDS: " + oldDS);
+                System.out.println("newDS: " + newDS);
+                System.out.println();
+
+                JScrollBar hs = jsp.getHorizontalScrollBar();
+                JScrollBar vs = jsp.getVerticalScrollBar();
+                hs.setValue((int) (bx / newDS) - e.getX());
+                vs.setValue((int) (by / newDS) - e.getY());
             }
         };
 
