@@ -1,5 +1,6 @@
 package edu.cmu.cs.diamond.wholeslide;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -60,12 +61,17 @@ public class Wholeslide {
 
         double newDownsample = downsample / actualDownsample;
 
+        g.setColor(getBackgroundColor());
+        g.fillRect(dx, dy, w, h);
+
         System.out.println("newDownsample " + newDownsample);
 
+        getLayerDimension(layer);
+        
         int newW = (int) (newDownsample * w);
         int newH = (int) (newDownsample * h);
-        int newX = (int) (newDownsample * sx);
-        int newY = (int) (newDownsample * sy);
+        int newX = (int) (downsample * sx);
+        int newY = (int) (downsample * sy);
 
         System.out.println("newW " + newW + ", newH " + newH + ", newX " + newX
                 + ", newY " + newY);
