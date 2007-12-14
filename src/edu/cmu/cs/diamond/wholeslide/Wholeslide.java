@@ -79,7 +79,7 @@ public class Wholeslide {
             sy = 0;
         }
         
-        System.out.println("newDownsample " + newDownsample);
+//        System.out.println("newDownsample " + newDownsample);
 
         getLayerDimension(layer);
 
@@ -88,8 +88,8 @@ public class Wholeslide {
         int newX = (int) (downsample * sx);
         int newY = (int) (downsample * sy);
 
-        System.out.println("newW " + newW + ", newH " + newH + ", newX " + newX
-                + ", newY " + newY);
+//        System.out.println("newW " + newW + ", newH " + newH + ", newX " + newX
+//                + ", newY " + newY);
 
         BufferedImage img = new BufferedImage(newW, newH,
                 BufferedImage.TYPE_INT_ARGB_PRE);

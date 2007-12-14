@@ -34,7 +34,7 @@ public class Test extends JPanel {
         d.width /= downsample;
 
         System.out.println(downsample);
-        System.out.println(d);
+//        System.out.println(d);
         
         setMinimumSize(d);
         setPreferredSize(d);
@@ -139,7 +139,7 @@ public class Test extends JPanel {
         }
         
         Rectangle clip = g2.getClipBounds();
-        System.out.println(clip);
+//        System.out.println(clip);
         wsd.paintRegion(g2, clip.x, clip.y, clip.x - offsetX, clip.y - offsetY, clip.width,
                 clip.height, downsample);
     }
