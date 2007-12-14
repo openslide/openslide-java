@@ -38,6 +38,7 @@ public class Test extends JPanel {
         setPreferredSize(d);
         setMaximumSize(d);
         revalidate();
+        repaint();
     }
 
     public static void main(String[] args) {
@@ -58,14 +59,14 @@ public class Test extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                System.out.println(e);
+//                System.out.println(e);
                 x = e.getXOnScreen();
                 y = e.getYOnScreen();
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                System.out.println(e);
+//                System.out.println(e);
 
                 int newX = e.getXOnScreen();
                 int newY = e.getYOnScreen();
@@ -116,6 +117,7 @@ public class Test extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
 
         Rectangle clip = g2.getClipBounds();
+        System.out.println(clip);
         wsd.paintRegion(g2, clip.x, clip.y, clip.x, clip.y, clip.width,
                 clip.height, downsample);
     }
