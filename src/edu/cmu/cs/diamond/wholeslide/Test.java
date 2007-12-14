@@ -55,11 +55,11 @@ public class Test extends JPanel {
         d.height /= downsample;
         d.width /= downsample;
 
-        System.out.println(downsample);
         // System.out.println(d);
 
         setMinimumSize(d);
         setPreferredSize(d);
+        setSize(d);
         // setMaximumSize(d);
         revalidate();
         repaint();
