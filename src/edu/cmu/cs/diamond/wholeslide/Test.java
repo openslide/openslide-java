@@ -87,27 +87,52 @@ public class Test extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                if (!SwingUtilities.isLeftMouseButton(e)) {
+                    return;
+                }
+
                 // System.out.println(e);
                 x = e.getX();
                 y = e.getY();
-                sbx = jsp.getHorizontalScrollBar().getValue();
-                sby = jsp.getVerticalScrollBar().getValue();
+
+                JScrollBar h = jsp.getHorizontalScrollBar();
+                sbx = h.getValue();
+                JScrollBar v = jsp.getVerticalScrollBar();
+                sby = v.getValue();
+
+                h.setValueIsAdjusting(true);
+                v.setValueIsAdjusting(true);
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                // System.out.println(e);
+                if (!SwingUtilities.isLeftMouseButton(e)) {
+                    return;
+                }
 
-                int newX = e.getX();
-                int newY = e.getY();
-                int relX = sbx + x - newX;
-                int relY = sby + y - newY;
+                int newX = sbx + x - e.getX();
+                int newY = sby + y - e.getY();
+
+                System.out.println(newX + " " + newY);
 
                 JScrollBar h = jsp.getHorizontalScrollBar();
                 JScrollBar v = jsp.getVerticalScrollBar();
 
-                h.setValue(relX);
-                v.setValue(relY);
+                h.setValue(newX);
+                v.setValue(newY);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (!SwingUtilities.isLeftMouseButton(e)) {
+                    return;
+                }
+
+                JScrollBar h = jsp.getHorizontalScrollBar();
+                JScrollBar v = jsp.getHorizontalScrollBar();
+
+                h.setValueIsAdjusting(false);
+                v.setValueIsAdjusting(false);
             }
 
             @Override
