@@ -10,7 +10,7 @@ import java.io.File;
 import edu.cmu.cs.diamond.wholeslide.glue.SWIGTYPE_p__wholeslide;
 
 public class Wholeslide {
-    final private SWIGTYPE_p__wholeslide wsd;
+    private SWIGTYPE_p__wholeslide wsd;
 
     final private int baselineW;
 
@@ -29,22 +29,41 @@ public class Wholeslide {
         baselineH = h[0];
     }
 
+    public void dispose() {
+        if (wsd != null) {
+            edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_close(wsd);
+            wsd = null;
+        }
+    }
+
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_close(wsd);
+        dispose();
     }
 
     public int getLayerCount() {
+        checkDisposed();
+        
         return edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_layer_count(wsd);
     }
 
+    private void checkDisposed() {
+        if (wsd == null) {
+            throw new WholeslideDisposedException();
+        }
+    }
+
     public Dimension getBaselineDimension() {
+        checkDisposed();
+        
         return new Dimension(baselineW, baselineH);
     }
 
     public Dimension getLayerDimension(int layer) {
+        checkDisposed();
+        
         int[] x = new int[1];
         int[] y = new int[1];
         edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_get_layer_dimensions(
@@ -54,12 +73,16 @@ public class Wholeslide {
     }
 
     public String getComment() {
+        checkDisposed();
+        
         return edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_comment(wsd);
     }
 
     public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
             int w, int h, double downsample) {
+        checkDisposed();
+        
         int layer = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_best_layer_for_downsample(wsd, downsample);
 
@@ -97,8 +120,9 @@ public class Wholeslide {
             h = (int) (newH / newDownsample);
         }
 
-//        System.out.println("newW " + newW + ", newH " + newH + ", newX " + newX
-//                + ", newY " + newY);
+        // System.out.println("newW " + newW + ", newH " + newH + ", newX " +
+        // newX
+        // + ", newY " + newY);
 
         BufferedImage img = new BufferedImage(newW, newH,
                 BufferedImage.TYPE_INT_ARGB_PRE);
@@ -113,6 +137,8 @@ public class Wholeslide {
     }
 
     public Color getBackgroundColor() {
+        checkDisposed();
+        
         int color = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_background_color(wsd);
         return new Color((color >> 16) & 0xFF, (color >> 8) & 0xFF,
