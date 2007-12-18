@@ -39,8 +39,6 @@ public class Test extends JPanel {
     public Test(Wholeslide w) {
         wsd = w;
 
-        setBackground(wsd.getBackgroundColor());
-
         Dimension d = wsd.getBaselineDimension();
         maxDownsampleFactor = (int) Math.max(Math.log(d.getHeight() / MIN_SIZE)
                 / Math.log(DOWNSAMPLE_BASE), Math.log(d.getWidth() / MIN_SIZE)
