@@ -12,7 +12,7 @@ public class Test extends JPanel {
 
     private static final int MIN_SIZE = 100;
 
-    final private Wholeslide wsd;
+    final transient private Wholeslide wsd;
 
     private int downsampleFactor = 0;
 
