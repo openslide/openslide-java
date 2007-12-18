@@ -34,4 +34,5 @@ void ws_get_baseline_dimensions(wholeslide_t *wsd,
 void ws_get_layer_dimensions(wholeslide_t *wsd, uint32_t layer,
 			     uint32_t *OUTPUT, uint32_t *OUTPUT);
 
+%include "wholeslide-features.h"
 %include "wholeslide.h"
