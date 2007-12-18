@@ -68,7 +68,7 @@ public class Test extends JPanel {
     public static void main(String[] args) {
         File f = new File(args[0]);
 
-        Wholeslide w = new Wholeslide(f);
+        final Wholeslide w = new Wholeslide(f);
 
         JFrame j = new JFrame("OMG");
 
