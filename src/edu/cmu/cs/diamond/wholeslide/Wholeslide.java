@@ -1,6 +1,5 @@
 package edu.cmu.cs.diamond.wholeslide;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -19,6 +18,11 @@ public class Wholeslide {
     public Wholeslide(File file) {
         wsd = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_open(file
                 .getPath());
+        
+        if (wsd == null) {
+            // TODO not just file not found
+            throw new WholeslideException();
+        }
 
         // store baseline
         int w[] = new int[1];

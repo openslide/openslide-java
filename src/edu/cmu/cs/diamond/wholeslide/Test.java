@@ -5,6 +5,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import javax.swing.*;
 
@@ -66,13 +67,14 @@ public class Test extends JPanel {
     public static void main(String[] args) {
         File f = new File(args[0]);
 
-        final Wholeslide w = new Wholeslide(f);
+        Wholeslide w = new Wholeslide(f);
 
         JFrame j = new JFrame("OMG");
 
         final Test t = new Test(w);
         final JScrollPane jsp = new JScrollPane(t);
         jsp.setWheelScrollingEnabled(false);
+        jsp.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
 
         MouseAdapter m = new MouseAdapter() {
             private int x;
@@ -111,7 +113,7 @@ public class Test extends JPanel {
                 int newX = sbx + x - e.getX();
                 int newY = sby + y - e.getY();
 
-                System.out.println(newX + " " + newY);
+//                System.out.println(newX + " " + newY);
 
                 JScrollBar h = jsp.getHorizontalScrollBar();
                 JScrollBar v = jsp.getVerticalScrollBar();
@@ -149,9 +151,9 @@ public class Test extends JPanel {
 
                 double newDS = t.getDownsample();
 
-                System.out.println("oldDS: " + oldDS);
-                System.out.println("newDS: " + newDS);
-                System.out.println();
+//                System.out.println("oldDS: " + oldDS);
+//                System.out.println("newDS: " + newDS);
+//                System.out.println();
 
                 JScrollBar hs = jsp.getHorizontalScrollBar();
                 JScrollBar vs = jsp.getVerticalScrollBar();
