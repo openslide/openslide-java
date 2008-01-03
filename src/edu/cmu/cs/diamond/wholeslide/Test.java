@@ -86,6 +86,13 @@ public class Test extends JPanel {
             private int sby;
 
             @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isMiddleMouseButton(e)) {
+                    jsp.repaint();
+                }
+            }
+            
+            @Override
             public void mousePressed(MouseEvent e) {
                 if (!SwingUtilities.isLeftMouseButton(e)) {
                     return;
