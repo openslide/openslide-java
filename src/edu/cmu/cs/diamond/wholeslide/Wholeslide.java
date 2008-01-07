@@ -28,7 +28,7 @@ public class Wholeslide {
         int w[] = new int[1];
         int h[] = new int[1];
         edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
-                .ws_get_baseline_dimensions(wsd, w, h);
+                .ws_get_layer0_dimensions(wsd, w, h);
         baselineW = w[0];
         baselineH = h[0];
     }
