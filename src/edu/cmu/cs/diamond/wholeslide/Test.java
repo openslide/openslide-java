@@ -40,7 +40,7 @@ public class Test extends JPanel {
     public Test(Wholeslide w) {
         wsd = w;
 
-        Dimension d = wsd.getBaselineDimension();
+        Dimension d = wsd.getLayer0Dimension();
         maxDownsampleFactor = (int) Math.max(Math.log(d.getHeight() / MIN_SIZE)
                 / Math.log(DOWNSAMPLE_BASE), Math.log(d.getWidth() / MIN_SIZE)
                 / Math.log(DOWNSAMPLE_BASE));
@@ -49,7 +49,7 @@ public class Test extends JPanel {
     }
 
     private void updateSize() {
-        Dimension d = wsd.getBaselineDimension();
+        Dimension d = wsd.getLayer0Dimension();
         double downsample = getDownsample();
         d.height /= downsample;
         d.width /= downsample;
@@ -188,7 +188,7 @@ public class Test extends JPanel {
         int offsetX = 0;
         int offsetY = 0;
 
-        Dimension d = wsd.getBaselineDimension();
+        Dimension d = wsd.getLayer0Dimension();
         double downsample = getDownsample();
         d.width /= downsample;
         d.height /= downsample;

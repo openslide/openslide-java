@@ -27,8 +27,8 @@ public class Wholeslide {
         // store baseline
         int w[] = new int[1];
         int h[] = new int[1];
-        edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
-                .ws_get_layer0_dimensions(wsd, w, h);
+        edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_get_layer0_dimensions(
+                wsd, w, h);
         baselineW = w[0];
         baselineH = h[0];
     }
@@ -59,9 +59,9 @@ public class Wholeslide {
         }
     }
 
-    public Dimension getBaselineDimension() {
+    public Dimension getLayer0Dimension() {
         checkDisposed();
-        
+
         return new Dimension(baselineW, baselineH);
     }
 
