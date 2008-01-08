@@ -86,7 +86,12 @@ public class Wholeslide {
     public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
             int w, int h, double downsample) {
         checkDisposed();
-        
+
+        if (downsample < 1.0) {
+            throw new IllegalArgumentException("downsample (" + downsample
+                    + ") must be >= 1.0");
+        }
+
         int layer = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_best_layer_for_downsample(wsd, downsample);
 
