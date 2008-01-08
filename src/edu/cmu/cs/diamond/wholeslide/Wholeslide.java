@@ -18,7 +18,7 @@ public class Wholeslide {
     public Wholeslide(File file) {
         wsd = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_open(file
                 .getPath());
-        
+
         if (wsd == null) {
             // TODO not just file not found
             throw new WholeslideException();
@@ -48,7 +48,7 @@ public class Wholeslide {
 
     public int getLayerCount() {
         checkDisposed();
-        
+
         return edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_layer_count(wsd);
     }
@@ -67,7 +67,7 @@ public class Wholeslide {
 
     public Dimension getLayerDimension(int layer) {
         checkDisposed();
-        
+
         int[] x = new int[1];
         int[] y = new int[1];
         edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_get_layer_dimensions(
@@ -78,7 +78,7 @@ public class Wholeslide {
 
     public String getComment() {
         checkDisposed();
-        
+
         return edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_comment(wsd);
     }
