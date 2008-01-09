@@ -15,6 +15,11 @@ public class Wholeslide {
 
     final private int baselineH;
 
+    public static boolean fileIsValid(File file) {
+        return edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_can_open(file
+                .getPath());
+    }
+
     public Wholeslide(File file) {
         wsd = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_open(file
                 .getPath());
