@@ -5,7 +5,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import javax.swing.*;
 
@@ -74,7 +73,6 @@ public class Test extends JPanel {
         final Test t = new Test(w);
         final JScrollPane jsp = new JScrollPane(t);
         jsp.setWheelScrollingEnabled(false);
-        jsp.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
 
         MouseAdapter m = new MouseAdapter() {
             private int x;
