@@ -27,7 +27,7 @@ public class WholeslideView extends JComponent {
 
     private double rotation;
 
-    private int downsampleExponent;
+    private int downsampleExponent = 10;
 
     // relative to centers of image and component
     private Point slidePosition = new Point();
@@ -52,7 +52,7 @@ public class WholeslideView extends JComponent {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
-                zoomSlide(e.getX(), e.getY(), -e.getScrollAmount());
+                zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
             }
         });
 
@@ -112,6 +112,7 @@ public class WholeslideView extends JComponent {
     }
 
     private void zoomSlide(int centerX, int centerY, int amount) {
+        System.out.println("amount: " + amount);
         double oldDS = getDownsample();
 
         final int bx = (int) (centerX * oldDS);
@@ -120,9 +121,13 @@ public class WholeslideView extends JComponent {
         adjustDownsample(amount);
 
         final double newDS = getDownsample();
+        System.out.println(newDS);
 
         slidePosition.move((int) (bx / newDS) - centerX, (int) (by / newDS)
                 - centerY);
+
+        redrawBackingStore();
+        repaint();
     }
 
     private void adjustDownsample(int amount) {
@@ -164,9 +169,20 @@ public class WholeslideView extends JComponent {
     }
 
     Dimension getScreenSize() {
-        DisplayMode dm = getGraphicsConfiguration().getDevice()
-                .getDisplayMode();
-        return new Dimension(dm.getWidth(), dm.getHeight());
+        // from javadoc example
+        Rectangle virtualBounds = new Rectangle();
+        GraphicsEnvironment ge = GraphicsEnvironment
+                .getLocalGraphicsEnvironment();
+        GraphicsDevice[] gs = ge.getScreenDevices();
+        for (int j = 0; j < gs.length; j++) {
+            GraphicsDevice gd = gs[j];
+            GraphicsConfiguration[] gc = gd.getConfigurations();
+            for (int i = 0; i < gc.length; i++) {
+                virtualBounds = virtualBounds.union(gc[i].getBounds());
+            }
+        }
+        System.out.println(virtualBounds);
+        return virtualBounds.getSize();
     }
 
     @Override
@@ -174,28 +190,31 @@ public class WholeslideView extends JComponent {
         Dimension sd = getScreenSize();
         int w = sd.width;
         int h = sd.height;
-        
-        if (dbuf.getWidth() != w * 3 || dbuf.getHeight() != h * 3) {
-            initBackingStore();
-        }
+
+        possiblyInitBackingStore();
 
         g.drawImage(dbuf, -(dbufOffset.x + w), -(dbufOffset.y + h), null);
     }
 
-    private void initBackingStore() {
+    private void possiblyInitBackingStore() {
+        // TODO optimize based on location on screen (3x screen size not
+        // required)
         Dimension sd = getScreenSize();
         int w = sd.width * 3;
         int h = sd.height * 3;
-        dbuf = new BufferedImage(w, h, DBUF_TYPE);
-        System.out.println(dbuf);
+        if (dbuf.getWidth() != w || dbuf.getHeight() != h) {
+            dbuf = new BufferedImage(w, h, DBUF_TYPE);
+            System.out.println(dbuf);
 
-        redrawBackingStore();
+            redrawBackingStore();
+        }
     }
 
     private void redrawBackingStore() {
+        // TODO don't redraw the entire thing, use copyarea, etc.
         System.out.print("redrawing backing store... ");
         System.out.flush();
-        
+
         Dimension sd = getScreenSize();
         int w = sd.width * 3;
         int h = sd.height * 3;
