@@ -2,6 +2,7 @@ package edu.cmu.cs.diamond.wholeslide.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
@@ -33,6 +34,12 @@ public class WholeslideView extends JComponent {
 
     private Point viewPosition = new Point();
 
+    protected double tmpZoomScale = 1.0;
+
+    protected int tmpZoomX;
+
+    protected int tmpZoomY;
+
     public WholeslideView(Wholeslide w) {
         this(w, 1.2, 40);
     }
@@ -60,8 +67,19 @@ public class WholeslideView extends JComponent {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
+                double origDS = getDownsample();
                 zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
+                double relScale = origDS / getDownsample();
+                
+                tmpZoomX = e.getX();
+                tmpZoomY = e.getY();
+                tmpZoomScale = relScale;
 
+                // TODO more fancy deferred zooming
+                paintImmediately(0, 0, getWidth(), getHeight());
+                
+                tmpZoomScale = 1.0;
+                
                 redrawBackingStore();
                 repaint();
             }
@@ -309,6 +327,8 @@ public class WholeslideView extends JComponent {
 
     @Override
     protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        
         Dimension sd = getScreenSize();
         int w = sd.width;
         int h = sd.height;
@@ -322,7 +342,12 @@ public class WholeslideView extends JComponent {
 
         possiblyInitBackingStore();
 
-        g.drawImage(dbuf, -(dbufOffset.x + w), -(dbufOffset.y + h), null);
+        AffineTransform a = new AffineTransform();
+        a.translate(tmpZoomX, tmpZoomY);
+        a.scale(tmpZoomScale, tmpZoomScale);
+        a.translate(-tmpZoomX, -tmpZoomY);
+        g2.transform(a);
+        g2.drawImage(dbuf, -(dbufOffset.x + w), -(dbufOffset.y + h), null);
     }
 
     private void possiblyInitBackingStore() {
@@ -353,9 +378,9 @@ public class WholeslideView extends JComponent {
         g.setBackground(getBackground());
         g.clearRect(0, 0, w, h);
 
-        System.out.print(viewPosition.x + "," + viewPosition.y + " -> " + cw
-                + "," + ch + " ");
-        System.out.flush();
+//        System.out.print(viewPosition.x + "," + viewPosition.y + " -> " + cw
+//                + "," + ch + " ");
+//        System.out.flush();
 
         wsd.paintRegion(g, 0, 0, viewPosition.x - cw, viewPosition.y - ch, w,
                 h, getDownsample());
