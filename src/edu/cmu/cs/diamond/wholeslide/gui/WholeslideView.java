@@ -40,6 +40,8 @@ public class WholeslideView extends JComponent {
 
     protected int tmpZoomY;
 
+    private WholeslideView otherView;
+
     public WholeslideView(Wholeslide w) {
         this(w, 1.2, 40);
     }
@@ -63,25 +65,59 @@ public class WholeslideView extends JComponent {
         repaint();
     }
 
+    static private void mouseReleasedHelper(WholeslideView w) {
+        if (w == null) {
+            return;
+        }
+        w.viewPosition.translate(w.dbufOffset.x, w.dbufOffset.y);
+        w.redrawBackingStore(w.dbufOffset.x, w.dbufOffset.y);
+        w.dbufOffset.move(0, 0);
+    }
+
+    static private void mouseDraggedHelper(WholeslideView w, int newX, int newY) {
+        if (w == null) {
+            return;
+        }
+        w.dbufOffset.move(newX, newY);
+        w.repaint();
+    }
+
+    static private void spaceTyped(WholeslideView w) {
+        if (w == null) {
+            return;
+        }
+        Point delta = w.centerSlide();
+        w.redrawBackingStore(delta.x, delta.y);
+        w.repaint();
+    }
+
+    static private void mouseWheelHelper(WholeslideView w, MouseWheelEvent e) {
+        if (w == null) {
+            return;
+        }
+        double origDS = w.getDownsample();
+        w.zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
+        double relScale = origDS / w.getDownsample();
+
+        w.tmpZoomX = e.getX();
+        w.tmpZoomY = e.getY();
+        w.tmpZoomScale = relScale;
+
+        // TODO more fancy deferred zooming
+        w.paintImmediately(0, 0, w.getWidth(), w.getHeight());
+
+        w.tmpZoomScale = 1.0;
+
+        w.redrawBackingStore();
+        w.repaint();
+    }
+
     private void registerEventHandlers() {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
-                double origDS = getDownsample();
-                zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
-                double relScale = origDS / getDownsample();
-                
-                tmpZoomX = e.getX();
-                tmpZoomY = e.getY();
-                tmpZoomScale = relScale;
-
-                // TODO more fancy deferred zooming
-                paintImmediately(0, 0, getWidth(), getHeight());
-                
-                tmpZoomScale = 1.0;
-                
-                redrawBackingStore();
-                repaint();
+                mouseWheelHelper(WholeslideView.this, e);
+                mouseWheelHelper(otherView, e);
             }
         });
 
@@ -94,7 +130,7 @@ public class WholeslideView extends JComponent {
             @Override
             public void mousePressed(MouseEvent e) {
                 requestFocusInWindow();
-                
+
                 if (!SwingUtilities.isLeftMouseButton(e)) {
                     return;
                 }
@@ -110,9 +146,8 @@ public class WholeslideView extends JComponent {
                     return;
                 }
 
-                viewPosition.translate(dbufOffset.x, dbufOffset.y);
-                redrawBackingStore(dbufOffset.x, dbufOffset.y);
-                dbufOffset.move(0, 0);
+                mouseReleasedHelper(WholeslideView.this);
+                mouseReleasedHelper(otherView);
                 System.out.println(viewPosition);
             }
 
@@ -125,11 +160,10 @@ public class WholeslideView extends JComponent {
                 int newX = x - e.getX();
                 int newY = y - e.getY();
 
-                dbufOffset.move(newX, newY);
-                // System.out.println(dbufOffset);
-
-                repaint();
+                mouseDraggedHelper(WholeslideView.this, newX, newY);
+                mouseDraggedHelper(otherView, newX, newY);
             }
+
         };
         addMouseListener(ma);
         addMouseMotionListener(ma);
@@ -142,9 +176,8 @@ public class WholeslideView extends JComponent {
                 char key = e.getKeyChar();
                 switch (key) {
                 case ' ':
-                    Point delta = centerSlide();
-                    redrawBackingStore(delta.x, delta.y);
-                    repaint();
+                    spaceTyped(WholeslideView.this);
+                    spaceTyped(otherView);
                     break;
                 }
             }
@@ -182,8 +215,8 @@ public class WholeslideView extends JComponent {
         } else if (y < 0) {
             // fill top
             g.clearRect(0, 0, w, -y);
-            wsd.paintRegion(g, 0, 0, viewPosition.x - cw,
-                    viewPosition.y - ch, w, -y, ds);
+            wsd.paintRegion(g, 0, 0, viewPosition.x - cw, viewPosition.y - ch,
+                    w, -y, ds);
 
             // adjust h and y so as not to draw twice to the intersection
             h += y;
@@ -212,7 +245,7 @@ public class WholeslideView extends JComponent {
 
         int centerX = mouseX + viewPosition.x;
         int centerY = mouseY + viewPosition.y;
-        
+
         final int bx = (int) (centerX * oldDS);
         final int by = (int) (centerY * oldDS);
 
@@ -240,7 +273,7 @@ public class WholeslideView extends JComponent {
 
     public Point centerSlide() {
         // TODO make faster drawing
-        
+
         int w = getWidth();
         int h = getHeight();
 
@@ -301,11 +334,15 @@ public class WholeslideView extends JComponent {
     }
 
     public void linkWithOther(WholeslideView otherView) {
-        // TODO
+        this.otherView = otherView;
+        otherView.otherView = this;
     }
 
     public void unlinkOther() {
-        // TODO
+        if (otherView != null) {
+            otherView.otherView = null;
+            otherView = null;
+        }
     }
 
     Dimension getScreenSize() {
@@ -328,7 +365,7 @@ public class WholeslideView extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        
+
         Dimension sd = getScreenSize();
         int w = sd.width;
         int h = sd.height;
@@ -378,9 +415,9 @@ public class WholeslideView extends JComponent {
         g.setBackground(getBackground());
         g.clearRect(0, 0, w, h);
 
-//        System.out.print(viewPosition.x + "," + viewPosition.y + " -> " + cw
-//                + "," + ch + " ");
-//        System.out.flush();
+        // System.out.print(viewPosition.x + "," + viewPosition.y + " -> " + cw
+        // + "," + ch + " ");
+        // System.out.flush();
 
         wsd.paintRegion(g, 0, 0, viewPosition.x - cw, viewPosition.y - ch, w,
                 h, getDownsample());
