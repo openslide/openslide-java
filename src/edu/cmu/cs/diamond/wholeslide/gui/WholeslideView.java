@@ -190,19 +190,20 @@ public class WholeslideView extends JComponent {
         System.out.println("done");
     }
 
-    private void zoomSlide(int centerX, int centerY, int amount) {
-        System.out.println("amount: " + amount);
+    private void zoomSlide(int mouseX, int mouseY, int amount) {
         double oldDS = getDownsample();
 
+        int centerX = mouseX + slidePosition.x;
+        int centerY = mouseY + slidePosition.y;
+        
         final int bx = (int) (centerX * oldDS);
         final int by = (int) (centerY * oldDS);
 
         adjustDownsample(amount);
 
         final double newDS = getDownsample();
-        System.out.println(newDS);
 
-        slidePosition.move((int) (bx / newDS) - centerX, (int) (by / newDS)
+        slidePosition.translate((int) (bx / newDS) - centerX, (int) (by / newDS)
                 - centerY);
     }
 
