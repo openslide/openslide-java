@@ -1,10 +1,7 @@
 package edu.cmu.cs.diamond.wholeslide.gui;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
@@ -13,9 +10,9 @@ import javax.swing.SwingUtilities;
 import edu.cmu.cs.diamond.wholeslide.Wholeslide;
 
 public class WholeslideView extends JComponent {
-    // allow a screenful on all sides
-    final static private int BACKING_STORE_SIZE = 3;
+    private static final int BACKING_STORE_SIZE = 3;
 
+    // allow a screenful on all sides
     final private double downsampleBase;
 
     final private int maxDownsampleExponent;
@@ -30,7 +27,9 @@ public class WholeslideView extends JComponent {
 
     private double rotation;
 
-    private int downsampleExponent = 10;
+    private int downsampleExponent;
+
+    private boolean firstPaint = true;
 
     // relative to centers of image and component
     private Point slidePosition = new Point();
@@ -45,12 +44,10 @@ public class WholeslideView extends JComponent {
         this.downsampleBase = downsampleBase;
         this.maxDownsampleExponent = maxDownsampleExponent;
 
+        setFocusable(true);
         setOpaque(true);
-        
-        registerEventHandlers();
 
-        zoomToFit();
-        centerSlide();
+        registerEventHandlers();
     }
 
     @Override
@@ -59,12 +56,15 @@ public class WholeslideView extends JComponent {
         redrawBackingStore();
         repaint();
     }
-    
+
     private void registerEventHandlers() {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
                 zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
+
+                redrawBackingStore();
+                repaint();
             }
         });
 
@@ -80,6 +80,8 @@ public class WholeslideView extends JComponent {
                     return;
                 }
 
+                requestFocusInWindow();
+                
                 x = e.getX();
                 y = e.getY();
                 // System.out.println(dbufOffset);
@@ -94,6 +96,7 @@ public class WholeslideView extends JComponent {
                 slidePosition.translate(dbufOffset.x, dbufOffset.y);
                 redrawBackingStore(dbufOffset.x, dbufOffset.y);
                 dbufOffset.move(0, 0);
+                System.out.println(slidePosition);
             }
 
             @Override
@@ -115,17 +118,34 @@ public class WholeslideView extends JComponent {
         addMouseMotionListener(ma);
 
         // keyboard
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                System.out.println(e);
+                char key = e.getKeyChar();
+                switch (key) {
+                case ' ':
+                    Point delta = centerSlide();
+                    redrawBackingStore(delta.x, delta.y);
+                    repaint();
+                    break;
+                }
+            }
+        });
     }
 
     protected void redrawBackingStore(int x, int y) {
-        System.out.print("redrawing backing store with offset (" + x + ","
-                + y + ")... ");
+        System.out.print("redrawing backing store with offset (" + x + "," + y
+                + ")... ");
         System.out.flush();
         Graphics2D g = dbuf.createGraphics();
         g.setBackground(getBackground());
 
         int w = dbuf.getWidth();
         int h = dbuf.getHeight();
+
+        int cw = w / BACKING_STORE_SIZE;
+        int ch = h / BACKING_STORE_SIZE;
 
         double ds = getDownsample();
 
@@ -136,8 +156,8 @@ public class WholeslideView extends JComponent {
         if (y > 0) {
             // moved up, fill bottom
             g.clearRect(0, h - y, w, y);
-            wsd.paintRegion(g, 0, h - y, slidePosition.x, slidePosition.y + h
-                    - y, w, y, ds);
+            wsd.paintRegion(g, 0, h - y, slidePosition.x - cw, slidePosition.y
+                    - ch + h - y, w, y, ds);
 
             // adjust h and y so as not to draw twice to the intersection
             h -= y;
@@ -145,9 +165,9 @@ public class WholeslideView extends JComponent {
         } else if (y < 0) {
             // fill top
             g.clearRect(0, 0, w, -y);
-            wsd.paintRegion(g, 0, 0, slidePosition.x, slidePosition.y, w, -y,
-                    ds);
-            
+            wsd.paintRegion(g, 0, 0, slidePosition.x - cw,
+                    slidePosition.y - ch, w, -y, ds);
+
             // adjust h and y so as not to draw twice to the intersection
             h += y;
             y = -y;
@@ -157,13 +177,13 @@ public class WholeslideView extends JComponent {
         if (x > 0) {
             // fill right
             g.clearRect(w - x, y, x, h);
-            wsd.paintRegion(g, w - x, y, slidePosition.x + w - x,
-                    slidePosition.y + y, x, h, ds);
+            wsd.paintRegion(g, w - x, y, slidePosition.x + w - x - cw,
+                    slidePosition.y + y - ch, x, h, ds);
         } else if (x < 0) {
             // fill left
             g.clearRect(0, y, -x, h);
-            wsd.paintRegion(g, 0, y, slidePosition.x, slidePosition.y + y, -x,
-                    h, ds);
+            wsd.paintRegion(g, 0, y, slidePosition.x - cw, slidePosition.y + y
+                    - ch, -x, h, ds);
         }
 
         g.dispose();
@@ -184,9 +204,6 @@ public class WholeslideView extends JComponent {
 
         slidePosition.move((int) (bx / newDS) - centerX, (int) (by / newDS)
                 - centerY);
-
-        redrawBackingStore();
-        repaint();
     }
 
     private void adjustDownsample(int amount) {
@@ -203,12 +220,58 @@ public class WholeslideView extends JComponent {
         return Math.pow(downsampleBase, downsampleExponent);
     }
 
-    public void centerSlide() {
-        slidePosition.move(0, 0);
+    public Point centerSlide() {
+        // TODO make faster drawing
+        
+        int w = getWidth();
+        int h = getHeight();
+
+        if (w == 0 || h == 0) {
+            return new Point();
+        }
+
+        double ds = getDownsample();
+        Dimension d = wsd.getLayer0Dimension();
+        int dw = (int) (d.width / ds);
+        int dh = (int) (d.height / ds);
+
+        int newX = -(w / 2 - dw / 2);
+        int newY = -(h / 2 - dh / 2);
+
+        System.out.println("centering to " + newX + "," + newY);
+
+        Point delta = new Point(newX - slidePosition.x, newY - slidePosition.y);
+        slidePosition.move(newX, newY);
+
+        return delta;
     }
 
     public void zoomToFit() {
-        // TODO
+        int w = getWidth();
+        int h = getHeight();
+
+        if (w == 0 || h == 0) {
+            return;
+        }
+
+        Dimension d = wsd.getLayer0Dimension();
+        double ws = d.width / w;
+        double hs = d.height / h;
+
+        double maxS = Math.max(ws, hs);
+
+        if (maxS < 1.0) {
+            downsampleExponent = 0;
+        } else {
+            downsampleExponent = (int) Math.ceil(Math.log(maxS)
+                    / Math.log(downsampleBase));
+        }
+
+        if (downsampleExponent > maxDownsampleExponent) {
+            downsampleExponent = maxDownsampleExponent;
+        }
+
+        System.out.println(downsampleExponent);
     }
 
     private void rotateSlide(double angle) {
@@ -250,14 +313,20 @@ public class WholeslideView extends JComponent {
         int w = sd.width;
         int h = sd.height;
 
+        if (firstPaint && w != 0 && h != 0) {
+            System.out.println("firstPaint");
+            zoomToFit();
+            centerSlide();
+            firstPaint = false;
+        }
+
         possiblyInitBackingStore();
 
         g.drawImage(dbuf, -(dbufOffset.x + w), -(dbufOffset.y + h), null);
     }
 
     private void possiblyInitBackingStore() {
-        // TODO optimize based on location on screen (3x screen size not
-        // required)
+        // 3x so we can drag the entire length of the screen in all directions
         Dimension sd = getScreenSize();
         int w = sd.width * BACKING_STORE_SIZE;
         int h = sd.height * BACKING_STORE_SIZE;
@@ -271,19 +340,25 @@ public class WholeslideView extends JComponent {
     }
 
     private void redrawBackingStore() {
-        // TODO don't redraw the entire thing, use copyarea, etc.
         System.out.print("redrawing backing store... ");
         System.out.flush();
 
-        Dimension sd = getScreenSize();
-        int w = sd.width * BACKING_STORE_SIZE;
-        int h = sd.height * BACKING_STORE_SIZE;
+        int w = dbuf.getWidth();
+        int h = dbuf.getHeight();
+
+        int cw = w / BACKING_STORE_SIZE;
+        int ch = h / BACKING_STORE_SIZE;
 
         Graphics2D g = dbuf.createGraphics();
         g.setBackground(getBackground());
         g.clearRect(0, 0, w, h);
-        wsd.paintRegion(g, 0, 0, slidePosition.x, slidePosition.y, w, h,
-                getDownsample());
+
+        System.out.print(slidePosition.x + "," + slidePosition.y + " -> " + cw
+                + "," + ch + " ");
+        System.out.flush();
+
+        wsd.paintRegion(g, 0, 0, slidePosition.x - cw, slidePosition.y - ch, w,
+                h, getDownsample());
         g.dispose();
         System.out.println("done");
     }
