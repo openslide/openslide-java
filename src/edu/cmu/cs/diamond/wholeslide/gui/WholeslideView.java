@@ -74,7 +74,7 @@ public class WholeslideView extends JComponent {
 
                 x = e.getX();
                 y = e.getY();
-                System.out.println(dbufOffset);
+//                System.out.println(dbufOffset);
             }
 
             @Override
@@ -100,7 +100,7 @@ public class WholeslideView extends JComponent {
                 int newY = y - e.getY();
 
                 dbufOffset.move(newX, newY);
-                System.out.println(dbufOffset);
+//                System.out.println(dbufOffset);
 
                 repaint();
             }
@@ -185,7 +185,7 @@ public class WholeslideView extends JComponent {
                 virtualBounds = virtualBounds.union(gc[i].getBounds());
             }
         }
-        System.out.println(virtualBounds);
+//        System.out.println(virtualBounds);
         return virtualBounds.getSize();
     }
 
