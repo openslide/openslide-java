@@ -31,8 +31,7 @@ public class WholeslideView extends JComponent {
 
     private boolean firstPaint = true;
 
-    // relative to centers of image and component
-    private Point slidePosition = new Point();
+    private Point viewPosition = new Point();
 
     public WholeslideView(Wholeslide w) {
         this(w, 1.2, 40);
@@ -93,10 +92,10 @@ public class WholeslideView extends JComponent {
                     return;
                 }
 
-                slidePosition.translate(dbufOffset.x, dbufOffset.y);
+                viewPosition.translate(dbufOffset.x, dbufOffset.y);
                 redrawBackingStore(dbufOffset.x, dbufOffset.y);
                 dbufOffset.move(0, 0);
-                System.out.println(slidePosition);
+                System.out.println(viewPosition);
             }
 
             @Override
@@ -156,7 +155,7 @@ public class WholeslideView extends JComponent {
         if (y > 0) {
             // moved up, fill bottom
             g.clearRect(0, h - y, w, y);
-            wsd.paintRegion(g, 0, h - y, slidePosition.x - cw, slidePosition.y
+            wsd.paintRegion(g, 0, h - y, viewPosition.x - cw, viewPosition.y
                     - ch + h - y, w, y, ds);
 
             // adjust h and y so as not to draw twice to the intersection
@@ -165,8 +164,8 @@ public class WholeslideView extends JComponent {
         } else if (y < 0) {
             // fill top
             g.clearRect(0, 0, w, -y);
-            wsd.paintRegion(g, 0, 0, slidePosition.x - cw,
-                    slidePosition.y - ch, w, -y, ds);
+            wsd.paintRegion(g, 0, 0, viewPosition.x - cw,
+                    viewPosition.y - ch, w, -y, ds);
 
             // adjust h and y so as not to draw twice to the intersection
             h += y;
@@ -177,12 +176,12 @@ public class WholeslideView extends JComponent {
         if (x > 0) {
             // fill right
             g.clearRect(w - x, y, x, h);
-            wsd.paintRegion(g, w - x, y, slidePosition.x + w - x - cw,
-                    slidePosition.y + y - ch, x, h, ds);
+            wsd.paintRegion(g, w - x, y, viewPosition.x + w - x - cw,
+                    viewPosition.y + y - ch, x, h, ds);
         } else if (x < 0) {
             // fill left
             g.clearRect(0, y, -x, h);
-            wsd.paintRegion(g, 0, y, slidePosition.x - cw, slidePosition.y + y
+            wsd.paintRegion(g, 0, y, viewPosition.x - cw, viewPosition.y + y
                     - ch, -x, h, ds);
         }
 
@@ -193,8 +192,8 @@ public class WholeslideView extends JComponent {
     private void zoomSlide(int mouseX, int mouseY, int amount) {
         double oldDS = getDownsample();
 
-        int centerX = mouseX + slidePosition.x;
-        int centerY = mouseY + slidePosition.y;
+        int centerX = mouseX + viewPosition.x;
+        int centerY = mouseY + viewPosition.y;
         
         final int bx = (int) (centerX * oldDS);
         final int by = (int) (centerY * oldDS);
@@ -203,7 +202,7 @@ public class WholeslideView extends JComponent {
 
         final double newDS = getDownsample();
 
-        slidePosition.translate((int) (bx / newDS) - centerX, (int) (by / newDS)
+        viewPosition.translate((int) (bx / newDS) - centerX, (int) (by / newDS)
                 - centerY);
     }
 
@@ -241,8 +240,8 @@ public class WholeslideView extends JComponent {
 
         System.out.println("centering to " + newX + "," + newY);
 
-        Point delta = new Point(newX - slidePosition.x, newY - slidePosition.y);
-        slidePosition.move(newX, newY);
+        Point delta = new Point(newX - viewPosition.x, newY - viewPosition.y);
+        viewPosition.move(newX, newY);
 
         return delta;
     }
@@ -354,11 +353,11 @@ public class WholeslideView extends JComponent {
         g.setBackground(getBackground());
         g.clearRect(0, 0, w, h);
 
-        System.out.print(slidePosition.x + "," + slidePosition.y + " -> " + cw
+        System.out.print(viewPosition.x + "," + viewPosition.y + " -> " + cw
                 + "," + ch + " ");
         System.out.flush();
 
-        wsd.paintRegion(g, 0, 0, slidePosition.x - cw, slidePosition.y - ch, w,
+        wsd.paintRegion(g, 0, 0, viewPosition.x - cw, viewPosition.y - ch, w,
                 h, getDownsample());
         g.dispose();
         System.out.println("done");
