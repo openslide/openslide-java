@@ -18,11 +18,9 @@ public class WholeslideView extends JComponent {
 
     final private int maxDownsampleExponent;
 
-    final private Wholeslide wsd;
+    transient final private Wholeslide wsd;
 
-    final private static int DBUF_TYPE = BufferedImage.TYPE_INT_ARGB_PRE;
-
-    private BufferedImage dbuf = new BufferedImage(1, 1, DBUF_TYPE);
+    transient private BufferedImage dbuf;
 
     private Point dbufOffset = new Point();
 
@@ -313,8 +311,8 @@ public class WholeslideView extends JComponent {
         }
 
         Dimension d = wsd.getLayer0Dimension();
-        double ws = d.width / w;
-        double hs = d.height / h;
+        double ws = (double) d.width / w;
+        double hs = (double) d.height / h;
 
         double maxS = Math.max(ws, hs);
 
@@ -399,7 +397,7 @@ public class WholeslideView extends JComponent {
         Dimension sd = getScreenSize();
         int w = sd.width * BACKING_STORE_SIZE;
         int h = sd.height * BACKING_STORE_SIZE;
-        if (dbuf.getWidth() != w || dbuf.getHeight() != h) {
+        if (dbuf == null || dbuf.getWidth() != w || dbuf.getHeight() != h) {
             dbuf = getGraphicsConfiguration().createCompatibleImage(w, h,
                     Transparency.OPAQUE);
             System.out.println(dbuf);
