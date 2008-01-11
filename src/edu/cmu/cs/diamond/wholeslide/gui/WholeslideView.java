@@ -76,12 +76,12 @@ public class WholeslideView extends JComponent {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                requestFocusInWindow();
+                
                 if (!SwingUtilities.isLeftMouseButton(e)) {
                     return;
                 }
 
-                requestFocusInWindow();
-                
                 x = e.getX();
                 y = e.getY();
                 // System.out.println(dbufOffset);
