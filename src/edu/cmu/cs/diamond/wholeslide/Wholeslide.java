@@ -134,6 +134,11 @@ public class Wholeslide {
             h = (int) (newH / newDownsample);
         }
 
+        if (newW <= 0 || newH <= 0) {
+            // nothing to draw
+            return;
+        }
+
         // System.out.println("newW " + newW + ", newH " + newH + ", newX " +
         // newX
         // + ", newY " + newY);
