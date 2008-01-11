@@ -107,17 +107,24 @@ public class WholeslideView extends JComponent {
         w.paintImmediately(0, 0, w.getWidth(), w.getHeight());
 
         w.tmpZoomScale = 1.0;
+    }
 
+    static private void mouseWheelHelper2(WholeslideView w) {
+        if (w == null) {
+            return;
+        }
         w.redrawBackingStore();
         w.repaint();
     }
-
+    
     private void registerEventHandlers() {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
                 mouseWheelHelper(WholeslideView.this, e);
                 mouseWheelHelper(otherView, e);
+                mouseWheelHelper2(WholeslideView.this);
+                mouseWheelHelper2(otherView);
             }
         });
 
