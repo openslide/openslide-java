@@ -39,7 +39,6 @@ public class Demo {
             JToggleButton linker = new JToggleButton("Link");
             jf.getContentPane().add(linker, BorderLayout.SOUTH);
             linker.addItemListener(new ItemListener() {
-                @Override
                 public void itemStateChanged(ItemEvent e) {
                     switch(e.getStateChange()) {
                     case ItemEvent.SELECTED:
