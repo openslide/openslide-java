@@ -42,10 +42,14 @@ public class WholeslideView extends JComponent {
         this.downsampleBase = downsampleBase;
         this.maxDownsampleExponent = maxDownsampleExponent;
 
+        setOpaque(true);
+
         registerEventHandlers();
 
         zoomToFit();
         centerSlide();
+
+        // RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
     }
 
     private void registerEventHandlers() {
@@ -203,7 +207,8 @@ public class WholeslideView extends JComponent {
         int w = sd.width * 3;
         int h = sd.height * 3;
         if (dbuf.getWidth() != w || dbuf.getHeight() != h) {
-            dbuf = new BufferedImage(w, h, DBUF_TYPE);
+            dbuf = getGraphicsConfiguration().createCompatibleImage(w, h,
+                    Transparency.OPAQUE);
             System.out.println(dbuf);
 
             redrawBackingStore();
