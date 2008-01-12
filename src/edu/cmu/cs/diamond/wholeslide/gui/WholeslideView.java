@@ -89,9 +89,9 @@ public class WholeslideView extends JComponent {
         w.repaint();
     }
 
-    static private void mouseWheelHelper(WholeslideView w, MouseWheelEvent e) {
+    static private boolean mouseWheelHelper(WholeslideView w, MouseWheelEvent e) {
         if (w == null) {
-            return;
+            return false;
         }
         double origDS = w.getDownsample();
         w.zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
@@ -105,6 +105,7 @@ public class WholeslideView extends JComponent {
         w.paintImmediately(0, 0, w.getWidth(), w.getHeight());
 
         w.tmpZoomScale = 1.0;
+        return relScale != 1.0;
     }
 
     static private void mouseWheelHelper2(WholeslideView w) {
@@ -114,15 +115,19 @@ public class WholeslideView extends JComponent {
         w.redrawBackingStore();
         w.repaint();
     }
-    
+
     private void registerEventHandlers() {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
-                mouseWheelHelper(WholeslideView.this, e);
-                mouseWheelHelper(otherView, e);
-                mouseWheelHelper2(WholeslideView.this);
-                mouseWheelHelper2(otherView);
+                boolean r1 = mouseWheelHelper(WholeslideView.this, e);
+                boolean r2 = mouseWheelHelper(otherView, e);
+                if (r1) {
+                    mouseWheelHelper2(WholeslideView.this);
+                }
+                if (r2) {
+                    mouseWheelHelper2(otherView);
+                }
             }
         });
 
@@ -376,7 +381,6 @@ public class WholeslideView extends JComponent {
         int h = sd.height;
 
         if (firstPaint && w != 0 && h != 0) {
-            System.out.println("firstPaint");
             zoomToFit();
             centerSlide();
             firstPaint = false;
@@ -407,6 +411,7 @@ public class WholeslideView extends JComponent {
     }
 
     private void redrawBackingStore() {
+        long time = System.currentTimeMillis();
         System.out.print("redrawing backing store... ");
         System.out.flush();
 
@@ -427,6 +432,8 @@ public class WholeslideView extends JComponent {
         wsd.paintRegion(g, 0, 0, viewPosition.x - cw, viewPosition.y - ch, w,
                 h, getDownsample());
         g.dispose();
-        System.out.println("done");
+        
+        long time2 = System.currentTimeMillis() - time;
+        System.out.println("done (" + time2 + ")");
     }
 }
