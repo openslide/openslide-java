@@ -2,8 +2,14 @@ package edu.cmu.cs.diamond.wholeslide.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -11,18 +17,13 @@ import javax.swing.SwingUtilities;
 import edu.cmu.cs.diamond.wholeslide.Wholeslide;
 
 public class WholeslideView extends JComponent {
-    private static final int BACKING_STORE_SIZE = 3;
+    private static final int TILE_SIZE = 256;
 
-    // allow a screenful on all sides
     final private double downsampleBase;
 
     final private int maxDownsampleExponent;
 
     transient final private Wholeslide wsd;
-
-    transient private BufferedImage dbuf;
-
-    private Point dbufOffset = new Point();
 
     private double rotation;
 
@@ -39,6 +40,11 @@ public class WholeslideView extends JComponent {
     protected int tmpZoomY;
 
     private WholeslideView otherView;
+
+    final private Map<Point, BufferedImage> tiles = Collections
+            .synchronizedMap(new HashMap<Point, BufferedImage>());
+
+    final private BlockingQueue<Point> dirtyTiles = new LinkedBlockingQueue<Point>();
 
     public WholeslideView(Wholeslide w) {
         this(w, 1.2, 40);
@@ -59,39 +65,85 @@ public class WholeslideView extends JComponent {
     @Override
     public void setBackground(Color bg) {
         super.setBackground(bg);
-        redrawBackingStore();
         repaint();
-    }
-
-    static private void mouseReleasedHelper(WholeslideView w) {
-        if (w == null) {
-            return;
-        }
-        w.viewPosition.translate(w.dbufOffset.x, w.dbufOffset.y);
-        w.redrawBackingStore(w.dbufOffset.x, w.dbufOffset.y);
-        w.dbufOffset.move(0, 0);
     }
 
     static private void mouseDraggedHelper(WholeslideView w, int newX, int newY) {
         if (w == null) {
             return;
         }
-        w.dbufOffset.move(newX, newY);
-        w.repaint();
+        w.viewPosition.move(newX, newY);
+        w.addRemoveTiles();
+    }
+
+    private void addRemoveTiles() {
+        Dimension sd = getScreenSize();
+        final int w = sd.width * 3;
+        final int h = sd.height * 3;
+
+        final int oX = viewPosition.x - sd.width;
+        final int oY = viewPosition.y - sd.height;
+
+        final int otX = (oX / TILE_SIZE) * TILE_SIZE;
+        final int otY = (oY / TILE_SIZE) * TILE_SIZE;
+
+        Rectangle bounds = new Rectangle(oX, oY, w, h);
+
+        Rectangle tmpTile = new Rectangle(TILE_SIZE, TILE_SIZE);
+
+        // remove
+        Iterator<Point> it = tiles.keySet().iterator();
+        while (it.hasNext()) {
+            Point p = it.next();
+            tmpTile.x = p.x;
+            tmpTile.y = p.y;
+            if (!bounds.intersects(tmpTile)) {
+                it.remove();
+            }
+        }
+
+        // add
+        for (int y = 0; y < w; y += TILE_SIZE) {
+            for (int x = 0; x < h; x += TILE_SIZE) {
+                tmpTile.setLocation(otX + x, otY + y);
+                if (bounds.intersects(tmpTile)) {
+                    Point p = tmpTile.getLocation();
+                    if (!tiles.containsKey(p)) {
+                        addNewTile(p);
+                    }
+                }
+            }
+        }
+    }
+
+    private void addNewTile(Point p) {
+        BufferedImage b = getGraphicsConfiguration().createCompatibleImage(
+                TILE_SIZE, TILE_SIZE, Transparency.OPAQUE);
+        Graphics2D g = b.createGraphics();
+        g.setBackground(getBackground());
+        g.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
+        g.dispose();
+
+        tiles.put(p, b);
+
+        try {
+            dirtyTiles.put(p);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     static private void spaceTyped(WholeslideView w) {
         if (w == null) {
             return;
         }
-        Point delta = w.centerSlide();
-        w.redrawBackingStore(delta.x, delta.y);
-        w.repaint();
+        w.centerSlide();
+        w.addRemoveTiles();
     }
 
-    static private boolean mouseWheelHelper(WholeslideView w, MouseWheelEvent e) {
+    static private void mouseWheelHelper(WholeslideView w, MouseWheelEvent e) {
         if (w == null) {
-            return false;
+            return;
         }
         double origDS = w.getDownsample();
         w.zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
@@ -105,29 +157,15 @@ public class WholeslideView extends JComponent {
         w.paintImmediately(0, 0, w.getWidth(), w.getHeight());
 
         w.tmpZoomScale = 1.0;
-        return relScale != 1.0;
-    }
-
-    static private void mouseWheelHelper2(WholeslideView w) {
-        if (w == null) {
-            return;
-        }
-        w.redrawBackingStore();
-        w.repaint();
+        w.addRemoveTiles();
     }
 
     private void registerEventHandlers() {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
-                boolean r1 = mouseWheelHelper(WholeslideView.this, e);
-                boolean r2 = mouseWheelHelper(otherView, e);
-                if (r1) {
-                    mouseWheelHelper2(WholeslideView.this);
-                }
-                if (r2) {
-                    mouseWheelHelper2(otherView);
-                }
+                mouseWheelHelper(WholeslideView.this, e);
+                mouseWheelHelper(otherView, e);
             }
         });
 
@@ -136,6 +174,10 @@ public class WholeslideView extends JComponent {
             private int x;
 
             private int y;
+
+            private int viewX;
+
+            private int viewY;
 
             @Override
             public void mousePressed(MouseEvent e) {
@@ -147,18 +189,9 @@ public class WholeslideView extends JComponent {
 
                 x = e.getX();
                 y = e.getY();
+                viewX = viewPosition.x;
+                viewY = viewPosition.y;
                 // System.out.println(dbufOffset);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (!SwingUtilities.isLeftMouseButton(e)) {
-                    return;
-                }
-
-                mouseReleasedHelper(WholeslideView.this);
-                mouseReleasedHelper(otherView);
-                System.out.println(viewPosition);
             }
 
             @Override
@@ -167,8 +200,8 @@ public class WholeslideView extends JComponent {
                     return;
                 }
 
-                int newX = x - e.getX();
-                int newY = y - e.getY();
+                int newX = viewX + x - e.getX();
+                int newY = viewY + y - e.getY();
 
                 mouseDraggedHelper(WholeslideView.this, newX, newY);
                 mouseDraggedHelper(otherView, newX, newY);
@@ -192,62 +225,6 @@ public class WholeslideView extends JComponent {
                 }
             }
         });
-    }
-
-    protected void redrawBackingStore(int x, int y) {
-        System.out.print("redrawing backing store with offset (" + x + "," + y
-                + ")... ");
-        System.out.flush();
-        Graphics2D g = dbuf.createGraphics();
-        g.setBackground(getBackground());
-
-        int w = dbuf.getWidth();
-        int h = dbuf.getHeight();
-
-        int cw = w / BACKING_STORE_SIZE;
-        int ch = h / BACKING_STORE_SIZE;
-
-        double ds = getDownsample();
-
-        // copy area
-        g.copyArea(0, 0, w, h, -x, -y);
-
-        // fill horiz
-        if (y > 0) {
-            // moved up, fill bottom
-            g.clearRect(0, h - y, w, y);
-            wsd.paintRegion(g, 0, h - y, viewPosition.x - cw, viewPosition.y
-                    - ch + h - y, w, y, ds);
-
-            // adjust h and y so as not to draw twice to the intersection
-            h -= y;
-            y = 0;
-        } else if (y < 0) {
-            // fill top
-            g.clearRect(0, 0, w, -y);
-            wsd.paintRegion(g, 0, 0, viewPosition.x - cw, viewPosition.y - ch,
-                    w, -y, ds);
-
-            // adjust h and y so as not to draw twice to the intersection
-            h += y;
-            y = -y;
-        }
-
-        // fill vert
-        if (x > 0) {
-            // fill right
-            g.clearRect(w - x, y, x, h);
-            wsd.paintRegion(g, w - x, y, viewPosition.x + w - x - cw,
-                    viewPosition.y + y - ch, x, h, ds);
-        } else if (x < 0) {
-            // fill left
-            g.clearRect(0, y, -x, h);
-            wsd.paintRegion(g, 0, y, viewPosition.x - cw, viewPosition.y + y
-                    - ch, -x, h, ds);
-        }
-
-        g.dispose();
-        System.out.println("done");
     }
 
     private void zoomSlide(int mouseX, int mouseY, int amount) {
@@ -281,14 +258,12 @@ public class WholeslideView extends JComponent {
         return Math.pow(downsampleBase, downsampleExponent);
     }
 
-    public Point centerSlide() {
-        // TODO make faster drawing
-
+    public void centerSlide() {
         int w = getWidth();
         int h = getHeight();
 
         if (w == 0 || h == 0) {
-            return new Point();
+            return;
         }
 
         double ds = getDownsample();
@@ -301,10 +276,7 @@ public class WholeslideView extends JComponent {
 
         System.out.println("centering to " + newX + "," + newY);
 
-        Point delta = new Point(newX - viewPosition.x, newY - viewPosition.y);
         viewPosition.move(newX, newY);
-
-        return delta;
     }
 
     public void zoomToFit() {
@@ -374,66 +346,35 @@ public class WholeslideView extends JComponent {
 
     @Override
     protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
+        if (firstPaint) {
+            Dimension sd = getScreenSize();
+            int w = sd.width;
+            int h = sd.height;
 
-        Dimension sd = getScreenSize();
-        int w = sd.width;
-        int h = sd.height;
-
-        if (firstPaint && w != 0 && h != 0) {
-            zoomToFit();
-            centerSlide();
-            firstPaint = false;
+            if (w != 0 && h != 0) {
+                zoomToFit();
+                centerSlide();
+                firstPaint = false;
+            }
         }
 
-        possiblyInitBackingStore();
-
-        AffineTransform a = new AffineTransform();
-        a.translate(tmpZoomX, tmpZoomY);
-        a.scale(tmpZoomScale, tmpZoomScale);
-        a.translate(-tmpZoomX, -tmpZoomY);
-        g2.transform(a);
-        g2.drawImage(dbuf, -(dbufOffset.x + w), -(dbufOffset.y + h), null);
+        paintAllTiles(g);
     }
 
-    private void possiblyInitBackingStore() {
-        // 3x so we can drag the entire length of the screen in all directions
-        Dimension sd = getScreenSize();
-        int w = sd.width * BACKING_STORE_SIZE;
-        int h = sd.height * BACKING_STORE_SIZE;
-        if (dbuf == null || dbuf.getWidth() != w || dbuf.getHeight() != h) {
-            dbuf = getGraphicsConfiguration().createCompatibleImage(w, h,
-                    Transparency.OPAQUE);
-            System.out.println(dbuf);
+    private void paintAllTiles(Graphics g) {
+        int offsetX = viewPosition.x % TILE_SIZE;
+        int offsetY = viewPosition.y % TILE_SIZE;
 
-            redrawBackingStore();
+        int h = getHeight();
+        int w = getWidth();
+
+        Point p = new Point();
+        for (int y = viewPosition.y; y < h + viewPosition.y; y += TILE_SIZE) {
+            for (int x = viewPosition.x; x < w + viewPosition.x; x += TILE_SIZE) {
+                p.move(x, y);
+                BufferedImage b = tiles.get(p);
+                g.drawImage(b, x, y, null);
+            }
         }
-    }
-
-    private void redrawBackingStore() {
-        long time = System.currentTimeMillis();
-        System.out.print("redrawing backing store... ");
-        System.out.flush();
-
-        int w = dbuf.getWidth();
-        int h = dbuf.getHeight();
-
-        int cw = w / BACKING_STORE_SIZE;
-        int ch = h / BACKING_STORE_SIZE;
-
-        Graphics2D g = dbuf.createGraphics();
-        g.setBackground(getBackground());
-        g.clearRect(0, 0, w, h);
-
-        // System.out.print(viewPosition.x + "," + viewPosition.y + " -> " + cw
-        // + "," + ch + " ");
-        // System.out.flush();
-
-        wsd.paintRegion(g, 0, 0, viewPosition.x - cw, viewPosition.y - ch, w,
-                h, getDownsample());
-        g.dispose();
-        
-        long time2 = System.currentTimeMillis() - time;
-        System.out.println("done (" + time2 + ")");
     }
 }
