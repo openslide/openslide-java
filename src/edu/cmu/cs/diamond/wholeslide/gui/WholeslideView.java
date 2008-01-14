@@ -3,10 +3,10 @@ package edu.cmu.cs.diamond.wholeslide.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -34,7 +34,17 @@ public class WholeslideView extends JComponent {
 
     private WholeslideView otherView;
 
-    final private Map<Point, BufferedImage> tiles = new HashMap<Point, BufferedImage>();
+    final private Map<Point, BufferedImage> tiles = new TreeMap<Point, BufferedImage>(new Comparator<Point>() {
+        @Override
+        public int compare(Point o1, Point o2) {
+            int yc = Integer.valueOf(o1.y).compareTo(Integer.valueOf(o2.y));
+            if (yc != 0) {
+                return yc;
+            } else {
+                return Integer.valueOf(o1.x).compareTo(Integer.valueOf(o2.x));
+            }
+        }
+    });
 
     final private BlockingQueue<Point> dirtyTiles = new LinkedBlockingQueue<Point>();
 
@@ -482,11 +492,14 @@ public class WholeslideView extends JComponent {
         Dimension sd = getScreenSize();
         int h = getHeight();
         int w = getWidth();
+        
+        int sOffsetX = sd.width;
+        int sOffsetY = sd.height;
 
         // System.out.println("drawing from " + viewPosition);
 
-        int startX = viewPosition.x - sd.width;
-        int startY = viewPosition.y - sd.height;
+        int startX = viewPosition.x - sOffsetX;
+        int startY = viewPosition.y - sOffsetY;
         int extraX = getExtraAt(viewPosition.x);
         int extraY = getExtraAt(viewPosition.y);
 
@@ -494,9 +507,9 @@ public class WholeslideView extends JComponent {
 
         Point p = new Point();
         for (int y = startY; y < h + startY + extraY; y += TILE_SIZE) {
-            int ty = getTileAt(y + sd.height);
+            int ty = getTileAt(y + sOffsetY);
             for (int x = startX; x < w + startX + extraX; x += TILE_SIZE) {
-                int tx = getTileAt(x + sd.width);
+                int tx = getTileAt(x + sOffsetX);
 
                 p.move(tx, ty);
 
