@@ -139,9 +139,8 @@ public class Wholeslide {
             return;
         }
 
-        // System.out.println("newW " + newW + ", newH " + newH + ", newX " +
-        // newX
-        // + ", newY " + newY);
+//        System.out.println("newW " + newW + ", newH " + newH + ", newX " + newX
+//                + ", newY " + newY);
 
         BufferedImage img = new BufferedImage(newW, newH,
                 BufferedImage.TYPE_INT_ARGB_PRE);

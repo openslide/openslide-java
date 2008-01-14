@@ -33,22 +33,25 @@ public class WholeslideView extends JComponent {
     private boolean firstPaint = true;
 
     private Point viewPosition = new Point();
-    
+
     private static final Point poisonPoint = new Point();
 
     private WholeslideView otherView;
 
-    final private Map<Point, BufferedImage> tiles = new TreeMap<Point, BufferedImage>(new Comparator<Point>() {
-        @Override
-        public int compare(Point o1, Point o2) {
-            int yc = Integer.valueOf(o1.y).compareTo(Integer.valueOf(o2.y));
-            if (yc != 0) {
-                return yc;
-            } else {
-                return Integer.valueOf(o1.x).compareTo(Integer.valueOf(o2.x));
-            }
-        }
-    });
+    final private Map<Point, BufferedImage> tiles = new TreeMap<Point, BufferedImage>(
+            new Comparator<Point>() {
+                @Override
+                public int compare(Point o1, Point o2) {
+                    int yc = Integer.valueOf(o1.y).compareTo(
+                            Integer.valueOf(o2.y));
+                    if (yc != 0) {
+                        return yc;
+                    } else {
+                        return Integer.valueOf(o1.x).compareTo(
+                                Integer.valueOf(o2.x));
+                    }
+                }
+            });
 
     final private BlockingQueue<Point> dirtyTiles = new LinkedBlockingQueue<Point>();
 
@@ -56,7 +59,7 @@ public class WholeslideView extends JComponent {
     protected void finalize() throws Throwable {
         dirtyTiles.put(poisonPoint);
     }
-    
+
     protected Runnable redrawer = new Runnable() {
         @Override
         public void run() {
@@ -119,8 +122,8 @@ public class WholeslideView extends JComponent {
         System.out.println("drawing tile for point " + p);
         double ds = getDownsample();
         wsd.paintRegion(g, 0, 0, p.x, p.y, TILE_SIZE, TILE_SIZE, ds);
-        g.setColor(Color.BLACK);
-        g.drawString(p.toString(), 10, 10);
+        // g.setColor(Color.BLACK);
+        // g.drawString(p.toString(), 10, 10);
         g.dispose();
     }
 
@@ -128,10 +131,10 @@ public class WholeslideView extends JComponent {
         Graphics2D g = emptyTile.createGraphics();
         g.setBackground(getBackground());
         g.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
-        g.setColor(Color.RED);
-        g.drawLine(0, 0, TILE_SIZE, TILE_SIZE);
-        g.drawLine(0, TILE_SIZE, TILE_SIZE, 0);
-        g.drawRect(0, 0, TILE_SIZE - 1, TILE_SIZE - 1);
+        // g.setColor(Color.RED);
+        // g.drawLine(0, 0, TILE_SIZE, TILE_SIZE);
+        // g.drawLine(0, TILE_SIZE, TILE_SIZE, 0);
+        // g.drawRect(0, 0, TILE_SIZE - 1, TILE_SIZE - 1);
         g.dispose();
     }
 
@@ -241,6 +244,7 @@ public class WholeslideView extends JComponent {
         }
 
         try {
+            System.out.println("adding " + p + " to dirtyTiles");
             dirtyTiles.put(p);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -358,19 +362,23 @@ public class WholeslideView extends JComponent {
                     break;
                 case KeyEvent.VK_UP:
                 case KeyEvent.VK_W:
-                    translateSlide(WholeslideView.this, 0, -KEYBOARD_SCROLL_AMOUNT);
+                    translateSlide(WholeslideView.this, 0,
+                            -KEYBOARD_SCROLL_AMOUNT);
                     break;
                 case KeyEvent.VK_DOWN:
                 case KeyEvent.VK_S:
-                    translateSlide(WholeslideView.this, 0, KEYBOARD_SCROLL_AMOUNT);
+                    translateSlide(WholeslideView.this, 0,
+                            KEYBOARD_SCROLL_AMOUNT);
                     break;
                 case KeyEvent.VK_LEFT:
                 case KeyEvent.VK_A:
-                    translateSlide(WholeslideView.this, -KEYBOARD_SCROLL_AMOUNT, 0);
+                    translateSlide(WholeslideView.this,
+                            -KEYBOARD_SCROLL_AMOUNT, 0);
                     break;
                 case KeyEvent.VK_RIGHT:
                 case KeyEvent.VK_D:
-                    translateSlide(WholeslideView.this, KEYBOARD_SCROLL_AMOUNT, 0);
+                    translateSlide(WholeslideView.this, KEYBOARD_SCROLL_AMOUNT,
+                            0);
                     break;
                 }
             }
@@ -524,7 +532,7 @@ public class WholeslideView extends JComponent {
         Dimension sd = getScreenSize();
         int h = getHeight();
         int w = getWidth();
-        
+
         int sOffsetX = sd.width;
         int sOffsetY = sd.height;
 
