@@ -16,6 +16,8 @@ import javax.swing.SwingUtilities;
 import edu.cmu.cs.diamond.wholeslide.Wholeslide;
 
 public class WholeslideView extends JComponent {
+    private static final int KEYBOARD_SCROLL_AMOUNT = 100;
+
     private static final int TILE_SIZE = 256;
 
     final private double downsampleBase;
@@ -326,19 +328,19 @@ public class WholeslideView extends JComponent {
                     break;
                 case KeyEvent.VK_UP:
                 case KeyEvent.VK_W:
-                    translateSlide(WholeslideView.this, 0, -TILE_SIZE);
+                    translateSlide(WholeslideView.this, 0, -KEYBOARD_SCROLL_AMOUNT);
                     break;
                 case KeyEvent.VK_DOWN:
                 case KeyEvent.VK_S:
-                    translateSlide(WholeslideView.this, 0, TILE_SIZE);
+                    translateSlide(WholeslideView.this, 0, KEYBOARD_SCROLL_AMOUNT);
                     break;
                 case KeyEvent.VK_LEFT:
                 case KeyEvent.VK_A:
-                    translateSlide(WholeslideView.this, -TILE_SIZE, 0);
+                    translateSlide(WholeslideView.this, -KEYBOARD_SCROLL_AMOUNT, 0);
                     break;
                 case KeyEvent.VK_RIGHT:
                 case KeyEvent.VK_D:
-                    translateSlide(WholeslideView.this, TILE_SIZE, 0);
+                    translateSlide(WholeslideView.this, KEYBOARD_SCROLL_AMOUNT, 0);
                     break;
                 }
             }
