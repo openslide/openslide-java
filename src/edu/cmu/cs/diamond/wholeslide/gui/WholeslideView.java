@@ -40,12 +40,16 @@ public class WholeslideView extends JComponent {
 
     private WholeslideView otherView;
 
-    private BufferedImage emptyTile;
-
-    final private Map<Point, BufferedImage> tiles = Collections
-            .synchronizedMap(new HashMap<Point, BufferedImage>());
+    final private Map<Point, BufferedImage> tiles = new HashMap<Point, BufferedImage>();
 
     final private BlockingQueue<Point> dirtyTiles = new LinkedBlockingQueue<Point>();
+
+    protected Runnable redrawer = new Runnable() {
+        @Override
+        public void run() {
+            repaint();
+        }
+    };
 
     public WholeslideView(Wholeslide w) {
         this(w, 1.2, 40);
@@ -61,14 +65,51 @@ public class WholeslideView extends JComponent {
         setOpaque(true);
 
         registerEventHandlers();
+
+        startDrawingThread();
     }
 
-    private void drawEmptyTile() {
-        if (emptyTile == null) {
-            emptyTile = getGraphicsConfiguration().createCompatibleImage(
-                    TILE_SIZE, TILE_SIZE, Transparency.OPAQUE);
-        }
+    private void startDrawingThread() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Point p = dirtyTiles.take();
+                        if (p == null) {
+                            return; // done
+                        }
 
+                        // get the tile
+                        System.out.println("checking " + p);
+
+                        synchronized (tiles) {
+                            if (!tiles.containsKey(p)) {
+                                continue;
+                            }
+                            drawTileForPoint(p, tiles.get(p));
+                        }
+                        SwingUtilities.invokeLater(redrawer);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+    }
+
+    protected void drawTileForPoint(Point p, BufferedImage b) {
+        Graphics2D g = b.createGraphics();
+        System.out.println("drawing tile for point " + p);
+        double ds = getDownsample();
+        wsd.paintRegion(g, 0, 0, p.x, p.y, TILE_SIZE,
+                TILE_SIZE, ds);
+        g.setColor(Color.BLACK);
+        g.drawString(p.toString(), 10, 10);
+        g.dispose();
+    }
+
+    private void drawEmptyTile(BufferedImage emptyTile) {
         Graphics2D g = emptyTile.createGraphics();
         g.setBackground(getBackground());
         g.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
@@ -82,7 +123,6 @@ public class WholeslideView extends JComponent {
     @Override
     public void setBackground(Color bg) {
         super.setBackground(bg);
-        drawEmptyTile();
         repaint();
     }
 
@@ -113,25 +153,27 @@ public class WholeslideView extends JComponent {
 
         Rectangle tmpTile = new Rectangle(TILE_SIZE, TILE_SIZE);
 
-        // remove
-        Iterator<Point> it = tiles.keySet().iterator();
-        while (it.hasNext()) {
-            Point p = it.next();
-            tmpTile.x = p.x;
-            tmpTile.y = p.y;
-            if (!bounds.intersects(tmpTile)) {
-                it.remove();
+        synchronized (tiles) {
+            // remove
+            Iterator<Point> it = tiles.keySet().iterator();
+            while (it.hasNext()) {
+                Point p = it.next();
+                tmpTile.x = p.x;
+                tmpTile.y = p.y;
+                if (!bounds.intersects(tmpTile)) {
+                    it.remove();
+                }
             }
-        }
 
-        // add
-        for (int y = 0; y < h; y += TILE_SIZE) {
-            for (int x = 0; x < w; x += TILE_SIZE) {
-                tmpTile.setLocation(otX + x, otY + y);
-                if (bounds.intersects(tmpTile)) {
-                    Point p = tmpTile.getLocation();
-                    if (!tiles.containsKey(p)) {
-                        addNewTile(p);
+            // add
+            for (int y = 0; y < h; y += TILE_SIZE) {
+                for (int x = 0; x < w; x += TILE_SIZE) {
+                    tmpTile.setLocation(otX + x, otY + y);
+                    if (bounds.intersects(tmpTile)) {
+                        Point p = tmpTile.getLocation();
+                        if (!tiles.containsKey(p)) {
+                            addNewTile(p);
+                        }
                     }
                 }
             }
@@ -152,14 +194,24 @@ public class WholeslideView extends JComponent {
     }
 
     private void addNewTile(Point p) {
-//        System.out.println("adding new tile for " + p);
-        tiles.put(p, emptyTile);
+        // System.out.println("adding new tile for " + p);
+        BufferedImage emptyTile = createTile();
+        drawEmptyTile(emptyTile);
+        synchronized (tiles) {
+            tiles.put(p, emptyTile);
+        }
 
         try {
             dirtyTiles.put(p);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private BufferedImage createTile() {
+        BufferedImage b = getGraphicsConfiguration().createCompatibleImage(
+                TILE_SIZE, TILE_SIZE, Transparency.OPAQUE);
+        return b;
     }
 
     static private void spaceTyped(WholeslideView w) {
@@ -170,12 +222,12 @@ public class WholeslideView extends JComponent {
         w.addRemoveTiles();
         w.repaint();
     }
-    
+
     static private void translateSlide(WholeslideView w, int x, int y) {
         if (w == null) {
             return;
         }
-        
+
         w.viewPosition.translate(x, y);
         w.addRemoveTiles();
         w.repaint();
@@ -410,7 +462,6 @@ public class WholeslideView extends JComponent {
             if (w != 0 && h != 0) {
                 zoomToFit();
                 centerSlide();
-                drawEmptyTile();
                 addRemoveTiles();
                 firstPaint = false;
             }
@@ -434,10 +485,10 @@ public class WholeslideView extends JComponent {
 
         // System.out.println("drawing from " + viewPosition);
 
-        int startX = viewPosition.x;
-        int startY = viewPosition.y;
-        int extraX = getExtraAt(startX + sd.width);
-        int extraY = getExtraAt(startY + sd.height);
+        int startX = viewPosition.x - sd.width;
+        int startY = viewPosition.y - sd.height;
+        int extraX = getExtraAt(viewPosition.x);
+        int extraY = getExtraAt(viewPosition.y);
 
         System.out.println("extra: " + extraX + "," + extraY);
 
@@ -448,12 +499,16 @@ public class WholeslideView extends JComponent {
                 int tx = getTileAt(x + sd.width);
 
                 p.move(tx, ty);
-                BufferedImage b = tiles.get(p);
+
+                BufferedImage b;
+                synchronized (tiles) {
+                    b = tiles.get(p);
+                }
 
                 int dx = x - startX - extraX;
                 int dy = y - startY - extraY;
-//                System.out.println("draw " + p + " " + (b != null) + " -> "
-//                        + dx + "," + dy);
+                // System.out.println("draw " + p + " " + (b != null) + " -> "
+                // + dx + "," + dy);
                 g.drawImage(b, dx, dy, null);
             }
         }
