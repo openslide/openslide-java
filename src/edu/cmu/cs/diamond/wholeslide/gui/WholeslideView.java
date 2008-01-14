@@ -65,6 +65,10 @@ public class WholeslideView extends JComponent {
         }
     };
 
+    protected boolean makingSelection;
+
+    protected Rectangle selection;
+
     public WholeslideView(Wholeslide w) {
         this(w, 1.2, 40);
     }
@@ -322,6 +326,8 @@ public class WholeslideView extends JComponent {
                     return;
                 }
 
+                makingSelection = (e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) == MouseEvent.SHIFT_DOWN_MASK;
+
                 x = e.getX();
                 y = e.getY();
                 viewX = viewPosition.x;
@@ -338,8 +344,14 @@ public class WholeslideView extends JComponent {
                 int newX = viewX + x - e.getX();
                 int newY = viewY + y - e.getY();
 
-                mouseDraggedHelper(WholeslideView.this, newX, newY);
-                mouseDraggedHelper(otherView, newX, newY);
+                if (!makingSelection) {
+                    mouseDraggedHelper(WholeslideView.this, newX, newY);
+                    mouseDraggedHelper(otherView, newX, newY);
+                } else {
+                    selection = new Rectangle(viewX + x, viewY + y, e.getX()
+                            - x, e.getY() - y);
+                    repaint();
+                }
             }
 
         };
@@ -376,6 +388,10 @@ public class WholeslideView extends JComponent {
                 case KeyEvent.VK_D:
                     translateSlide(WholeslideView.this, KEYBOARD_SCROLL_AMOUNT,
                             0);
+                    break;
+                case KeyEvent.VK_ESCAPE:
+                    selection = null;
+                    repaint();
                     break;
                 }
             }
@@ -514,7 +530,20 @@ public class WholeslideView extends JComponent {
             }
         }
 
-        paintAllTiles(g);
+        Graphics2D g2 = (Graphics2D) g;
+
+        paintAllTiles(g2);
+        paintSelection(g2);
+    }
+
+    private void paintSelection(Graphics2D g) {
+        if (selection != null) {
+            g.translate(-viewPosition.x, -viewPosition.y);
+            g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.15f));
+            g.fill(selection);
+            g.setColor(Color.RED);
+            g.draw(selection);
+        }
     }
 
     static private int getExtraAt(int p) {
@@ -525,7 +554,7 @@ public class WholeslideView extends JComponent {
         }
     }
 
-    private void paintAllTiles(Graphics g) {
+    private void paintAllTiles(Graphics2D g) {
         Dimension sd = getScreenSize();
         int h = getHeight();
         int w = getWidth();
