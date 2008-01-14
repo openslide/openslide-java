@@ -32,12 +32,6 @@ public class WholeslideView extends JComponent {
 
     private Point viewPosition = new Point();
 
-    protected double tmpZoomScale = 1.0;
-
-    protected int tmpZoomX;
-
-    protected int tmpZoomY;
-
     private WholeslideView otherView;
 
     final private Map<Point, BufferedImage> tiles = new HashMap<Point, BufferedImage>();
@@ -83,12 +77,15 @@ public class WholeslideView extends JComponent {
                         // get the tile
                         System.out.println("checking " + p);
 
+                        BufferedImage tile;
                         synchronized (tiles) {
                             if (!tiles.containsKey(p)) {
                                 continue;
                             }
-                            drawTileForPoint(p, tiles.get(p));
+                            tile = tiles.get(p);
                         }
+                        drawTileForPoint(p, tile);
+
                         SwingUtilities.invokeLater(redrawer);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -102,8 +99,7 @@ public class WholeslideView extends JComponent {
         Graphics2D g = b.createGraphics();
         System.out.println("drawing tile for point " + p);
         double ds = getDownsample();
-        wsd.paintRegion(g, 0, 0, p.x, p.y, TILE_SIZE,
-                TILE_SIZE, ds);
+        wsd.paintRegion(g, 0, 0, p.x, p.y, TILE_SIZE, TILE_SIZE, ds);
         g.setColor(Color.BLACK);
         g.drawString(p.toString(), 10, 10);
         g.dispose();
@@ -237,19 +233,23 @@ public class WholeslideView extends JComponent {
         if (w == null) {
             return;
         }
-        double origDS = w.getDownsample();
         w.zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
-        double relScale = origDS / w.getDownsample();
-
-        w.tmpZoomX = e.getX();
-        w.tmpZoomY = e.getY();
-        w.tmpZoomScale = relScale;
-
-        // TODO more fancy deferred zooming
-        w.paintImmediately(0, 0, w.getWidth(), w.getHeight());
-
-        w.tmpZoomScale = 1.0;
+        w.dirtyAllTiles();
         w.addRemoveTiles();
+    }
+
+    private void dirtyAllTiles() {
+        synchronized (tiles) {
+            for (Point p : tiles.keySet()) {
+                try {
+                    if (!dirtyTiles.contains(p)) {
+                        dirtyTiles.put(p);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void registerEventHandlers() {
