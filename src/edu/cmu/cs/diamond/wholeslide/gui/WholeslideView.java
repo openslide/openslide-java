@@ -177,6 +177,7 @@ public class WholeslideView extends JComponent {
                 tmpTile.y = p.y;
                 if (!bounds.intersects(tmpTile)) {
                     it.remove();
+                    dirtyTiles.remove(p);
                 }
             }
 
@@ -259,11 +260,10 @@ public class WholeslideView extends JComponent {
 
     private void dirtyAllTiles() {
         synchronized (tiles) {
+            dirtyTiles.clear();
             for (Point p : tiles.keySet()) {
                 try {
-                    if (!dirtyTiles.contains(p)) {
-                        dirtyTiles.put(p);
-                    }
+                    dirtyTiles.put(p);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
