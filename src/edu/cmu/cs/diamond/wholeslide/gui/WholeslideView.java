@@ -170,6 +170,16 @@ public class WholeslideView extends JComponent {
         w.addRemoveTiles();
         w.repaint();
     }
+    
+    static private void translateSlide(WholeslideView w, int x, int y) {
+        if (w == null) {
+            return;
+        }
+        
+        w.viewPosition.translate(x, y);
+        w.addRemoveTiles();
+        w.repaint();
+    }
 
     static private void mouseWheelHelper(WholeslideView w, MouseWheelEvent e) {
         if (w == null) {
@@ -244,13 +254,29 @@ public class WholeslideView extends JComponent {
         // keyboard
         addKeyListener(new KeyAdapter() {
             @Override
-            public void keyTyped(KeyEvent e) {
+            public void keyPressed(KeyEvent e) {
                 System.out.println(e);
-                char key = e.getKeyChar();
+                int key = e.getKeyCode();
                 switch (key) {
-                case ' ':
+                case KeyEvent.VK_SPACE:
                     spaceTyped(WholeslideView.this);
                     spaceTyped(otherView);
+                    break;
+                case KeyEvent.VK_UP:
+                case KeyEvent.VK_W:
+                    translateSlide(WholeslideView.this, 0, -TILE_SIZE);
+                    break;
+                case KeyEvent.VK_DOWN:
+                case KeyEvent.VK_S:
+                    translateSlide(WholeslideView.this, 0, TILE_SIZE);
+                    break;
+                case KeyEvent.VK_LEFT:
+                case KeyEvent.VK_A:
+                    translateSlide(WholeslideView.this, -TILE_SIZE, 0);
+                    break;
+                case KeyEvent.VK_RIGHT:
+                case KeyEvent.VK_D:
+                    translateSlide(WholeslideView.this, TILE_SIZE, 0);
                     break;
                 }
             }
@@ -426,8 +452,8 @@ public class WholeslideView extends JComponent {
 
                 int dx = x - startX - extraX;
                 int dy = y - startY - extraY;
-                System.out.println("draw " + p + " " + (b != null) + " -> "
-                        + dx + "," + dy);
+//                System.out.println("draw " + p + " " + (b != null) + " -> "
+//                        + dx + "," + dy);
                 g.drawImage(b, dx, dy, null);
             }
         }
