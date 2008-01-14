@@ -123,6 +123,8 @@ public class WholeslideView extends JComponent {
         Graphics2D g = b.createGraphics();
         System.out.println("drawing tile for point " + p);
         double ds = getDownsample();
+        g.setBackground(getBackground());
+        g.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
         wsd.paintRegion(g, 0, 0, p.x, p.y, TILE_SIZE, TILE_SIZE, ds);
         // g.setColor(Color.BLACK);
         // g.drawString(p.toString(), 10, 10);
@@ -133,10 +135,10 @@ public class WholeslideView extends JComponent {
         Graphics2D g = emptyTile.createGraphics();
         g.setBackground(getBackground());
         g.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
-        // g.setColor(Color.RED);
-        // g.drawLine(0, 0, TILE_SIZE, TILE_SIZE);
-        // g.drawLine(0, TILE_SIZE, TILE_SIZE, 0);
-        // g.drawRect(0, 0, TILE_SIZE - 1, TILE_SIZE - 1);
+        g.setColor(Color.RED);
+        g.drawLine(0, 0, TILE_SIZE, TILE_SIZE);
+        g.drawLine(0, TILE_SIZE, TILE_SIZE, 0);
+        g.drawRect(0, 0, TILE_SIZE - 1, TILE_SIZE - 1);
         g.dispose();
     }
 
