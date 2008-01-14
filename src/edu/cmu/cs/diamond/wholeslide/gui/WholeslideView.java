@@ -33,6 +33,8 @@ public class WholeslideView extends JComponent {
     private boolean firstPaint = true;
 
     private Point viewPosition = new Point();
+    
+    private static final Point poisonPoint = new Point();
 
     private WholeslideView otherView;
 
@@ -50,6 +52,11 @@ public class WholeslideView extends JComponent {
 
     final private BlockingQueue<Point> dirtyTiles = new LinkedBlockingQueue<Point>();
 
+    @Override
+    protected void finalize() throws Throwable {
+        dirtyTiles.put(poisonPoint);
+    }
+    
     protected Runnable redrawer = new Runnable() {
         @Override
         public void run() {
@@ -82,7 +89,7 @@ public class WholeslideView extends JComponent {
                 while (true) {
                     try {
                         Point p = dirtyTiles.take();
-                        if (p == null) {
+                        if (p == poisonPoint) {
                             return; // done
                         }
 
