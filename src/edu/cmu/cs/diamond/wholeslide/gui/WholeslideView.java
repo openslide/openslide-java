@@ -3,7 +3,6 @@ package edu.cmu.cs.diamond.wholeslide.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -88,8 +87,8 @@ public class WholeslideView extends JComponent {
 
         System.out.println("oX: " + oX + ", oY: " + oY);
 
-        final int otX = (oX / TILE_SIZE) * TILE_SIZE;
-        final int otY = (oY / TILE_SIZE) * TILE_SIZE;
+        final int otX = getTileAt(oX);
+        final int otY = getTileAt(oY);
 
         Rectangle bounds = new Rectangle(oX, oY, w, h);
 
@@ -117,6 +116,19 @@ public class WholeslideView extends JComponent {
                     }
                 }
             }
+        }
+    }
+
+    static private int getTileAt(int p) {
+        if (p < 0) {
+            int p2 = (p / TILE_SIZE) * TILE_SIZE;
+            if (p == p2) {
+                return p;
+            } else {
+                return p2 - TILE_SIZE;
+            }
+        } else {
+            return (p / TILE_SIZE) * TILE_SIZE;
         }
     }
 
@@ -372,28 +384,42 @@ public class WholeslideView extends JComponent {
         paintAllTiles(g);
     }
 
+    static private int getExtraAt(int p) {
+        if (p < 0) {
+            return -(getTileAt(p) - p);
+        } else {
+            return p % TILE_SIZE;
+        }
+    }
+
     private void paintAllTiles(Graphics g) {
         Dimension sd = getScreenSize();
         int h = getHeight();
         int w = getWidth();
 
-        System.out.println("drawing from " + viewPosition);
+        // System.out.println("drawing from " + viewPosition);
 
         int startX = viewPosition.x;
         int startY = viewPosition.y;
-        int extraX = (startX + sd.width) % TILE_SIZE;
-        int extraY = (startY + sd.height) % TILE_SIZE;
-        
+        int extraX = getExtraAt(startX + sd.width);
+        int extraY = getExtraAt(startY + sd.height);
+
+        System.out.println("extra: " + extraX + "," + extraY);
+
         Point p = new Point();
         for (int y = startY; y < h + startY + extraY; y += TILE_SIZE) {
-            int ty = ((y + sd.height) / TILE_SIZE) * TILE_SIZE;
+            int ty = getTileAt(y + sd.height);
             for (int x = startX; x < w + startX + extraX; x += TILE_SIZE) {
-                int tx = ((x + sd.width) / TILE_SIZE) * TILE_SIZE;
+                int tx = getTileAt(x + sd.width);
 
                 p.move(tx, ty);
                 BufferedImage b = tiles.get(p);
-                System.out.println("draw " + p + " " + (b != null));
-                g.drawImage(b, x - startX - extraX, y - startY - extraY, null);
+
+                int dx = x - startX - extraX;
+                int dy = y - startY - extraY;
+                System.out.println("draw " + p + " " + (b != null) + " -> "
+                        + dx + "," + dy);
+                g.drawImage(b, dx, dy, null);
             }
         }
     }
