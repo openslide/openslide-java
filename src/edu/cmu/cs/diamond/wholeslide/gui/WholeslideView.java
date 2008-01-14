@@ -182,14 +182,37 @@ public class WholeslideView extends JComponent {
             }
 
             // add
-            for (int y = 0; y < h; y += TILE_SIZE) {
-                for (int x = 0; x < w; x += TILE_SIZE) {
-                    tmpTile.setLocation(otX + x, otY + y);
-                    if (bounds.intersects(tmpTile)) {
-                        Point p = tmpTile.getLocation();
-                        if (!tiles.containsKey(p)) {
-                            addNewTile(p);
-                        }
+            addTiles(sd.width, sd.height, getTileAt(oX + sd.width), getTileAt(oY + sd.height), bounds);
+            addTiles(w, h, otX, otY, bounds);
+
+            /*
+             * // add, in a spiral int maxD = Math.max(w, h); int maxSteps =
+             * maxD / TILE_SIZE + ((maxD % TILE_SIZE != 0) ? 1 : 0); maxSteps *=
+             * maxSteps; int y = getTileAt(h / 2); int x = getTileAt(w / 2); int
+             * dir = 0; int steps = 1; int stepsUntilChangeDir = steps * 2; for
+             * (int i = 0; i < maxSteps; i++) { tmpTile.setLocation(otX + x, otY +
+             * y); if (bounds.intersects(tmpTile)) { Point p =
+             * tmpTile.getLocation(); if (!tiles.containsKey(p)) {
+             * addNewTile(p); } }
+             * 
+             * switch (dir) { case 0: x += TILE_SIZE; break; case 1: y +=
+             * TILE_SIZE; break; case 2: x -= TILE_SIZE; break; case 3: y -=
+             * TILE_SIZE; break; } stepsUntilChangeDir--; if
+             * (stepsUntilChangeDir == 0) { if (dir == 1 || dir == 3) { steps++; }
+             * dir = (dir + 1) % 4; stepsUntilChangeDir = steps; } }
+             */
+        }
+    }
+
+    private void addTiles(int w, int h, int otX, int otY, Rectangle bounds) {
+        Rectangle tmpTile = new Rectangle(TILE_SIZE, TILE_SIZE);
+        for (int y = 0; y < h; y += TILE_SIZE) {
+            for (int x = 0; x < w; x += TILE_SIZE) {
+                tmpTile.setLocation(otX + x, otY + y);
+                if (bounds.intersects(tmpTile)) {
+                    Point p = tmpTile.getLocation();
+                    if (!tiles.containsKey(p)) {
+                        addNewTile(p);
                     }
                 }
             }
