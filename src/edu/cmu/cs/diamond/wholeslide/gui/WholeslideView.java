@@ -3,10 +3,9 @@ package edu.cmu.cs.diamond.wholeslide.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -38,19 +37,21 @@ public class WholeslideView extends JComponent {
 
     private WholeslideView otherView;
 
-    final private Map<Point, BufferedImage> tiles = new TreeMap<Point, BufferedImage>(
-            new Comparator<Point>() {
-                public int compare(Point o1, Point o2) {
-                    int yc = Integer.valueOf(o1.y).compareTo(
-                            Integer.valueOf(o2.y));
-                    if (yc != 0) {
-                        return yc;
-                    } else {
-                        return Integer.valueOf(o1.x).compareTo(
-                                Integer.valueOf(o2.x));
-                    }
-                }
-            });
+    // final private Map<Point, BufferedImage> tiles = new TreeMap<Point,
+    // BufferedImage>(
+    // new Comparator<Point>() {
+    // public int compare(Point o1, Point o2) {
+    // int yc = Integer.valueOf(o1.y).compareTo(
+    // Integer.valueOf(o2.y));
+    // if (yc != 0) {
+    // return yc;
+    // } else {
+    // return Integer.valueOf(o1.x).compareTo(
+    // Integer.valueOf(o2.x));
+    // }
+    // }
+    // });
+    final private Map<Point, BufferedImage> tiles = new HashMap<Point, BufferedImage>();
 
     final private BlockingQueue<Point> dirtyTiles = new LinkedBlockingQueue<Point>();
 
@@ -181,31 +182,31 @@ public class WholeslideView extends JComponent {
                 tmpTile.y = p.y;
                 if (!bounds.intersects(tmpTile)) {
                     it.remove();
-                    dirtyTiles.remove(p);
+                    // dirtyTiles.remove(p);
                 }
             }
-
-            // add
-            addTiles(sd.width, sd.height, getTileAt(oX + sd.width), getTileAt(oY + sd.height), bounds);
-            addTiles(w, h, otX, otY, bounds);
-
-            /*
-             * // add, in a spiral int maxD = Math.max(w, h); int maxSteps =
-             * maxD / TILE_SIZE + ((maxD % TILE_SIZE != 0) ? 1 : 0); maxSteps *=
-             * maxSteps; int y = getTileAt(h / 2); int x = getTileAt(w / 2); int
-             * dir = 0; int steps = 1; int stepsUntilChangeDir = steps * 2; for
-             * (int i = 0; i < maxSteps; i++) { tmpTile.setLocation(otX + x, otY +
-             * y); if (bounds.intersects(tmpTile)) { Point p =
-             * tmpTile.getLocation(); if (!tiles.containsKey(p)) {
-             * addNewTile(p); } }
-             * 
-             * switch (dir) { case 0: x += TILE_SIZE; break; case 1: y +=
-             * TILE_SIZE; break; case 2: x -= TILE_SIZE; break; case 3: y -=
-             * TILE_SIZE; break; } stepsUntilChangeDir--; if
-             * (stepsUntilChangeDir == 0) { if (dir == 1 || dir == 3) { steps++; }
-             * dir = (dir + 1) % 4; stepsUntilChangeDir = steps; } }
-             */
         }
+
+        // add
+        addTiles(sd.width, sd.height, getTileAt(oX + sd.width), getTileAt(oY
+                + sd.height), bounds);
+        addTiles(w, h, otX, otY, bounds);
+
+        /*
+         * // add, in a spiral int maxD = Math.max(w, h); int maxSteps = maxD /
+         * TILE_SIZE + ((maxD % TILE_SIZE != 0) ? 1 : 0); maxSteps *= maxSteps;
+         * int y = getTileAt(h / 2); int x = getTileAt(w / 2); int dir = 0; int
+         * steps = 1; int stepsUntilChangeDir = steps * 2; for (int i = 0; i <
+         * maxSteps; i++) { tmpTile.setLocation(otX + x, otY + y); if
+         * (bounds.intersects(tmpTile)) { Point p = tmpTile.getLocation(); if
+         * (!tiles.containsKey(p)) { addNewTile(p); } }
+         * 
+         * switch (dir) { case 0: x += TILE_SIZE; break; case 1: y += TILE_SIZE;
+         * break; case 2: x -= TILE_SIZE; break; case 3: y -= TILE_SIZE; break; }
+         * stepsUntilChangeDir--; if (stepsUntilChangeDir == 0) { if (dir == 1 ||
+         * dir == 3) { steps++; } dir = (dir + 1) % 4; stepsUntilChangeDir =
+         * steps; } }
+         */
     }
 
     private void addTiles(int w, int h, int otX, int otY, Rectangle bounds) {
@@ -282,8 +283,14 @@ public class WholeslideView extends JComponent {
             return;
         }
         w.zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
-        w.dirtyAllTiles();
+        w.removeAllTiles();
         w.addRemoveTiles();
+    }
+
+    private void removeAllTiles() {
+        synchronized (tiles) {
+            tiles.clear();
+        }
     }
 
     private void dirtyAllTiles() {
