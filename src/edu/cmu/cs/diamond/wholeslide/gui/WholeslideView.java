@@ -40,7 +40,6 @@ public class WholeslideView extends JComponent {
 
     final private Map<Point, BufferedImage> tiles = new TreeMap<Point, BufferedImage>(
             new Comparator<Point>() {
-                @Override
                 public int compare(Point o1, Point o2) {
                     int yc = Integer.valueOf(o1.y).compareTo(
                             Integer.valueOf(o2.y));
@@ -61,7 +60,6 @@ public class WholeslideView extends JComponent {
     }
 
     protected Runnable redrawer = new Runnable() {
-        @Override
         public void run() {
             repaint();
         }
@@ -87,7 +85,6 @@ public class WholeslideView extends JComponent {
 
     private void startDrawingThread() {
         new Thread(new Runnable() {
-            @Override
             public void run() {
                 while (true) {
                     try {
