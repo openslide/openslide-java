@@ -40,6 +40,8 @@ public class WholeslideView extends JComponent {
 
     private WholeslideView otherView;
 
+    private BufferedImage emptyTile;
+
     final private Map<Point, BufferedImage> tiles = Collections
             .synchronizedMap(new HashMap<Point, BufferedImage>());
 
@@ -61,9 +63,26 @@ public class WholeslideView extends JComponent {
         registerEventHandlers();
     }
 
+    private void drawEmptyTile() {
+        if (emptyTile == null) {
+            emptyTile = getGraphicsConfiguration().createCompatibleImage(
+                    TILE_SIZE, TILE_SIZE, Transparency.OPAQUE);
+        }
+
+        Graphics2D g = emptyTile.createGraphics();
+        g.setBackground(getBackground());
+        g.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
+        g.setColor(Color.RED);
+        g.drawLine(0, 0, TILE_SIZE, TILE_SIZE);
+        g.drawLine(0, TILE_SIZE, TILE_SIZE, 0);
+        g.drawRect(0, 0, TILE_SIZE - 1, TILE_SIZE - 1);
+        g.dispose();
+    }
+
     @Override
     public void setBackground(Color bg) {
         super.setBackground(bg);
+        drawEmptyTile();
         repaint();
     }
 
@@ -133,19 +152,8 @@ public class WholeslideView extends JComponent {
     }
 
     private void addNewTile(Point p) {
-        System.out.println("adding new tile for " + p);
-
-        BufferedImage b = getGraphicsConfiguration().createCompatibleImage(
-                TILE_SIZE, TILE_SIZE, Transparency.OPAQUE);
-        Graphics2D g = b.createGraphics();
-        g.setBackground(getBackground());
-        g.setColor(Color.BLACK);
-        g.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
-        g.drawRect(0, 0, TILE_SIZE, TILE_SIZE);
-        g.drawString(p.toString(), 10, 10);
-        g.dispose();
-
-        tiles.put(p, b);
+//        System.out.println("adding new tile for " + p);
+        tiles.put(p, emptyTile);
 
         try {
             dirtyTiles.put(p);
@@ -376,6 +384,7 @@ public class WholeslideView extends JComponent {
             if (w != 0 && h != 0) {
                 zoomToFit();
                 centerSlide();
+                drawEmptyTile();
                 addRemoveTiles();
                 firstPaint = false;
             }
