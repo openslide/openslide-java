@@ -292,6 +292,7 @@ public class WholeslideView extends JComponent {
     private void removeAllTiles() {
         synchronized (tiles) {
             tiles.clear();
+            dirtyTiles.clear();
         }
     }
 
