@@ -357,8 +357,22 @@ public class WholeslideView extends JComponent {
                     mouseDraggedHelper(WholeslideView.this, newX, newY);
                     mouseDraggedHelper(otherView, newX, newY);
                 } else {
-                    selection = new Rectangle(viewX + x, viewY + y, e.getX()
-                            - x, e.getY() - y);
+                    double ds = getDownsample();
+                    int dx = (int) ((viewX + x) * ds);
+                    int dy = (int) ((viewY + y) * ds);
+                    int dw = (int) ((e.getX() - x) * ds);
+                    int dh = (int) ((e.getY() - y) * ds);
+
+                    if (dw < 0) {
+                        dx += dw;
+                        dw = -dw;
+                    }
+                    if (dh < 0) {
+                        dy += dh;
+                        dh = -dh;
+                    }
+
+                    selection = new Rectangle(dx, dy, dw, dh);
                     repaint();
                 }
             }
@@ -547,7 +561,10 @@ public class WholeslideView extends JComponent {
 
     private void paintSelection(Graphics2D g) {
         if (selection != null) {
+            double ds = getDownsample();
+
             g.translate(-viewPosition.x, -viewPosition.y);
+            g.scale(1 / ds, 1 / ds);
             g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.15f));
             g.fill(selection);
             g.setColor(Color.RED);
