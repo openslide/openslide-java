@@ -564,12 +564,15 @@ public class WholeslideView extends JComponent {
         if (selection != null) {
             double ds = getDownsample();
 
-            g.translate(-viewPosition.x, -viewPosition.y);
-            g.scale(1 / ds, 1 / ds);
+            int x = (int) (selection.x / ds - viewPosition.x);
+            int y = (int) (selection.y / ds - viewPosition.y);
+            int w = (int) (selection.width / ds);
+            int h = (int) (selection.height / ds);
+            
             g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.15f));
-            g.fill(selection);
+            g.fillRect(x, y, w, h);
             g.setColor(Color.RED);
-            g.draw(selection);
+            g.drawRect(x, y, w, h);
         }
     }
 
