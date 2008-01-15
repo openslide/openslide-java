@@ -138,13 +138,13 @@ public class WholeslideView extends JComponent {
 
         // mouse drag
         MouseAdapter ma = new MouseAdapter() {
-            private int viewX;
-
-            private int viewY;
-
             private int oldX;
 
             private int oldY;
+
+            private int slideStartX;
+
+            private int slideStartY;
 
             @Override
             public void mousePressed(MouseEvent e) {
@@ -156,11 +156,12 @@ public class WholeslideView extends JComponent {
 
                 makingSelection = (e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) == MouseEvent.SHIFT_DOWN_MASK;
 
-                viewX = viewPosition.x;
-                viewY = viewPosition.y;
                 oldX = e.getX();
                 oldY = e.getY();
-                // System.out.println(dbufOffset);
+                
+                double ds = getDownsample();
+                slideStartX = (int) ((oldX + viewPosition.x) * ds);
+                slideStartY = (int) ((oldY + viewPosition.y) * ds);
             }
 
             @Override
@@ -177,10 +178,10 @@ public class WholeslideView extends JComponent {
                     mouseDraggedHelper(otherView, relX, relY);
                 } else {
                     double ds = getDownsample();
-                    int dx = (int) ((viewX + oldX) * ds);
-                    int dy = (int) ((viewY + oldY) * ds);
-                    int dw = (int) ((e.getX() - oldX) * ds);
-                    int dh = (int) ((e.getY() - oldY) * ds);
+                    int dx = slideStartX;
+                    int dy = slideStartY;
+                    int dw = (int) ((e.getX() + viewPosition.x) * ds) - dx;
+                    int dh = (int) ((e.getY() + viewPosition.y) * ds) - dy;
 
                     if (dw < 0) {
                         dx += dw;
@@ -192,10 +193,16 @@ public class WholeslideView extends JComponent {
                     }
 
                     selection = new Rectangle(dx, dy, dw, dh);
+                    System.out.println(selection);
                     repaint();
                 }
                 oldX = e.getX();
                 oldY = e.getY();
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                makingSelection = false;
             }
 
         };
@@ -407,8 +414,8 @@ public class WholeslideView extends JComponent {
 
             int x = (int) (selection.x / ds - viewPosition.x);
             int y = (int) (selection.y / ds - viewPosition.y);
-            int w = (int) (selection.width / ds);
-            int h = (int) (selection.height / ds);
+            int w = (int) Math.round(selection.width / ds);
+            int h = (int) Math.round(selection.height / ds);
 
             g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.15f));
             g.fillRect(x, y, w, h);
