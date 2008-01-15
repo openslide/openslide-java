@@ -372,11 +372,18 @@ public class WholeslideView extends JComponent {
         if (dbuf == null || dbuf.getWidth() != w || dbuf.getHeight() != h) {
             dbuf = getGraphicsConfiguration().createCompatibleImage(w, h,
                     Transparency.OPAQUE);
-            redrawBackingStore(g2);
+            redrawBackingStore();
         }
         
         g2.drawImage(dbuf, 0, 0, null);
         paintSelection(g2);
+    }
+
+    private void redrawBackingStore() {
+        Graphics2D dg = dbuf.createGraphics();
+        dg.setClip(0, 0, dbuf.getWidth(), dbuf.getHeight());
+        redrawBackingStore(dg);
+        dg.dispose();
     }
 
     private void redrawBackingStore(Graphics2D g) {
