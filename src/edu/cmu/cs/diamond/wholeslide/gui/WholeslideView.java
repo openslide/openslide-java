@@ -24,7 +24,7 @@ public class WholeslideView extends JComponent {
 
     transient final private Wholeslide wsd;
 
-    private double rotation;
+    private int rotation;
 
     private int downsampleExponent;
 
@@ -428,12 +428,12 @@ public class WholeslideView extends JComponent {
         System.out.println(downsampleExponent);
     }
 
-    private void rotateSlide(double angle) {
-        // TODO
-    }
-
-    private void setSlideRotation(double angle) {
-        rotation = angle;
+    private void rotateSlide(int quads) {
+        rotation += quads;
+        rotation %= 4;
+        if (rotation < 0) {
+            rotation += 4;
+        }
     }
 
     public void linkWithOther(WholeslideView otherView) {
