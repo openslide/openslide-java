@@ -357,6 +357,7 @@ public class WholeslideView extends JComponent {
                 createBackingStore();
                 zoomToFit();
                 centerSlide();
+                paintBackingStore();
                 firstPaint = false;
             } else {
                 return;
