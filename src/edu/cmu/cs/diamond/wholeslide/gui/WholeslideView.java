@@ -59,6 +59,7 @@ public class WholeslideView extends JComponent {
     @Override
     public void setBackground(Color bg) {
         super.setBackground(bg);
+        paintBackingStore();
         repaint();
     }
 
@@ -68,25 +69,26 @@ public class WholeslideView extends JComponent {
             return;
         }
 
-        int w = ws.getWidth();
-        int h = ws.getHeight();
+        BufferedImage dbuf = ws.dbuf;
+        int w = dbuf.getWidth();
+        int h = dbuf.getHeight();
 
-        Graphics g = ws.getGraphics();
+        Graphics2D g = dbuf.createGraphics();
         g.copyArea(0, 0, w, h, -dX, -dY);
-        g.dispose();
         ws.viewPosition.move(newX, newY);
-        // System.out.println(w.viewPosition);
 
-        if (dX > 0) {
+        if (dY > 0) {
             // moved up, fill bottom
-            ws.repaint(0, h - dY, w, dY);
+            g.setClip(0, h - dY, w, dY);
+            ws.paintBackingStore(g);
 
             // adjust h and y so as not to draw twice to the intersection
             h -= dY;
             dY = 0;
         } else if (dY < 0) {
             // fill top
-            ws.repaint(0, 0, w, -dY);
+            g.setClip(0, 0, w, -dY);
+            ws.paintBackingStore(g);
 
             // adjust h and y so as not to draw twice to the intersection
             h += dY;
@@ -96,12 +98,16 @@ public class WholeslideView extends JComponent {
         // fill vert
         if (dX > 0) {
             // fill right
-            ws.repaint(w - dX, dY, dX, h);
+            g.setClip(w - dX, dY, dX, h);
+            ws.paintBackingStore(g);
         } else if (dX < 0) {
             // fill left
-            ws.repaint(0, dY, -dX, h);
+            g.setClip(0, dY, -dX, h);
+            ws.paintBackingStore(g);
         }
-        // w.repaint();
+        g.dispose();
+
+        ws.repaint();
     }
 
     static private void spaceTyped(WholeslideView w) {
@@ -125,8 +131,14 @@ public class WholeslideView extends JComponent {
         if (w == null) {
             return;
         }
+
+        double oldDS = w.getDownsample();
         w.zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
-        w.repaint();
+
+        if (oldDS != w.getDownsample()) {
+            w.paintBackingStore();
+            w.repaint();
+        }
     }
 
     private void registerEventHandlers() {
@@ -246,6 +258,10 @@ public class WholeslideView extends JComponent {
                     break;
                 case KeyEvent.VK_ESCAPE:
                     selection = null;
+                    repaint();
+                    break;
+                case KeyEvent.VK_ENTER:
+                    paintBackingStore();
                     repaint();
                     break;
                 }
@@ -372,28 +388,32 @@ public class WholeslideView extends JComponent {
         if (dbuf == null || dbuf.getWidth() != w || dbuf.getHeight() != h) {
             dbuf = getGraphicsConfiguration().createCompatibleImage(w, h,
                     Transparency.OPAQUE);
-            redrawBackingStore();
+            paintBackingStore();
         }
-        
+
         g2.drawImage(dbuf, 0, 0, null);
         paintSelection(g2);
     }
 
-    private void redrawBackingStore() {
+    private void paintBackingStore() {
         Graphics2D dg = dbuf.createGraphics();
         dg.setClip(0, 0, dbuf.getWidth(), dbuf.getHeight());
-        redrawBackingStore(dg);
+        paintBackingStore(dg);
         dg.dispose();
     }
 
-    private void redrawBackingStore(Graphics2D g) {
+    private void paintBackingStore(Graphics2D g) {
         double ds = getDownsample();
         int offsetX = viewPosition.x;
         int offsetY = viewPosition.y;
 
         Rectangle clip = g.getClipBounds();
-        wsd.paintRegion(g, clip.x, clip.y, offsetX, offsetY, clip.width,
-                clip.height, ds);
+
+        g.setBackground(getBackground());
+        g.clearRect(clip.x, clip.y, clip.width, clip.height);
+
+        wsd.paintRegion(g, clip.x, clip.y, offsetX + clip.x, offsetY + clip.y,
+                clip.width, clip.height, ds);
     }
 
     private void paintSelection(Graphics2D g) {
