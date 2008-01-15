@@ -1,5 +1,6 @@
 package edu.cmu.cs.diamond.wholeslide;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -134,13 +135,15 @@ public class Wholeslide {
             h = (int) (newH / newDownsample);
         }
 
+        if (debug) {
+            System.out.println("newW " + newW + ", newH " + newH + ", newX "
+                    + newX + ", newY " + newY);
+        }
+
         if (newW <= 0 || newH <= 0) {
             // nothing to draw
             return;
         }
-
-//        System.out.println("newW " + newW + ", newH " + newH + ", newX " + newX
-//                + ", newY " + newY);
 
         BufferedImage img = new BufferedImage(newW, newH,
                 BufferedImage.TYPE_INT_ARGB_PRE);
@@ -152,5 +155,20 @@ public class Wholeslide {
                 newX, newY, layer, img.getWidth(), img.getHeight());
 
         g.drawImage(img, dx, dy, w, h, null);
+
+        if (debug) {
+            if (debugThingy == 0) {
+                g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.4f));
+                debugThingy = 1;
+            } else {
+                g.setColor(new Color(0.0f, 1.0f, 0.0f, 0.4f));
+                debugThingy = 0;
+            }
+            g.fillRect(dx, dy, w, h);
+        }
     }
+
+    final boolean debug = true;
+
+    int debugThingy = 0;
 }
