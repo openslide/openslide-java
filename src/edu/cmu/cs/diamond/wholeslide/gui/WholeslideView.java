@@ -71,6 +71,14 @@ public class WholeslideView extends JComponent {
         ws.translateSlide(dX, dY);
     }
 
+    static private void repaintHelper(WholeslideView w) {
+        if (w == null) {
+            return;
+        }
+
+        w.repaint();
+    }
+
     static private void centerHelper(WholeslideView w) {
         if (w == null) {
             return;
@@ -116,27 +124,32 @@ public class WholeslideView extends JComponent {
             paintBackingStore(g);
         }
         g.dispose();
-
-        repaint();
     }
 
-    static private void zoomHelper(WholeslideView w, MouseWheelEvent e) {
+    static private double zoomHelper(WholeslideView w, MouseWheelEvent e) {
         if (w == null) {
-            return;
+            return 1.0;
         }
 
         double oldDS = w.getDownsample();
         w.zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
 
         double newDS = w.getDownsample();
-        if (oldDS != newDS) {
-            w.tmpZoomScale = oldDS / newDS;
+
+        return oldDS / newDS;
+    }
+
+    static private void zoomHelper2(WholeslideView w, double relDS, MouseWheelEvent e) {
+        if (w == null) {
+            return;
+        }
+        
+        if (relDS != 1.0) {
+            w.tmpZoomScale = relDS;
             w.tmpZoomX = e.getX();
             w.tmpZoomY = e.getY();
-            w.paintImmediately(0, 0, w.getWidth(), w.getHeight());
 
-            w.paintBackingStore();
-            w.repaint();
+            w.paintImmediately(0, 0, w.getWidth(), w.getHeight());
 
             w.tmpZoomScale = 1.0;
             w.tmpZoomX = 0;
@@ -144,12 +157,28 @@ public class WholeslideView extends JComponent {
         }
     }
 
+    static private void zoomHelper3(WholeslideView w, double relDS) {
+        if (w == null) {
+            return;
+        }
+        
+        if (relDS != 1.0) {
+            w.paintBackingStore();
+        }
+    }
+    
     private void registerEventHandlers() {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
-                zoomHelper(WholeslideView.this, e);
-                zoomHelper(otherView, e);
+                double ds1 = zoomHelper(WholeslideView.this, e);
+                double ds2 = zoomHelper(otherView, e);
+                zoomHelper2(WholeslideView.this, ds1, e);
+                zoomHelper2(otherView, ds2, e);
+                zoomHelper3(WholeslideView.this, ds1);
+                zoomHelper3(otherView, ds2);
+                repaintHelper(WholeslideView.this);
+                repaintHelper(otherView);
             }
         });
 
@@ -193,6 +222,8 @@ public class WholeslideView extends JComponent {
                 if (!makingSelection) {
                     translateHelper(WholeslideView.this, relX, relY);
                     translateHelper(otherView, relX, relY);
+                    repaintHelper(WholeslideView.this);
+                    repaintHelper(otherView);
                 } else {
                     double ds = getDownsample();
                     int dx = slideStartX;
@@ -236,30 +267,40 @@ public class WholeslideView extends JComponent {
                 case KeyEvent.VK_SPACE:
                     centerHelper(WholeslideView.this);
                     centerHelper(otherView);
+                    repaintHelper(WholeslideView.this);
+                    repaintHelper(otherView);
                     break;
                 case KeyEvent.VK_UP:
                 case KeyEvent.VK_W:
                     translateHelper(WholeslideView.this, 0,
                             -KEYBOARD_SCROLL_AMOUNT);
                     translateHelper(otherView, 0, -KEYBOARD_SCROLL_AMOUNT);
+                    repaintHelper(WholeslideView.this);
+                    repaintHelper(otherView);
                     break;
                 case KeyEvent.VK_DOWN:
                 case KeyEvent.VK_S:
                     translateHelper(WholeslideView.this, 0,
                             KEYBOARD_SCROLL_AMOUNT);
                     translateHelper(otherView, 0, KEYBOARD_SCROLL_AMOUNT);
+                    repaintHelper(WholeslideView.this);
+                    repaintHelper(otherView);
                     break;
                 case KeyEvent.VK_LEFT:
                 case KeyEvent.VK_A:
                     translateHelper(WholeslideView.this,
                             -KEYBOARD_SCROLL_AMOUNT, 0);
                     translateHelper(otherView, -KEYBOARD_SCROLL_AMOUNT, 0);
+                    repaintHelper(WholeslideView.this);
+                    repaintHelper(otherView);
                     break;
                 case KeyEvent.VK_RIGHT:
                 case KeyEvent.VK_D:
                     translateHelper(WholeslideView.this,
                             KEYBOARD_SCROLL_AMOUNT, 0);
                     translateHelper(otherView, KEYBOARD_SCROLL_AMOUNT, 0);
+                    repaintHelper(WholeslideView.this);
+                    repaintHelper(otherView);
                     break;
                 case KeyEvent.VK_ESCAPE:
                     selection = null;
