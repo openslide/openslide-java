@@ -26,17 +26,11 @@ public class WholeslideView extends JComponent {
 
     private Point viewPosition = new Point();
 
-    private static final Point poisonPoint = new Point();
-
     private WholeslideView otherView;
 
     protected boolean makingSelection;
 
     protected Rectangle selection;
-
-    protected int oldX;
-
-    protected int oldY;
 
     private BufferedImage dbuf;
 
@@ -63,51 +57,11 @@ public class WholeslideView extends JComponent {
         repaint();
     }
 
-    static private void mouseDraggedHelper(WholeslideView ws, int newX,
-            int newY, int dX, int dY) {
+    static private void mouseDraggedHelper(WholeslideView ws, int dX, int dY) {
         if (ws == null) {
             return;
         }
-
-        BufferedImage dbuf = ws.dbuf;
-        int w = dbuf.getWidth();
-        int h = dbuf.getHeight();
-
-        Graphics2D g = dbuf.createGraphics();
-        g.copyArea(0, 0, w, h, -dX, -dY);
-        ws.viewPosition.move(newX, newY);
-
-        if (dY > 0) {
-            // moved up, fill bottom
-            g.setClip(0, h - dY, w, dY);
-            ws.paintBackingStore(g);
-
-            // adjust h and y so as not to draw twice to the intersection
-            h -= dY;
-            dY = 0;
-        } else if (dY < 0) {
-            // fill top
-            g.setClip(0, 0, w, -dY);
-            ws.paintBackingStore(g);
-
-            // adjust h and y so as not to draw twice to the intersection
-            h += dY;
-            dY = -dY;
-        }
-
-        // fill vert
-        if (dX > 0) {
-            // fill right
-            g.setClip(w - dX, dY, dX, h);
-            ws.paintBackingStore(g);
-        } else if (dX < 0) {
-            // fill left
-            g.setClip(0, dY, -dX, h);
-            ws.paintBackingStore(g);
-        }
-        g.dispose();
-
-        ws.repaint();
+        ws.translateSlide(dX, dY);
     }
 
     static private void spaceTyped(WholeslideView w) {
@@ -118,13 +72,45 @@ public class WholeslideView extends JComponent {
         w.repaint();
     }
 
-    static private void translateSlide(WholeslideView w, int x, int y) {
-        if (w == null) {
-            return;
+    private void translateSlide(int dX, int dY) {
+        int w = dbuf.getWidth();
+        int h = dbuf.getHeight();
+
+        Graphics2D g = dbuf.createGraphics();
+        g.copyArea(0, 0, w, h, -dX, -dY);
+        viewPosition.translate(dX, dY);
+
+        if (dY > 0) {
+            // moved up, fill bottom
+            g.setClip(0, h - dY, w, dY);
+            paintBackingStore(g);
+
+            // adjust h and y so as not to draw twice to the intersection
+            h -= dY;
+            dY = 0;
+        } else if (dY < 0) {
+            // fill top
+            g.setClip(0, 0, w, -dY);
+            paintBackingStore(g);
+
+            // adjust h and y so as not to draw twice to the intersection
+            h += dY;
+            dY = -dY;
         }
 
-        w.viewPosition.translate(x, y);
-        w.repaint();
+        // fill vert
+        if (dX > 0) {
+            // fill right
+            g.setClip(w - dX, dY, dX, h);
+            paintBackingStore(g);
+        } else if (dX < 0) {
+            // fill left
+            g.setClip(0, dY, -dX, h);
+            paintBackingStore(g);
+        }
+        g.dispose();
+
+        repaint();
     }
 
     static private void mouseWheelHelper(WholeslideView w, MouseWheelEvent e) {
@@ -152,13 +138,13 @@ public class WholeslideView extends JComponent {
 
         // mouse drag
         MouseAdapter ma = new MouseAdapter() {
-            private int x;
-
-            private int y;
-
             private int viewX;
 
             private int viewY;
+
+            private int oldX;
+
+            private int oldY;
 
             @Override
             public void mousePressed(MouseEvent e) {
@@ -170,12 +156,10 @@ public class WholeslideView extends JComponent {
 
                 makingSelection = (e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) == MouseEvent.SHIFT_DOWN_MASK;
 
-                x = e.getX();
-                y = e.getY();
                 viewX = viewPosition.x;
                 viewY = viewPosition.y;
-                oldX = x;
-                oldY = y;
+                oldX = e.getX();
+                oldY = e.getY();
                 // System.out.println(dbufOffset);
             }
 
@@ -185,27 +169,18 @@ public class WholeslideView extends JComponent {
                     return;
                 }
 
-                int dX = x - e.getX();
-                int dY = y - e.getY();
-                int newX = viewX + dX;
-                int newY = viewY + dY;
-
                 int relX = oldX - e.getX();
                 int relY = oldY - e.getY();
 
-                oldX = e.getX();
-                oldY = e.getY();
-
                 if (!makingSelection) {
-                    mouseDraggedHelper(WholeslideView.this, newX, newY, relX,
-                            relY);
-                    mouseDraggedHelper(otherView, newX, newY, relX, relY);
+                    mouseDraggedHelper(WholeslideView.this, relX, relY);
+                    mouseDraggedHelper(otherView, relX, relY);
                 } else {
                     double ds = getDownsample();
-                    int dx = (int) ((viewX + x) * ds);
-                    int dy = (int) ((viewY + y) * ds);
-                    int dw = (int) ((e.getX() - x) * ds);
-                    int dh = (int) ((e.getY() - y) * ds);
+                    int dx = (int) ((viewX + oldX) * ds);
+                    int dy = (int) ((viewY + oldY) * ds);
+                    int dw = (int) ((e.getX() - oldX) * ds);
+                    int dh = (int) ((e.getY() - oldY) * ds);
 
                     if (dw < 0) {
                         dx += dw;
@@ -219,6 +194,8 @@ public class WholeslideView extends JComponent {
                     selection = new Rectangle(dx, dy, dw, dh);
                     repaint();
                 }
+                oldX = e.getX();
+                oldY = e.getY();
             }
 
         };
@@ -316,9 +293,7 @@ public class WholeslideView extends JComponent {
         int newX = -(w / 2 - dw / 2);
         int newY = -(h / 2 - dh / 2);
 
-        System.out.println("centering to " + newX + "," + newY);
-
-        viewPosition.move(newX, newY);
+        translateSlide(newX - viewPosition.x, newY - viewPosition.y);
     }
 
     public void zoomToFit() {
