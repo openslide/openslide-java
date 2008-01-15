@@ -98,14 +98,18 @@ public class Wholeslide {
                     + ") must be >= 1.0");
         }
 
+        // get the layer
         int layer = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_best_layer_for_downsample(wsd, downsample);
 
-        double actualDownsample = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
+        // figure out its downsample
+        double layerDS = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
                 .ws_get_layer_downsample(wsd, layer);
 
-        double newDownsample = downsample / actualDownsample;
+        // compute the difference
+        double relativeDS = downsample / layerDS;
 
+        // translate if sx or sy are negative
         if (sx < 0) {
             dx -= sx;
             w += sx; // shrink w
@@ -117,44 +121,43 @@ public class Wholeslide {
             sy = 0;
         }
 
-        // System.out.println("newDownsample " + newDownsample);
+        // scale source coordinates into layer coordinates
+        int baseX = (int) (downsample * sx);
+        int baseY = (int) (downsample * sy);
+        int layerX = (int) (relativeDS * sx);
+        int layerY = (int) (relativeDS * sy);
 
-        int newW = (int) (newDownsample * w);
-        int newH = (int) (newDownsample * h);
-        int newX = (int) (downsample * sx);
-        int newY = (int) (downsample * sy);
+        // scale width and height by relative downsample
+        int layerW = (int) (relativeDS * w);
+        int layerH = (int) (relativeDS * h);
 
+        // clip to edge of image
         Dimension d = getLayerDimension(layer);
-
-        if (newW > d.width - sx) {
-            newW = d.width - sx;
-            w = (int) (newW / newDownsample);
-        }
-        if (newH > d.height - sy) {
-            newH = d.height - sy;
-            h = (int) (newH / newDownsample);
-        }
+        layerW = Math.min(layerW, d.width - layerX);
+        layerH = Math.min(layerH, d.height - layerY);
 
         if (debug) {
-            System.out.println("newW " + newW + ", newH " + newH + ", newX "
-                    + newX + ", newY " + newY);
+            System.out.println("layerW " + layerW + ", layerH " + layerH
+                    + ", baseX " + baseX + ", baseY " + baseY);
         }
 
-        if (newW <= 0 || newH <= 0) {
+        if (layerW <= 0 || layerH <= 0) {
             // nothing to draw
             return;
         }
 
-        BufferedImage img = new BufferedImage(newW, newH,
+        BufferedImage img = new BufferedImage(layerW, layerH,
                 BufferedImage.TYPE_INT_ARGB_PRE);
 
         int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                 .getData();
 
         edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_read_region(wsd, data,
-                newX, newY, layer, img.getWidth(), img.getHeight());
+                baseX, baseY, layer, img.getWidth(), img.getHeight());
 
-        g.drawImage(img, dx, dy, w, h, null);
+        int scaledW = (int) (layerW / relativeDS);
+        int scaledH = (int) (layerH / relativeDS);
+        g.drawImage(img, dx, dy, scaledW, scaledH, null);
 
         if (debug) {
             if (debugThingy == 0) {
@@ -164,7 +167,7 @@ public class Wholeslide {
                 g.setColor(new Color(0.0f, 1.0f, 0.0f, 0.4f));
                 debugThingy = 0;
             }
-            g.fillRect(dx, dy, w, h);
+            g.fillRect(dx, dy, scaledW + 1, scaledH + 1);
         }
     }
 
