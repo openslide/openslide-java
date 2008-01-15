@@ -139,11 +139,12 @@ public class WholeslideView extends JComponent {
         return oldDS / newDS;
     }
 
-    static private void zoomHelper2(WholeslideView w, double relDS, MouseWheelEvent e) {
+    static private void zoomHelper2(WholeslideView w, double relDS,
+            MouseWheelEvent e) {
         if (w == null) {
             return;
         }
-        
+
         if (relDS != 1.0) {
             w.tmpZoomScale = relDS;
             w.tmpZoomX = e.getX();
@@ -161,12 +162,12 @@ public class WholeslideView extends JComponent {
         if (w == null) {
             return;
         }
-        
+
         if (relDS != 1.0) {
             w.paintBackingStore();
         }
     }
-    
+
     private void registerEventHandlers() {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
