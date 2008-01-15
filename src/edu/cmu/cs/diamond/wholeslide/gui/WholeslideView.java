@@ -2,6 +2,7 @@ package edu.cmu.cs.diamond.wholeslide.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
@@ -34,6 +35,12 @@ public class WholeslideView extends JComponent {
 
     private BufferedImage dbuf;
 
+    private double tmpZoomScale = 1.0;
+
+    private int tmpZoomX;
+
+    private int tmpZoomY;
+
     public WholeslideView(Wholeslide w) {
         this(w, 1.2, 40);
     }
@@ -57,14 +64,14 @@ public class WholeslideView extends JComponent {
         repaint();
     }
 
-    static private void mouseDraggedHelper(WholeslideView ws, int dX, int dY) {
+    static private void translateHelper(WholeslideView ws, int dX, int dY) {
         if (ws == null) {
             return;
         }
         ws.translateSlide(dX, dY);
     }
 
-    static private void spaceTyped(WholeslideView w) {
+    static private void centerHelper(WholeslideView w) {
         if (w == null) {
             return;
         }
@@ -113,7 +120,7 @@ public class WholeslideView extends JComponent {
         repaint();
     }
 
-    static private void mouseWheelHelper(WholeslideView w, MouseWheelEvent e) {
+    static private void zoomHelper(WholeslideView w, MouseWheelEvent e) {
         if (w == null) {
             return;
         }
@@ -121,9 +128,19 @@ public class WholeslideView extends JComponent {
         double oldDS = w.getDownsample();
         w.zoomSlide(e.getX(), e.getY(), e.getWheelRotation());
 
-        if (oldDS != w.getDownsample()) {
+        double newDS = w.getDownsample();
+        if (oldDS != newDS) {
+            w.tmpZoomScale = oldDS / newDS;
+            w.tmpZoomX = e.getX();
+            w.tmpZoomY = e.getY();
+            w.paintImmediately(0, 0, w.getWidth(), w.getHeight());
+
             w.paintBackingStore();
             w.repaint();
+
+            w.tmpZoomScale = 1.0;
+            w.tmpZoomX = 0;
+            w.tmpZoomY = 0;
         }
     }
 
@@ -131,8 +148,8 @@ public class WholeslideView extends JComponent {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
-                mouseWheelHelper(WholeslideView.this, e);
-                mouseWheelHelper(otherView, e);
+                zoomHelper(WholeslideView.this, e);
+                zoomHelper(otherView, e);
             }
         });
 
@@ -158,7 +175,7 @@ public class WholeslideView extends JComponent {
 
                 oldX = e.getX();
                 oldY = e.getY();
-                
+
                 double ds = getDownsample();
                 slideStartX = (int) ((oldX + viewPosition.x) * ds);
                 slideStartY = (int) ((oldY + viewPosition.y) * ds);
@@ -174,8 +191,8 @@ public class WholeslideView extends JComponent {
                 int relY = oldY - e.getY();
 
                 if (!makingSelection) {
-                    mouseDraggedHelper(WholeslideView.this, relX, relY);
-                    mouseDraggedHelper(otherView, relX, relY);
+                    translateHelper(WholeslideView.this, relX, relY);
+                    translateHelper(otherView, relX, relY);
                 } else {
                     double ds = getDownsample();
                     int dx = slideStartX;
@@ -193,7 +210,7 @@ public class WholeslideView extends JComponent {
                     }
 
                     selection = new Rectangle(dx, dy, dw, dh);
-                    System.out.println(selection);
+                    // System.out.println(selection);
                     repaint();
                 }
                 oldX = e.getX();
@@ -217,32 +234,32 @@ public class WholeslideView extends JComponent {
                 int key = e.getKeyCode();
                 switch (key) {
                 case KeyEvent.VK_SPACE:
-                    spaceTyped(WholeslideView.this);
-                    spaceTyped(otherView);
+                    centerHelper(WholeslideView.this);
+                    centerHelper(otherView);
                     break;
                 case KeyEvent.VK_UP:
                 case KeyEvent.VK_W:
-                    mouseDraggedHelper(WholeslideView.this, 0,
+                    translateHelper(WholeslideView.this, 0,
                             -KEYBOARD_SCROLL_AMOUNT);
-                    mouseDraggedHelper(otherView, 0, -KEYBOARD_SCROLL_AMOUNT);
+                    translateHelper(otherView, 0, -KEYBOARD_SCROLL_AMOUNT);
                     break;
                 case KeyEvent.VK_DOWN:
                 case KeyEvent.VK_S:
-                    mouseDraggedHelper(WholeslideView.this, 0,
+                    translateHelper(WholeslideView.this, 0,
                             KEYBOARD_SCROLL_AMOUNT);
-                    mouseDraggedHelper(otherView, 0, KEYBOARD_SCROLL_AMOUNT);
+                    translateHelper(otherView, 0, KEYBOARD_SCROLL_AMOUNT);
                     break;
                 case KeyEvent.VK_LEFT:
                 case KeyEvent.VK_A:
-                    mouseDraggedHelper(WholeslideView.this,
+                    translateHelper(WholeslideView.this,
                             -KEYBOARD_SCROLL_AMOUNT, 0);
-                    mouseDraggedHelper(otherView, -KEYBOARD_SCROLL_AMOUNT, 0);
+                    translateHelper(otherView, -KEYBOARD_SCROLL_AMOUNT, 0);
                     break;
                 case KeyEvent.VK_RIGHT:
                 case KeyEvent.VK_D:
-                    mouseDraggedHelper(WholeslideView.this,
+                    translateHelper(WholeslideView.this,
                             KEYBOARD_SCROLL_AMOUNT, 0);
-                    mouseDraggedHelper(otherView, KEYBOARD_SCROLL_AMOUNT, 0);
+                    translateHelper(otherView, KEYBOARD_SCROLL_AMOUNT, 0);
                     break;
                 case KeyEvent.VK_ESCAPE:
                     selection = null;
@@ -378,7 +395,16 @@ public class WholeslideView extends JComponent {
             paintBackingStore();
         }
 
+        AffineTransform a = g2.getTransform();
+        if (tmpZoomScale != 1.0) {
+            g2.setBackground(getBackground());
+            g2.clearRect(0, 0, w, h);
+            g2.translate(tmpZoomX, tmpZoomY);
+            g2.scale(tmpZoomScale, tmpZoomScale);
+            g2.translate(-tmpZoomX, -tmpZoomY);
+        }
         g2.drawImage(dbuf, 0, 0, null);
+        g2.setTransform(a);
         paintSelection(g2);
     }
 
