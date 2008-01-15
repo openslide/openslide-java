@@ -174,7 +174,7 @@ public class Wholeslide {
         }
     }
 
-    final boolean debug = true;
+    final boolean debug = false;
 
     int debugThingy = 0;
 }
