@@ -215,23 +215,27 @@ public class WholeslideView extends JComponent {
                     break;
                 case KeyEvent.VK_UP:
                 case KeyEvent.VK_W:
-                    translateSlide(WholeslideView.this, 0,
+                    mouseDraggedHelper(WholeslideView.this, 0,
                             -KEYBOARD_SCROLL_AMOUNT);
+                    mouseDraggedHelper(otherView, 0, -KEYBOARD_SCROLL_AMOUNT);
                     break;
                 case KeyEvent.VK_DOWN:
                 case KeyEvent.VK_S:
-                    translateSlide(WholeslideView.this, 0,
+                    mouseDraggedHelper(WholeslideView.this, 0,
                             KEYBOARD_SCROLL_AMOUNT);
+                    mouseDraggedHelper(otherView, 0, KEYBOARD_SCROLL_AMOUNT);
                     break;
                 case KeyEvent.VK_LEFT:
                 case KeyEvent.VK_A:
-                    translateSlide(WholeslideView.this,
+                    mouseDraggedHelper(WholeslideView.this,
                             -KEYBOARD_SCROLL_AMOUNT, 0);
+                    mouseDraggedHelper(otherView, -KEYBOARD_SCROLL_AMOUNT, 0);
                     break;
                 case KeyEvent.VK_RIGHT:
                 case KeyEvent.VK_D:
-                    translateSlide(WholeslideView.this, KEYBOARD_SCROLL_AMOUNT,
-                            0);
+                    mouseDraggedHelper(WholeslideView.this,
+                            KEYBOARD_SCROLL_AMOUNT, 0);
+                    mouseDraggedHelper(otherView, KEYBOARD_SCROLL_AMOUNT, 0);
                     break;
                 case KeyEvent.VK_ESCAPE:
                     selection = null;
