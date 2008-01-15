@@ -354,6 +354,7 @@ public class WholeslideView extends JComponent {
         int h = getHeight();
         if (firstPaint) {
             if (w != 0 && h != 0) {
+                createBackingStore();
                 zoomToFit();
                 centerSlide();
                 firstPaint = false;
@@ -364,14 +365,18 @@ public class WholeslideView extends JComponent {
 
         Graphics2D g2 = (Graphics2D) g;
 
-        if (dbuf == null || dbuf.getWidth() != w || dbuf.getHeight() != h) {
-            dbuf = getGraphicsConfiguration().createCompatibleImage(w, h,
-                    Transparency.OPAQUE);
+        if (dbuf.getWidth() != w || dbuf.getHeight() != h) {
+            createBackingStore();
             paintBackingStore();
         }
 
         g2.drawImage(dbuf, 0, 0, null);
         paintSelection(g2);
+    }
+
+    private void createBackingStore() {
+        dbuf = getGraphicsConfiguration().createCompatibleImage(getWidth(),
+                getHeight(), Transparency.OPAQUE);
     }
 
     private void paintBackingStore() {
