@@ -128,13 +128,15 @@ public class Wholeslide {
         int layerY = (int) (relativeDS * sy);
 
         // scale width and height by relative downsample
-        int layerW = (int) (relativeDS * w);
-        int layerH = (int) (relativeDS * h);
+        int layerW = (int) Math.round(relativeDS * w);
+        int layerH = (int) Math.round(relativeDS * h);
 
         // clip to edge of image
         Dimension d = getLayerDimension(layer);
         layerW = Math.min(layerW, d.width - layerX);
         layerH = Math.min(layerH, d.height - layerY);
+        w = (int) Math.round(layerW / relativeDS);
+        h = (int) Math.round(layerH / relativeDS);
 
         if (debug) {
             System.out.println("layerW " + layerW + ", layerH " + layerH
@@ -155,11 +157,12 @@ public class Wholeslide {
         edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_read_region(wsd, data,
                 baseX, baseY, layer, img.getWidth(), img.getHeight());
 
-        int scaledW = (int) (layerW / relativeDS);
-        int scaledH = (int) (layerH / relativeDS);
-        g.drawImage(img, dx, dy, scaledW, scaledH, null);
+        // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
+        g.drawImage(img, dx, dy, w, h, null);
 
         if (debug) {
+            System.out.println(img);
+
             if (debugThingy == 0) {
                 g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.4f));
                 debugThingy = 1;
@@ -167,7 +170,7 @@ public class Wholeslide {
                 g.setColor(new Color(0.0f, 1.0f, 0.0f, 0.4f));
                 debugThingy = 0;
             }
-            g.fillRect(dx, dy, scaledW + 1, scaledH + 1);
+            g.fillRect(dx, dy, w, h);
         }
     }
 
