@@ -404,8 +404,10 @@ public class WholeslideView extends JComponent {
 
         final double newDS = getDownsample();
 
-        viewPosition.translate((int) (bx / newDS) - centerX, (int) (by / newDS)
-                - centerY);
+        if (oldDS != newDS) {
+            viewPosition.translate((int) (bx / newDS) - centerX,
+                    (int) (by / newDS) - centerY);
+        }
     }
 
     private void adjustDownsample(int amount) {
