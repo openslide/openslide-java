@@ -33,7 +33,7 @@ public class WholeslideView extends JComponent {
 
     protected Rectangle selection;
 
-    private BufferedImage dbuf;
+    transient private BufferedImage dbuf;
 
     private double tmpZoomScale = 1.0;
 
