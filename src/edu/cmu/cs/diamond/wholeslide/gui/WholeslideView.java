@@ -394,16 +394,16 @@ public class WholeslideView extends JComponent {
         int centerX = mouseX + viewPosition.x;
         int centerY = mouseY + viewPosition.y;
 
-        final int bx = (int) (centerX * oldDS);
-        final int by = (int) (centerY * oldDS);
+        final double bx = centerX * oldDS;
+        final double by = centerY * oldDS;
 
         adjustDownsample(amount);
 
         final double newDS = getDownsample();
 
         if (oldDS != newDS) {
-            viewPosition.translate((int) (bx / newDS) - centerX,
-                    (int) (by / newDS) - centerY);
+            viewPosition.translate((int) Math.round(bx / newDS) - centerX,
+                    (int) Math.round(by / newDS) - centerY);
         }
     }
 
