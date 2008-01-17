@@ -1,10 +1,5 @@
 package edu.cmu.cs.diamond.wholeslide.gui;
 
-import ij.IJ;
-import ij.ImageJ;
-import ij.ImagePlus;
-import ij.gui.ImageWindow;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
@@ -382,6 +377,7 @@ public class WholeslideView extends JComponent {
         wsd.paintRegion(g, 0, 0, x, y, w, h, ds);
         g.dispose();
 
+        /*
         ImageJ ij = IJ.getInstance();
         if (ij == null) {
             ij = new ImageJ(null, ImageJ.EMBEDDED);
@@ -389,6 +385,7 @@ public class WholeslideView extends JComponent {
 
         ImagePlus ip = new ImagePlus("Slide Piece", b);
         ImageWindow iw = new ImageWindow(ip);
+        */
     }
 
     private void zoomSlide(int mouseX, int mouseY, int amount) {
