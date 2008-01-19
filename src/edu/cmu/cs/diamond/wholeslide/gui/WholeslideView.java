@@ -68,7 +68,7 @@ public class WholeslideView extends JComponent {
         if (ws == null) {
             return;
         }
-        ws.translateSlide(dX, dY);
+        ws.translateSlidePrivate(dX, dY);
     }
 
     static private void repaintHelper(WholeslideView w) {
@@ -77,18 +77,21 @@ public class WholeslideView extends JComponent {
         }
 
         w.repaint();
-//        w.paintImmediately(0, 0, w.getWidth(), w.getHeight());
     }
 
     static private void centerHelper(WholeslideView w) {
         if (w == null) {
             return;
         }
-        w.centerSlide();
-        w.repaint();
+        w.centerSlidePrivate();
     }
 
-    private void translateSlide(int dX, int dY) {
+    public void translateSlide(int dX, int dY) {
+        translateSlide(dX, dY);
+        repaint();
+    }
+
+    private void translateSlidePrivate(int dX, int dY) {
         int w = dbuf.getWidth();
         int h = dbuf.getHeight();
 
@@ -172,8 +175,10 @@ public class WholeslideView extends JComponent {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
-                double ds1 = zoomHelper(WholeslideView.this, e.getX(), e.getY(), e.getWheelRotation());
-                double ds2 = zoomHelper(otherView, e.getX(), e.getY(), e.getWheelRotation());
+                double ds1 = zoomHelper(WholeslideView.this, e.getX(),
+                        e.getY(), e.getWheelRotation());
+                double ds2 = zoomHelper(otherView, e.getX(), e.getY(), e
+                        .getWheelRotation());
                 zoomHelper2(WholeslideView.this, ds1, e.getX(), e.getY());
                 zoomHelper2(otherView, ds2, e.getX(), e.getY());
                 zoomHelper3(WholeslideView.this, ds1);
@@ -341,6 +346,9 @@ public class WholeslideView extends JComponent {
                     repaintHelper(WholeslideView.this);
                     repaintHelper(otherView);
                     break;
+                // case KeyEvent.VK_Z:
+                // setViewPosition(0, 100);
+                // break;
                 }
             }
         });
@@ -357,7 +365,7 @@ public class WholeslideView extends JComponent {
         if (w == null) {
             return 1.0;
         }
-        
+
         return zoomHelper(w, w.getWidth() / 2, w.getHeight() / 2, i);
     }
 
@@ -378,14 +386,12 @@ public class WholeslideView extends JComponent {
         g.dispose();
 
         /*
-        ImageJ ij = IJ.getInstance();
-        if (ij == null) {
-            ij = new ImageJ(null, ImageJ.EMBEDDED);
-        }
-
-        ImagePlus ip = new ImagePlus("Slide Piece", b);
-        ImageWindow iw = new ImageWindow(ip);
-        */
+         * ImageJ ij = IJ.getInstance(); if (ij == null) { ij = new ImageJ(null,
+         * ImageJ.EMBEDDED); }
+         * 
+         * ImagePlus ip = new ImagePlus("Slide Piece", b); ImageWindow iw = new
+         * ImageWindow(ip);
+         */
     }
 
     private void zoomSlide(int mouseX, int mouseY, int amount) {
@@ -422,6 +428,16 @@ public class WholeslideView extends JComponent {
     }
 
     public void centerSlide() {
+        centerSlidePrivate();
+        repaint();
+    }
+
+    public void setViewPosition(int x, int y) {
+        translateSlidePrivate(x - viewPosition.x, y - viewPosition.y);
+        repaint();
+    }
+
+    private void centerSlidePrivate() {
         int w = getWidth();
         int h = getHeight();
 
@@ -437,10 +453,10 @@ public class WholeslideView extends JComponent {
         int newX = -(w / 2 - dw / 2);
         int newY = -(h / 2 - dh / 2);
 
-        translateSlide(newX - viewPosition.x, newY - viewPosition.y);
+        translateSlidePrivate(newX - viewPosition.x, newY - viewPosition.y);
     }
 
-    public void zoomToFit() {
+    private void zoomToFit() {
         int w = getWidth();
         int h = getHeight();
 
@@ -496,7 +512,7 @@ public class WholeslideView extends JComponent {
             if (w != 0 && h != 0) {
                 createBackingStore();
                 zoomToFit();
-                centerSlide();
+                centerSlidePrivate();
                 paintBackingStore();
                 firstPaint = false;
             } else {
