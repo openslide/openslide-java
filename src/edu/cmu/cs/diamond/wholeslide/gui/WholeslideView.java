@@ -481,7 +481,7 @@ public class WholeslideView extends JComponent {
             downsampleExponent = maxDownsampleExponent;
         }
 
-        System.out.println(downsampleExponent);
+//        System.out.println(downsampleExponent);
     }
 
     private void rotateSlide(int quads) {
