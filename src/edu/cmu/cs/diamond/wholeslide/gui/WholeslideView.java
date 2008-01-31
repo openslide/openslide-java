@@ -31,7 +31,7 @@ public class WholeslideView extends JComponent {
 
     protected boolean makingSelection;
 
-    protected Rectangle selection;
+    final protected Rectangle selection = new Rectangle();
 
     transient private BufferedImage dbuf;
 
@@ -246,7 +246,7 @@ public class WholeslideView extends JComponent {
                         dh = -dh;
                     }
 
-                    selection = new Rectangle(dx, dy, dw, dh);
+                    selection.setBounds(dx, dy, dw, dh);
                     // System.out.println(selection);
                     repaint();
                 }
@@ -312,7 +312,7 @@ public class WholeslideView extends JComponent {
                     runImageJ();
                     break;
                 case KeyEvent.VK_ESCAPE:
-                    selection = null;
+                    selection.setBounds(0, 0, 0, 0);
                     repaint();
                     break;
                 case KeyEvent.VK_ENTER:
@@ -370,7 +370,7 @@ public class WholeslideView extends JComponent {
     }
 
     protected void runImageJ() {
-        if (selection == null) {
+        if (selection.height == 0 || selection.width == 0) {
             return;
         }
 
@@ -481,7 +481,7 @@ public class WholeslideView extends JComponent {
             downsampleExponent = maxDownsampleExponent;
         }
 
-//        System.out.println(downsampleExponent);
+        // System.out.println(downsampleExponent);
     }
 
     private void rotateSlide(int quads) {
@@ -567,18 +567,20 @@ public class WholeslideView extends JComponent {
     }
 
     private void paintSelection(Graphics2D g) {
-        if (selection != null) {
-            double ds = getDownsample();
+        double ds = getDownsample();
 
-            int x = (int) (selection.x / ds - viewPosition.x);
-            int y = (int) (selection.y / ds - viewPosition.y);
-            int w = (int) Math.round(selection.width / ds);
-            int h = (int) Math.round(selection.height / ds);
+        int x = (int) (selection.x / ds - viewPosition.x);
+        int y = (int) (selection.y / ds - viewPosition.y);
+        int w = (int) Math.round(selection.width / ds);
+        int h = (int) Math.round(selection.height / ds);
 
-            g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.15f));
-            g.fillRect(x, y, w, h);
-            g.setColor(Color.RED);
-            g.drawRect(x, y, w, h);
-        }
+        g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.15f));
+        g.fillRect(x, y, w, h);
+        g.setColor(Color.RED);
+        g.drawRect(x, y, w, h);
+    }
+
+    public Rectangle getSelection() {
+        return new Rectangle(selection);
     }
 }
