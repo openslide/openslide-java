@@ -16,6 +16,8 @@ public class Wholeslide {
 
     final private int baselineH;
 
+    final private int layerCount;
+
     public static boolean fileIsValid(File file) {
         return edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_can_open(file
                 .getPath());
@@ -37,6 +39,10 @@ public class Wholeslide {
                 wsd, w, h);
         baselineW = w[0];
         baselineH = h[0];
+
+        // store layer count
+        layerCount = edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
+                .ws_get_layer_count(wsd);
     }
 
     public void dispose() {
@@ -53,10 +59,7 @@ public class Wholeslide {
     }
 
     public int getLayerCount() {
-        checkDisposed();
-
-        return edu.cmu.cs.diamond.wholeslide.glue.Wholeslide
-                .ws_get_layer_count(wsd);
+        return layerCount;
     }
 
     private void checkDisposed() {
