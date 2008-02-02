@@ -31,7 +31,7 @@ public class WholeslideView extends JComponent {
 
     protected boolean makingSelection;
 
-    final protected Rectangle selection = new Rectangle();
+    protected Shape selection = new Rectangle();
 
     transient private BufferedImage dbuf;
 
@@ -246,7 +246,7 @@ public class WholeslideView extends JComponent {
                         dh = -dh;
                     }
 
-                    selection.setBounds(dx, dy, dw, dh);
+                    selection = new Rectangle(dx, dy, dw, dh);
                     // System.out.println(selection);
                     repaint();
                 }
@@ -308,11 +308,8 @@ public class WholeslideView extends JComponent {
                     repaintHelper(WholeslideView.this);
                     repaintHelper(otherView);
                     break;
-                case KeyEvent.VK_I:
-                    runImageJ();
-                    break;
                 case KeyEvent.VK_ESCAPE:
-                    selection.setBounds(0, 0, 0, 0);
+                    selection = new Rectangle();
                     repaint();
                     break;
                 case KeyEvent.VK_ENTER:
@@ -367,31 +364,6 @@ public class WholeslideView extends JComponent {
         }
 
         return zoomHelper(w, w.getWidth() / 2, w.getHeight() / 2, i);
-    }
-
-    protected void runImageJ() {
-        if (selection.height == 0 || selection.width == 0) {
-            return;
-        }
-
-        double ds = getDownsample();
-        int x = (int) (selection.x / ds);
-        int y = (int) (selection.y / ds);
-        int w = (int) Math.round(selection.width / ds);
-        int h = (int) Math.round(selection.height / ds);
-
-        BufferedImage b = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = b.createGraphics();
-        wsd.paintRegion(g, 0, 0, x, y, w, h, ds);
-        g.dispose();
-
-        /*
-         * ImageJ ij = IJ.getInstance(); if (ij == null) { ij = new ImageJ(null,
-         * ImageJ.EMBEDDED); }
-         * 
-         * ImagePlus ip = new ImagePlus("Slide Piece", b); ImageWindow iw = new
-         * ImageWindow(ip);
-         */
     }
 
     private void zoomSlide(int mouseX, int mouseY, int amount) {
@@ -569,18 +541,22 @@ public class WholeslideView extends JComponent {
     private void paintSelection(Graphics2D g) {
         double ds = getDownsample();
 
-        int x = (int) (selection.x / ds - viewPosition.x);
-        int y = (int) (selection.y / ds - viewPosition.y);
-        int w = (int) Math.round(selection.width / ds);
-        int h = (int) Math.round(selection.height / ds);
+        Graphics2D g2 = (Graphics2D) g.create();
+        
+        // XXX fill doesn't line up with draw always
+        
+        g2.translate(-viewPosition.x, -viewPosition.y);
+        g2.scale(1 / ds, 1 / ds);
 
-        g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.15f));
-        g.fillRect(x, y, w, h);
-        g.setColor(Color.RED);
-        g.drawRect(x, y, w, h);
+        g2.setColor(new Color(1.0f, 0.0f, 0.0f, 0.15f));
+        g2.fill(selection);
+        g2.setColor(Color.RED);
+        g2.draw(selection);
+
+        g2.dispose();
     }
 
     public Rectangle getSelection() {
-        return new Rectangle(selection);
+        return selection.getBounds();
     }
 }
