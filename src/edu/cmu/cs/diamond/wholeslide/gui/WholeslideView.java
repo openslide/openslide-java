@@ -541,19 +541,18 @@ public class WholeslideView extends JComponent {
     private void paintSelection(Graphics2D g) {
         double ds = getDownsample();
 
-        Graphics2D g2 = (Graphics2D) g.create();
-        
-        // XXX fill doesn't line up with draw always
-        
-        g2.translate(-viewPosition.x, -viewPosition.y);
-        g2.scale(1 / ds, 1 / ds);
+        AffineTransform at = new AffineTransform();
+        at.translate(-viewPosition.x, -viewPosition.y);
+        at.scale(1 / ds, 1 / ds);
 
-        g2.setColor(new Color(1.0f, 0.0f, 0.0f, 0.15f));
-        g2.fill(selection);
-        g2.setColor(Color.RED);
-        g2.draw(selection);
+        Shape s = at.createTransformedShape(selection);
 
-        g2.dispose();
+        g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.15f));
+        g.fill(s);
+        g.setColor(Color.RED);
+        g.draw(s);
+
+        g.dispose();
     }
 
     public Rectangle getSelection() {
