@@ -5,6 +5,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JToggleButton;
@@ -22,8 +23,10 @@ public class Demo {
             return;
 
         case 1:
-            jf.getContentPane().add(
-                    new WholeslideView(new Wholeslide(new File(args[0]))));
+            WholeslideView wv = new WholeslideView(new Wholeslide(new File(args[0])));
+            wv.setBorder(BorderFactory.createTitledBorder(args[0]));
+            jf.getContentPane().add(wv);
+            
             break;
 
         case 2:
