@@ -3,6 +3,7 @@ package edu.cmu.cs.diamond.wholeslide.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
@@ -28,8 +29,6 @@ public class WholeslideView extends JComponent {
     private Point viewPosition = new Point();
 
     private WholeslideView otherView;
-
-    protected boolean makingSelection;
 
     protected Shape selection;
 
@@ -192,6 +191,14 @@ public class WholeslideView extends JComponent {
 
         // mouse drag
         MouseAdapter ma = new MouseAdapter() {
+            final private static int SELECTION_MODE_NONE = 0;
+
+            final private static int SELECTION_MODE_RECT = 1;
+
+            final private static int SELECTION_MODE_FREEHAND = 2;
+
+            private int selectionMode;
+
             private int oldX;
 
             private int oldY;
@@ -199,6 +206,8 @@ public class WholeslideView extends JComponent {
             private int slideStartX;
 
             private int slideStartY;
+
+            private GeneralPath freehandPath;
 
             @Override
             public void mousePressed(MouseEvent e) {
@@ -208,7 +217,15 @@ public class WholeslideView extends JComponent {
                     return;
                 }
 
-                makingSelection = (e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) == MouseEvent.SHIFT_DOWN_MASK;
+                if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == MouseEvent.CTRL_DOWN_MASK) {
+                    selectionMode = SELECTION_MODE_FREEHAND;
+                    selection = null;
+                } else if ((e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) == MouseEvent.SHIFT_DOWN_MASK) {
+                    selectionMode = SELECTION_MODE_RECT;
+                    selection = null;
+                } else {
+                    selectionMode = SELECTION_MODE_NONE;
+                }
 
                 oldX = e.getX();
                 oldY = e.getY();
@@ -227,17 +244,24 @@ public class WholeslideView extends JComponent {
                 int relX = oldX - e.getX();
                 int relY = oldY - e.getY();
 
-                if (!makingSelection) {
+                double ds;
+                int dw;
+                int dh;
+
+                switch (selectionMode) {
+                case SELECTION_MODE_NONE:
                     translateHelper(WholeslideView.this, relX, relY);
                     translateHelper(otherView, relX, relY);
                     repaintHelper(WholeslideView.this);
                     repaintHelper(otherView);
-                } else {
-                    double ds = getDownsample();
+                    break;
+
+                case SELECTION_MODE_RECT:
+                    ds = getDownsample();
                     int dx = slideStartX;
                     int dy = slideStartY;
-                    int dw = (int) ((e.getX() + viewPosition.x) * ds) - dx;
-                    int dh = (int) ((e.getY() + viewPosition.y) * ds) - dy;
+                    dw = (int) ((e.getX() + viewPosition.x) * ds) - dx;
+                    dh = (int) ((e.getY() + viewPosition.y) * ds) - dy;
 
                     if (dw < 0) {
                         dx += dw;
@@ -251,6 +275,25 @@ public class WholeslideView extends JComponent {
                     selection = new Rectangle(dx, dy, dw, dh);
                     // System.out.println(selection);
                     repaint();
+                    break;
+
+                case SELECTION_MODE_FREEHAND:
+                    if (selection == null) {
+                        // new selection
+                        freehandPath = new GeneralPath();
+                        selection = freehandPath;
+
+                        freehandPath.moveTo(slideStartX, slideStartY);
+                    }
+
+                    ds = getDownsample();
+                    dx = (int) ((e.getX() + viewPosition.x) * ds);
+                    dy = (int) ((e.getY() + viewPosition.y) * ds);
+
+                    freehandPath.lineTo(dx, dy);
+
+                    repaint();
+                    break;
                 }
                 oldX = e.getX();
                 oldY = e.getY();
@@ -258,7 +301,11 @@ public class WholeslideView extends JComponent {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                makingSelection = false;
+                if (selectionMode == SELECTION_MODE_FREEHAND) {
+                    freehandPath.closePath();
+                    repaint();
+                }
+                selectionMode = SELECTION_MODE_NONE;
             }
 
         };
