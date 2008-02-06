@@ -412,10 +412,12 @@ public class WholeslideView extends JComponent {
     }
 
     private void centerSlidePrivate() {
-        int w = getWidth();
-        int h = getHeight();
+        Insets insets = getInsets();
+        
+        int w = getWidth() - insets.left - insets.right;
+        int h = getHeight() - insets.top - insets.bottom;
 
-        if (w == 0 || h == 0) {
+        if (w <= 0 || h <= 0) {
             return;
         }
 
@@ -424,17 +426,25 @@ public class WholeslideView extends JComponent {
         int dw = (int) (d.width / ds);
         int dh = (int) (d.height / ds);
 
-        int newX = -(w / 2 - dw / 2);
-        int newY = -(h / 2 - dh / 2);
+        int centerX = w / 2 + insets.left;
+        int centerY = h / 2 + insets.top;
+        
+        int centerDX = dw / 2;
+        int centerDY = dh / 2;
+        
+        int newX = -(centerX - centerDX);
+        int newY = -(centerY - centerDY);
 
         translateSlidePrivate(newX - viewPosition.x, newY - viewPosition.y);
     }
 
     private void zoomToFit() {
-        int w = getWidth();
-        int h = getHeight();
+        Insets insets = getInsets();
+        
+        int w = getWidth() - insets.left - insets.right;
+        int h = getHeight() - insets.top - insets.bottom;
 
-        if (w == 0 || h == 0) {
+        if (w <= 0 || h <= 0) {
             return;
         }
 
@@ -480,8 +490,11 @@ public class WholeslideView extends JComponent {
 
     @Override
     protected void paintComponent(Graphics g) {
+        Insets insets = getInsets();
+
         int w = getWidth();
         int h = getHeight();
+
         if (firstPaint) {
             if (w != 0 && h != 0) {
                 createBackingStore();
@@ -494,24 +507,32 @@ public class WholeslideView extends JComponent {
             }
         }
 
-        Graphics2D g2 = (Graphics2D) g;
-
         if (dbuf.getWidth() != w || dbuf.getHeight() != h) {
             createBackingStore();
             paintBackingStore();
         }
 
-        AffineTransform a = g2.getTransform();
-        if (tmpZoomScale != 1.0) {
-            g2.setBackground(getBackground());
-            g2.clearRect(0, 0, w, h);
-            g2.translate(tmpZoomX, tmpZoomY);
-            g2.scale(tmpZoomScale, tmpZoomScale);
-            g2.translate(-tmpZoomX, -tmpZoomY);
+        Graphics scratchG = g.create();
+        Graphics2D g2 = (Graphics2D) scratchG;
+        try {
+            g2.clipRect(insets.left, insets.top,
+                    w - insets.left - insets.right, h - insets.top
+                            - insets.bottom);
+
+            AffineTransform a = g2.getTransform();
+            if (tmpZoomScale != 1.0) {
+                g2.setBackground(getBackground());
+                g2.clearRect(0, 0, w, h);
+                g2.translate(tmpZoomX, tmpZoomY);
+                g2.scale(tmpZoomScale, tmpZoomScale);
+                g2.translate(-tmpZoomX, -tmpZoomY);
+            }
+            g2.drawImage(dbuf, 0, 0, null);
+            g2.setTransform(a);
+            paintSelection(g2);
+        } finally {
+            scratchG.dispose();
         }
-        g2.drawImage(dbuf, 0, 0, null);
-        g2.setTransform(a);
-        paintSelection(g2);
     }
 
     private void createBackingStore() {
