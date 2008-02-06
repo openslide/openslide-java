@@ -562,6 +562,11 @@ public class WholeslideView extends JComponent {
         Graphics scratchG = g.create();
         Graphics2D g2 = (Graphics2D) scratchG;
         try {
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+                    RenderingHints.VALUE_STROKE_NORMALIZE);
+
             g2.clipRect(insets.left, insets.top,
                     w - insets.left - insets.right, h - insets.top
                             - insets.bottom);
@@ -621,9 +626,11 @@ public class WholeslideView extends JComponent {
 
         Shape s = at.createTransformedShape(selection);
 
-        g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.15f));
-        g.fill(s);
-        g.setColor(Color.RED);
+//        g.setColor(new Color(1.0f, 1.0f, 1.0f, 0.4f));
+//        g.fill(s);
+        g.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT,
+                BasicStroke.JOIN_BEVEL, 0, new float[] { 6, 6 }, 0.5f));
+        g.setColor(Color.BLACK);
         g.draw(s);
 
         g.dispose();
