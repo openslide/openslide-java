@@ -31,7 +31,7 @@ public class WholeslideView extends JComponent {
 
     protected boolean makingSelection;
 
-    protected Shape selection = new Rectangle();
+    protected Shape selection;
 
     transient private BufferedImage dbuf;
 
@@ -311,7 +311,7 @@ public class WholeslideView extends JComponent {
                     repaintHelper(otherView);
                     break;
                 case KeyEvent.VK_ESCAPE:
-                    selection = new Rectangle();
+                    selection = null;
                     repaint();
                     break;
                 case KeyEvent.VK_ENTER:
@@ -562,6 +562,10 @@ public class WholeslideView extends JComponent {
     }
 
     private void paintSelection(Graphics2D g) {
+        if (selection == null) {
+            return;
+        }
+        
         double ds = getDownsample();
 
         AffineTransform at = new AffineTransform();
