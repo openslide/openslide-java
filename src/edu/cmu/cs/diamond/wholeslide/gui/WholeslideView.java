@@ -60,8 +60,10 @@ public class WholeslideView extends JComponent {
     @Override
     public void setBackground(Color bg) {
         super.setBackground(bg);
-        paintBackingStore();
-        repaint();
+        if (dbuf != null) {
+            paintBackingStore();
+            repaint();
+        }
     }
 
     static private void translateHelper(WholeslideView ws, int dX, int dY) {
