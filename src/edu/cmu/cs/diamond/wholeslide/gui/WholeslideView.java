@@ -413,7 +413,7 @@ public class WholeslideView extends JComponent {
 
     private void centerSlidePrivate() {
         Insets insets = getInsets();
-        
+
         int w = getWidth() - insets.left - insets.right;
         int h = getHeight() - insets.top - insets.bottom;
 
@@ -428,10 +428,10 @@ public class WholeslideView extends JComponent {
 
         int centerX = w / 2 + insets.left;
         int centerY = h / 2 + insets.top;
-        
+
         int centerDX = dw / 2;
         int centerDY = dh / 2;
-        
+
         int newX = -(centerX - centerDX);
         int newY = -(centerY - centerDY);
 
@@ -440,7 +440,7 @@ public class WholeslideView extends JComponent {
 
     private void zoomToFit() {
         Insets insets = getInsets();
-        
+
         int w = getWidth() - insets.left - insets.right;
         int h = getHeight() - insets.top - insets.bottom;
 
@@ -565,7 +565,7 @@ public class WholeslideView extends JComponent {
         if (selection == null) {
             return;
         }
-        
+
         double ds = getDownsample();
 
         AffineTransform at = new AffineTransform();
