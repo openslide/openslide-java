@@ -180,4 +180,25 @@ public class Wholeslide {
     final boolean debug = false;
 
     private int debugThingy = 0;
+
+    public BufferedImage createThumbnailImage(int maxSize) {
+        double ds;
+        int w;
+        int h;
+        if (baselineW > baselineH) {
+            ds = (double) baselineW / maxSize;
+        } else {
+            ds = (double) baselineH / maxSize;
+        }
+        w = (int) (baselineW / ds);
+        h = (int) (baselineH / ds);
+
+        BufferedImage result = new BufferedImage(w, h,
+                BufferedImage.TYPE_INT_ARGB_PRE);
+        
+        Graphics2D g = result.createGraphics();
+        paintRegion(g, 0, 0, 0, 0, w, h, ds);
+        g.dispose();
+        return result;
+    }
 }
