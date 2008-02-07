@@ -649,23 +649,13 @@ public class WholeslideView extends JComponent {
                 clip.width, clip.height, ds);
     }
 
-    private void paintSelection(Graphics2D g) {
-        if (selection == null) {
-            return;
-        }
-
-        double ds = getDownsample();
-
-        System.out.println(selection);
-
+    public static void paintSelection(Graphics2D g, Shape selection, int x,
+            int y, double downsample) {
         AffineTransform at = new AffineTransform();
-        at.translate(-viewPosition.x, -viewPosition.y);
-        at.scale(1 / ds, 1 / ds);
-        System.out.println(at);
+        at.translate(x, y);
+        at.scale(1 / downsample, 1 / downsample);
 
         Shape s = at.createTransformedShape(selection);
-
-        System.out.println(s);
 
         g.setStroke(new BasicStroke(5f));
         g.setColor(Color.BLACK);
@@ -684,7 +674,20 @@ public class WholeslideView extends JComponent {
         g.draw(s);
     }
 
-    public Rectangle getSelection() {
-        return selection.getBounds();
+    private void paintSelection(Graphics2D g) {
+        if (selection == null) {
+            return;
+        }
+
+        paintSelection(g, selection, -viewPosition.x, -viewPosition.y,
+                getDownsample());
+    }
+
+    public Shape getSelection() {
+        return selection;
+    }
+
+    public Wholeslide getWholeSlide() {
+        return wsd;
     }
 }
