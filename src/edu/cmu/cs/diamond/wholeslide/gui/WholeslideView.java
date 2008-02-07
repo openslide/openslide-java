@@ -311,8 +311,8 @@ public class WholeslideView extends JComponent {
         addMouseMotionListener(ma);
 
         // keyboard
-        InputMap inputMap = getInputMap();
-        ActionMap actionMap = getActionMap();
+        InputMap inputMap = new InputMap();
+        ActionMap actionMap = new ActionMap();
 
         inputMap.put(KeyStroke.getKeyStroke("SPACE"), "center");
         actionMap.put("center", new AbstractAction() {
@@ -428,6 +428,14 @@ public class WholeslideView extends JComponent {
                 repaintHelper(otherView);
             }
         });
+        
+        // install as parents
+        InputMap oldInputMap = getInputMap();
+        ActionMap oldActionMap = getActionMap();
+        inputMap.setParent(oldInputMap.getParent());
+        oldInputMap.setParent(inputMap);
+        actionMap.setParent(oldActionMap.getParent());
+        oldActionMap.setParent(actionMap);
     }
 
     protected void zoomHelper2(WholeslideView w, double d) {
