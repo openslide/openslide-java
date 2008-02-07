@@ -8,6 +8,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.*;
@@ -301,9 +302,16 @@ public class WholeslideView extends JComponent {
             public void mouseReleased(MouseEvent e) {
                 if (selectionMode == SELECTION_MODE_FREEHAND) {
                     freehandPath.closePath();
-                    repaint();
                 }
                 selectionMode = SELECTION_MODE_NONE;
+
+                if (selection != null) {
+                    Rectangle bb = selection.getBounds();
+                    if (bb.height == 0 || bb.width == 0) {
+                        selection = null;
+                    }
+                }
+                repaint();
             }
 
         };
@@ -657,17 +665,32 @@ public class WholeslideView extends JComponent {
 
         Shape s = at.createTransformedShape(selection);
 
-        g.setStroke(new BasicStroke(5f));
+        Rectangle2D bb = s.getBounds2D();
+
+        float strokeWidth = 5;
+        double bw = bb.getWidth();
+        double bh = bb.getHeight();
+
+        if (bw < 6 && bh < 6) {
+            s = new Rectangle((int) bb.getCenterX() - 2,
+                    (int) bb.getCenterY() - 2, 4, 4);
+        }
+
+        if (bw < 10 || bh < 10) {
+            strokeWidth = 3;
+        }
+
+        g.setStroke(new BasicStroke(strokeWidth));
         g.setColor(Color.BLACK);
         g.draw(s);
 
-        g.setStroke(new BasicStroke(3f, BasicStroke.CAP_SQUARE,
+        g.setStroke(new BasicStroke(strokeWidth - 2, BasicStroke.CAP_SQUARE,
                 BasicStroke.JOIN_BEVEL, 0, new float[] { 3, 9 }, 0f));
         // g.setColor(Color.BLACK);
         g.setColor(new Color(176, 255, 107));
         g.draw(s);
 
-        g.setStroke(new BasicStroke(3f, BasicStroke.CAP_SQUARE,
+        g.setStroke(new BasicStroke(strokeWidth - 2, BasicStroke.CAP_SQUARE,
                 BasicStroke.JOIN_BEVEL, 0, new float[] { 3, 9 }, 6f));
         // g.setColor(Color.YELLOW);
         g.setColor(new Color(107, 176, 255));
