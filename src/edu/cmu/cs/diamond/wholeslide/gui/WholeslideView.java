@@ -1,13 +1,16 @@
 package edu.cmu.cs.diamond.wholeslide.gui;
 
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import edu.cmu.cs.diamond.wholeslide.Wholeslide;
 
@@ -308,89 +311,123 @@ public class WholeslideView extends JComponent {
         addMouseMotionListener(ma);
 
         // keyboard
-        addKeyListener(new KeyAdapter() {
+        InputMap inputMap = getInputMap();
+        ActionMap actionMap = getActionMap();
+
+        inputMap.put(KeyStroke.getKeyStroke("SPACE"), "center");
+        actionMap.put("center", new AbstractAction() {
             @Override
-            public void keyPressed(KeyEvent e) {
-                System.out.println(e);
-                int key = e.getKeyCode();
-                switch (key) {
-                case KeyEvent.VK_SPACE:
-                    centerHelper(WholeslideView.this);
-                    centerHelper(otherView);
-                    repaintHelper(WholeslideView.this);
-                    repaintHelper(otherView);
-                    break;
-                case KeyEvent.VK_UP:
-                case KeyEvent.VK_W:
-                    translateHelper(WholeslideView.this, 0,
-                            -KEYBOARD_SCROLL_AMOUNT);
-                    translateHelper(otherView, 0, -KEYBOARD_SCROLL_AMOUNT);
-                    repaintHelper(WholeslideView.this);
-                    repaintHelper(otherView);
-                    break;
-                case KeyEvent.VK_DOWN:
-                case KeyEvent.VK_S:
-                    translateHelper(WholeslideView.this, 0,
-                            KEYBOARD_SCROLL_AMOUNT);
-                    translateHelper(otherView, 0, KEYBOARD_SCROLL_AMOUNT);
-                    repaintHelper(WholeslideView.this);
-                    repaintHelper(otherView);
-                    break;
-                case KeyEvent.VK_LEFT:
-                case KeyEvent.VK_A:
-                    translateHelper(WholeslideView.this,
-                            -KEYBOARD_SCROLL_AMOUNT, 0);
-                    translateHelper(otherView, -KEYBOARD_SCROLL_AMOUNT, 0);
-                    repaintHelper(WholeslideView.this);
-                    repaintHelper(otherView);
-                    break;
-                case KeyEvent.VK_RIGHT:
-                case KeyEvent.VK_D:
-                    translateHelper(WholeslideView.this,
-                            KEYBOARD_SCROLL_AMOUNT, 0);
-                    translateHelper(otherView, KEYBOARD_SCROLL_AMOUNT, 0);
-                    repaintHelper(WholeslideView.this);
-                    repaintHelper(otherView);
-                    break;
-                case KeyEvent.VK_ESCAPE:
-                    selection = null;
-                    repaint();
-                    break;
-                case KeyEvent.VK_ENTER:
-                    paintBackingStore();
-                    repaint();
-                    break;
-                case KeyEvent.VK_L:
-                    rotateSlide(1);
-                    break;
-                case KeyEvent.VK_R:
-                    rotateSlide(-1);
-                    break;
-                case KeyEvent.VK_PLUS:
-                case KeyEvent.VK_EQUALS:
-                    double d1 = zoomHelper(WholeslideView.this, -1);
-                    double d2 = zoomHelper(otherView, -1);
-                    zoomHelper2(WholeslideView.this, d1);
-                    zoomHelper2(otherView, d2);
-                    zoomHelper3(WholeslideView.this, d1);
-                    zoomHelper3(otherView, d2);
-                    repaintHelper(WholeslideView.this);
-                    repaintHelper(otherView);
-                    break;
-                case KeyEvent.VK_MINUS:
-                    d1 = zoomHelper(WholeslideView.this, 1);
-                    d2 = zoomHelper(otherView, 1);
-                    zoomHelper2(WholeslideView.this, d1);
-                    zoomHelper2(otherView, d2);
-                    zoomHelper3(WholeslideView.this, d1);
-                    zoomHelper3(otherView, d2);
-                    repaintHelper(WholeslideView.this);
-                    repaintHelper(otherView);
-                    break;
-                // case KeyEvent.VK_Z:
-                // setViewPosition(0, 100);
-                // break;
-                }
+            public void actionPerformed(ActionEvent e) {
+                centerHelper(WholeslideView.this);
+                centerHelper(otherView);
+                repaintHelper(WholeslideView.this);
+                repaintHelper(otherView);
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke("UP"), "scroll up");
+        inputMap.put(KeyStroke.getKeyStroke("W"), "scroll up");
+        actionMap.put("scroll up", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                translateHelper(WholeslideView.this, 0, -KEYBOARD_SCROLL_AMOUNT);
+                translateHelper(otherView, 0, -KEYBOARD_SCROLL_AMOUNT);
+                repaintHelper(WholeslideView.this);
+                repaintHelper(otherView);
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke("DOWN"), "scroll down");
+        inputMap.put(KeyStroke.getKeyStroke("S"), "scroll down");
+        actionMap.put("scroll down", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                translateHelper(WholeslideView.this, 0, KEYBOARD_SCROLL_AMOUNT);
+                translateHelper(otherView, 0, KEYBOARD_SCROLL_AMOUNT);
+                repaintHelper(WholeslideView.this);
+                repaintHelper(otherView);
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke("LEFT"), "scroll left");
+        inputMap.put(KeyStroke.getKeyStroke("A"), "scroll left");
+        actionMap.put("scroll left", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                translateHelper(WholeslideView.this,
+                        -KEYBOARD_SCROLL_AMOUNT, 0);
+                translateHelper(otherView, -KEYBOARD_SCROLL_AMOUNT, 0);
+                repaintHelper(WholeslideView.this);
+                repaintHelper(otherView);
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "scroll right");
+        inputMap.put(KeyStroke.getKeyStroke("D"), "scroll right");
+        actionMap.put("scroll right", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                translateHelper(WholeslideView.this,
+                        KEYBOARD_SCROLL_AMOUNT, 0);
+                translateHelper(otherView, KEYBOARD_SCROLL_AMOUNT, 0);
+                repaintHelper(WholeslideView.this);
+                repaintHelper(otherView);
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "clear selection");
+        actionMap.put("clear selection", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selection = null;
+                repaint();
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke("L"), "rotate left");
+        actionMap.put("rotate left", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke("R"), "rotate right");
+        actionMap.put("rotate right", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke("PLUS"), "zoom in");
+        inputMap.put(KeyStroke.getKeyStroke("EQUALS"), "zoom in");
+        actionMap.put("zoom in", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                double d1 = zoomHelper(WholeslideView.this, -1);
+                double d2 = zoomHelper(otherView, -1);
+                zoomHelper2(WholeslideView.this, d1);
+                zoomHelper2(otherView, d2);
+                zoomHelper3(WholeslideView.this, d1);
+                zoomHelper3(otherView, d2);
+                repaintHelper(WholeslideView.this);
+                repaintHelper(otherView);
+            }
+        });
+
+        inputMap.put(KeyStroke.getKeyStroke("MINUS"), "zoom out");
+        actionMap.put("zoom out", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                double d1 = zoomHelper(WholeslideView.this, 1);
+                double d2 = zoomHelper(otherView, 1);
+                zoomHelper2(WholeslideView.this, d1);
+                zoomHelper2(otherView, d2);
+                zoomHelper3(WholeslideView.this, d1);
+                zoomHelper3(otherView, d2);
+                repaintHelper(WholeslideView.this);
+                repaintHelper(otherView);
             }
         });
     }
