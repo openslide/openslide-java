@@ -354,8 +354,7 @@ public class WholeslideView extends JComponent {
         actionMap.put("scroll left", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                translateHelper(WholeslideView.this,
-                        -KEYBOARD_SCROLL_AMOUNT, 0);
+                translateHelper(WholeslideView.this, -KEYBOARD_SCROLL_AMOUNT, 0);
                 translateHelper(otherView, -KEYBOARD_SCROLL_AMOUNT, 0);
                 repaintHelper(WholeslideView.this);
                 repaintHelper(otherView);
@@ -367,8 +366,7 @@ public class WholeslideView extends JComponent {
         actionMap.put("scroll right", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                translateHelper(WholeslideView.this,
-                        KEYBOARD_SCROLL_AMOUNT, 0);
+                translateHelper(WholeslideView.this, KEYBOARD_SCROLL_AMOUNT, 0);
                 translateHelper(otherView, KEYBOARD_SCROLL_AMOUNT, 0);
                 repaintHelper(WholeslideView.this);
                 repaintHelper(otherView);
@@ -664,16 +662,16 @@ public class WholeslideView extends JComponent {
         g.setStroke(new BasicStroke(5f));
         g.setColor(Color.BLACK);
         g.draw(s);
-        
+
         g.setStroke(new BasicStroke(3f, BasicStroke.CAP_SQUARE,
                 BasicStroke.JOIN_BEVEL, 0, new float[] { 3, 9 }, 0f));
-//        g.setColor(Color.BLACK);
+        // g.setColor(Color.BLACK);
         g.setColor(new Color(176, 255, 107));
         g.draw(s);
 
         g.setStroke(new BasicStroke(3f, BasicStroke.CAP_SQUARE,
                 BasicStroke.JOIN_BEVEL, 0, new float[] { 3, 9 }, 6f));
-//        g.setColor(Color.YELLOW);
+        // g.setColor(Color.YELLOW);
         g.setColor(new Color(107, 176, 255));
         g.draw(s);
     }
