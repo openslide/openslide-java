@@ -428,7 +428,7 @@ public class WholeslideView extends JComponent {
                 repaintHelper(otherView);
             }
         });
-        
+
         // install as parents
         InputMap oldInputMap = getInputMap();
         ActionMap oldActionMap = getActionMap();
