@@ -87,11 +87,6 @@ public class WholeslideView extends JComponent {
         w.centerSlidePrivate();
     }
 
-    public void translateSlide(int dX, int dY) {
-        translateSlide(dX, dY);
-        repaint();
-    }
-
     private void translateSlidePrivate(int dX, int dY) {
         int w = dbuf.getWidth();
         int h = dbuf.getHeight();
