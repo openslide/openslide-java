@@ -710,7 +710,12 @@ public class WholeslideView extends JComponent {
         return selection;
     }
 
-    public Wholeslide getWholeSlide() {
+    public void setSelection(Shape s) {
+        selection = s;
+        repaint();
+    }
+    
+    public Wholeslide getWholeslide() {
         return wsd;
     }
 }
