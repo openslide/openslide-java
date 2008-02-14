@@ -324,7 +324,6 @@ public class WholeslideView extends JComponent {
 
         inputMap.put(KeyStroke.getKeyStroke("SPACE"), "center");
         actionMap.put("center", new AbstractAction() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 centerHelper(WholeslideView.this);
                 centerHelper(otherView);
@@ -336,7 +335,6 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("UP"), "scroll up");
         inputMap.put(KeyStroke.getKeyStroke("W"), "scroll up");
         actionMap.put("scroll up", new AbstractAction() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 translateHelper(WholeslideView.this, 0, -KEYBOARD_SCROLL_AMOUNT);
                 translateHelper(otherView, 0, -KEYBOARD_SCROLL_AMOUNT);
@@ -348,7 +346,6 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("DOWN"), "scroll down");
         inputMap.put(KeyStroke.getKeyStroke("S"), "scroll down");
         actionMap.put("scroll down", new AbstractAction() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 translateHelper(WholeslideView.this, 0, KEYBOARD_SCROLL_AMOUNT);
                 translateHelper(otherView, 0, KEYBOARD_SCROLL_AMOUNT);
@@ -360,7 +357,6 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("LEFT"), "scroll left");
         inputMap.put(KeyStroke.getKeyStroke("A"), "scroll left");
         actionMap.put("scroll left", new AbstractAction() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 translateHelper(WholeslideView.this, -KEYBOARD_SCROLL_AMOUNT, 0);
                 translateHelper(otherView, -KEYBOARD_SCROLL_AMOUNT, 0);
@@ -372,7 +368,6 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "scroll right");
         inputMap.put(KeyStroke.getKeyStroke("D"), "scroll right");
         actionMap.put("scroll right", new AbstractAction() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 translateHelper(WholeslideView.this, KEYBOARD_SCROLL_AMOUNT, 0);
                 translateHelper(otherView, KEYBOARD_SCROLL_AMOUNT, 0);
@@ -383,7 +378,6 @@ public class WholeslideView extends JComponent {
 
         inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "clear selection");
         actionMap.put("clear selection", new AbstractAction() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 selection = null;
                 repaint();
@@ -392,7 +386,6 @@ public class WholeslideView extends JComponent {
 
         inputMap.put(KeyStroke.getKeyStroke("L"), "rotate left");
         actionMap.put("rotate left", new AbstractAction() {
-            @Override
             public void actionPerformed(ActionEvent e) {
 
             }
@@ -400,7 +393,6 @@ public class WholeslideView extends JComponent {
 
         inputMap.put(KeyStroke.getKeyStroke("R"), "rotate right");
         actionMap.put("rotate right", new AbstractAction() {
-            @Override
             public void actionPerformed(ActionEvent e) {
 
             }
@@ -409,7 +401,6 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("PLUS"), "zoom in");
         inputMap.put(KeyStroke.getKeyStroke("EQUALS"), "zoom in");
         actionMap.put("zoom in", new AbstractAction() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 double d1 = zoomHelper(WholeslideView.this, -1);
                 double d2 = zoomHelper(otherView, -1);
@@ -424,7 +415,6 @@ public class WholeslideView extends JComponent {
 
         inputMap.put(KeyStroke.getKeyStroke("MINUS"), "zoom out");
         actionMap.put("zoom out", new AbstractAction() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 double d1 = zoomHelper(WholeslideView.this, 1);
                 double d2 = zoomHelper(otherView, 1);
