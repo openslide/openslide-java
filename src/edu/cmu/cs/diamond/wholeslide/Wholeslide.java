@@ -92,8 +92,8 @@ public class Wholeslide {
                 .ws_get_comment(wsd);
     }
 
-    synchronized public void paintRegion(Graphics2D g, int dx, int dy, int sx,
-            int sy, int w, int h, double downsample) {
+    public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
+            int w, int h, double downsample) {
         checkDisposed();
 
         if (downsample < 1.0) {
@@ -157,8 +157,10 @@ public class Wholeslide {
         int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                 .getData();
 
-        edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_read_region(wsd, data,
-                baseX, baseY, layer, img.getWidth(), img.getHeight());
+        synchronized (wsd) {
+            edu.cmu.cs.diamond.wholeslide.glue.Wholeslide.ws_read_region(wsd,
+                    data, baseX, baseY, layer, img.getWidth(), img.getHeight());
+        }
 
         // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
         g.drawImage(img, dx, dy, w, h, null);
