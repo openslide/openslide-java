@@ -92,8 +92,8 @@ public class Wholeslide {
                 .ws_get_comment(wsd);
     }
 
-    public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
-            int w, int h, double downsample) {
+    synchronized public void paintRegion(Graphics2D g, int dx, int dy, int sx,
+            int sy, int w, int h, double downsample) {
         checkDisposed();
 
         if (downsample < 1.0) {
