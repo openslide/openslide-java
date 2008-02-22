@@ -181,7 +181,8 @@ public class Wholeslide {
 
     private int debugThingy = 0;
 
-    public BufferedImage createThumbnailImage(int x, int y, int w, int h, int maxSize) {
+    public BufferedImage createThumbnailImage(int x, int y, int w, int h,
+            int maxSize) {
         double ds;
 
         if (w > h) {
@@ -193,7 +194,7 @@ public class Wholeslide {
         if (ds < 1.0) {
             ds = 1.0;
         }
-        
+
         int sw = (int) (w / ds);
         int sh = (int) (h / ds);
         int sx = (int) (x / ds);
@@ -201,13 +202,13 @@ public class Wholeslide {
 
         BufferedImage result = new BufferedImage(sw, sh,
                 BufferedImage.TYPE_INT_ARGB_PRE);
-        
+
         Graphics2D g = result.createGraphics();
         paintRegion(g, 0, 0, sx, sy, sw, sh, ds);
         g.dispose();
         return result;
     }
-    
+
     public BufferedImage createThumbnailImage(int maxSize) {
         return createThumbnailImage(0, 0, baselineW, baselineH, maxSize);
     }
