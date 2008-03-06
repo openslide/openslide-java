@@ -429,6 +429,17 @@ public class WholeslideView extends JComponent {
             }
         });
 
+        inputMap.put(KeyStroke.getKeyStroke("Z"), "zoom to fit");
+        actionMap.put("zoom to fit", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("zoom");
+                zoomToFit();
+                centerSlidePrivate();
+                paintBackingStore();
+                repaint();
+            }
+        });
+
         // install as parents
         InputMap oldInputMap = getInputMap();
         ActionMap oldActionMap = getActionMap();
