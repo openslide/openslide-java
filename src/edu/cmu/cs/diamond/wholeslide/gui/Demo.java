@@ -14,12 +14,12 @@ import edu.cmu.cs.diamond.wholeslide.Wholeslide;
 
 public class Demo {
     public static void main(String[] args) {
-        JFrame jf = new JFrame("zzz");
+        JFrame jf = new JFrame("Wholeslide");
         jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         switch (args.length) {
         case 0:
-            System.out.println("oops");
+            System.out.println("Give 1 or 2 files");
             return;
 
         case 1:
@@ -60,7 +60,7 @@ public class Demo {
             return;
         }
 
-        jf.setSize(800, 600);
+        jf.setSize(900, 700);
 
         jf.setVisible(true);
     }
