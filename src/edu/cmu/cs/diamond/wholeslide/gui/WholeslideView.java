@@ -43,16 +43,23 @@ public class WholeslideView extends JComponent {
     private int tmpZoomX;
 
     private int tmpZoomY;
+    
+    private final boolean startWithZoomFit;
 
     public WholeslideView(Wholeslide w) {
-        this(w, 1.2, 40);
+        this(w, false);
+    }
+    
+    public WholeslideView(Wholeslide w, boolean startWithZoomFit) {
+        this(w, 1.2, 40, startWithZoomFit);
     }
 
     public WholeslideView(Wholeslide w, double downsampleBase,
-            int maxDownsampleExponent) {
+            int maxDownsampleExponent, boolean startWithZoomFit) {
         wsd = w;
         this.downsampleBase = downsampleBase;
         this.maxDownsampleExponent = maxDownsampleExponent;
+        this.startWithZoomFit = startWithZoomFit;
 
         setFocusable(true);
         setOpaque(true);
@@ -608,7 +615,9 @@ public class WholeslideView extends JComponent {
         if (firstPaint) {
             if (w != 0 && h != 0) {
                 createBackingStore();
-                // zoomToFit();
+                if (startWithZoomFit) {
+                    zoomToFit();
+                }
 
                 if (selection != null) {
                     centerOnSelectionPrivate();
