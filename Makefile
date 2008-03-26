@@ -12,7 +12,7 @@ wholeslide_wrap.c src/edu/cmu/cs/diamond/wholeslide/glue/Wholeslide.java: wholes
 
 
 libwholeslidejava.so: wholeslide_wrap.c
-	$(CC) $(CFLAGS) -fPIC -fno-strict-aliasing -shared $$(pkg-config wholeslide --cflags --libs) -g -O2 -Wall -o $@ $<
+	$(CC) $(CFLAGS) -fPIC -fno-strict-aliasing -shared -g -O2 -Wall -o $@ $< $$(pkg-config wholeslide --cflags --libs)
 
 clean:
 	ant clean
