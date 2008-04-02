@@ -23,27 +23,28 @@ public class Demo {
             return;
 
         case 1:
-            WholeslideView wv = new WholeslideView(new Wholeslide(new File(args[0])));
+            WholeslideView wv = new WholeslideView(new Wholeslide(new File(
+                    args[0])), true);
             wv.setBorder(BorderFactory.createTitledBorder(args[0]));
             jf.getContentPane().add(wv);
-            
+
             break;
 
         case 2:
             final WholeslideView w1 = new WholeslideView(new Wholeslide(
-                    new File(args[0])));
+                    new File(args[0])), true);
             final WholeslideView w2 = new WholeslideView(new Wholeslide(
-                    new File(args[1])));
+                    new File(args[1])), true);
             Box b = Box.createHorizontalBox();
             b.add(w1);
             b.add(w2);
             jf.getContentPane().add(b);
-            
+
             JToggleButton linker = new JToggleButton("Link");
             jf.getContentPane().add(linker, BorderLayout.SOUTH);
             linker.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
-                    switch(e.getStateChange()) {
+                    switch (e.getStateChange()) {
                     case ItemEvent.SELECTED:
                         w1.linkWithOther(w2);
                         break;
@@ -53,7 +54,7 @@ public class Demo {
                     }
                 }
             });
-            
+
             break;
 
         default:
