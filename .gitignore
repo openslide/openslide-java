@@ -1,0 +1,7 @@
+/bin
+/wholeslide_wrap.c
+/wholeslidejava.jar
+
+/src/edu/cmu/cs/diamond/wholeslide/glue
+
+*.so
