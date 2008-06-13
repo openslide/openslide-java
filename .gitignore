@@ -2,6 +2,6 @@
 /wholeslide_wrap.c
 /wholeslidejava.jar
 
-/src/edu/cmu/cs/diamond/wholeslide/glue
+/src/edu/cmu/cs/wholeslide/glue
 
 *.so

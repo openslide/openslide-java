@@ -1,4 +1,4 @@
-package edu.cmu.cs.diamond.wholeslide.gui;
+package edu.cmu.cs.wholeslide.gui;
 
 import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
@@ -10,7 +10,7 @@ import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JToggleButton;
 
-import edu.cmu.cs.diamond.wholeslide.Wholeslide;
+import edu.cmu.cs.wholeslide.Wholeslide;
 
 public class Demo {
     public static void main(String[] args) {

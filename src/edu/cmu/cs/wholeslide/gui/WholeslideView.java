@@ -1,4 +1,4 @@
-package edu.cmu.cs.diamond.wholeslide.gui;
+package edu.cmu.cs.wholeslide.gui;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -13,7 +13,7 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
-import edu.cmu.cs.diamond.wholeslide.Wholeslide;
+import edu.cmu.cs.wholeslide.Wholeslide;
 
 public class WholeslideView extends JComponent {
     private static final int KEYBOARD_SCROLL_AMOUNT = 100;

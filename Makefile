@@ -3,12 +3,12 @@
 CC = gcc
 JAVAC = javac
 
-all: libwholeslidejava.so src/edu/cmu/cs/diamond/wholeslide/glue/Wholeslide.java
+all: libwholeslidejava.so src/edu/cmu/cs/wholeslide/glue/Wholeslide.java
 	ant
 
-wholeslide_wrap.c src/edu/cmu/cs/diamond/wholeslide/glue/Wholeslide.java: wholeslide.i
-	mkdir -p src/edu/cmu/cs/diamond/wholeslide/glue
-	swig -Wall -I/usr/include -java $$(pkg-config wholeslide --cflags-only-I) -package edu.cmu.cs.diamond.wholeslide.glue -outdir src/edu/cmu/cs/diamond/wholeslide/glue $<
+wholeslide_wrap.c src/edu/cmu/cs/wholeslide/glue/Wholeslide.java: wholeslide.i
+	mkdir -p src/edu/cmu/cs/wholeslide/glue
+	swig -Wall -I/usr/include -java $$(pkg-config wholeslide --cflags-only-I) -package edu.cmu.cs.wholeslide.glue -outdir src/edu/cmu/cs/wholeslide/glue $<
 
 
 libwholeslidejava.so: wholeslide_wrap.c
@@ -16,7 +16,7 @@ libwholeslidejava.so: wholeslide_wrap.c
 
 clean:
 	ant clean
-	$(RM) libwholeslidejava.so wholeslide_wrap.c src/edu/cmu/cs/diamond/wholeslide/glue/*.java *~ bin
+	$(RM) libwholeslidejava.so wholeslide_wrap.c src/edu/cmu/cs/wholeslide/glue/*.java *~ bin
 
 
 

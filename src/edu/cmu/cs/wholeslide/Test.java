@@ -1,4 +1,4 @@
-package edu.cmu.cs.diamond.wholeslide;
+package edu.cmu.cs.wholeslide;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;

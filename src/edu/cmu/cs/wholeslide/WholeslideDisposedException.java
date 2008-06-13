@@ -1,4 +1,4 @@
-package edu.cmu.cs.diamond.wholeslide;
+package edu.cmu.cs.wholeslide;
 
 public class WholeslideDisposedException extends WholeslideException {
     public WholeslideDisposedException() {
