@@ -5,6 +5,7 @@
 %include "arrays_java.i"
 %include "various.i"
 
+#include <stdint.h>
 
 %javaconst(1);
 
@@ -24,15 +25,30 @@
 
 %newobject ws_open;
 
-typedef int uint32_t;  // hah
-%apply uint32_t[] {uint32_t *};
+%apply int64_t[] {int64_t *};
+%apply int32_t[] {uint32_t *};
 
+typedef struct _wholeslide wholeslide_t;
 
-void ws_get_layer0_dimensions(wholeslide_t *wsd,
-			      uint32_t *OUTPUT,
-			      uint32_t *OUTPUT);
-void ws_get_layer_dimensions(wholeslide_t *wsd, uint32_t layer,
-			     uint32_t *OUTPUT, uint32_t *OUTPUT);
+bool ws_can_open(const char *filename);
 
-%include "wholeslide-features.h"
-%include "wholeslide.h"
+wholeslide_t *ws_open(const char *filename);
+
+void ws_get_layer_dimensions(wholeslide_t *wsd, int32_t layer,
+			     int64_t *OUTPUT, int64_t *OUTPUT);
+
+int32_t ws_get_layer_count(wholeslide_t *wsd);
+
+void ws_close(wholeslide_t *wsd);
+
+const char *ws_get_comment(wholeslide_t *wsd);
+
+int32_t ws_get_best_layer_for_downsample(wholeslide_t *wsd, double downsample);
+
+double ws_get_layer_downsample(wholeslide_t *wsd, int32_t layer);
+
+void ws_read_region(wholeslide_t *wsd,
+		    uint32_t *dest,
+		    int64_t x, int64_t y,
+		    int32_t layer,
+		    int64_t w, int64_t h);

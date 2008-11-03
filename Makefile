@@ -8,7 +8,7 @@ all: libwholeslidejava.so src/edu/cmu/cs/wholeslide/glue/Wholeslide.java
 
 wholeslide_wrap.c src/edu/cmu/cs/wholeslide/glue/Wholeslide.java: wholeslide.i
 	mkdir -p src/edu/cmu/cs/wholeslide/glue
-	swig -Wall -I/usr/include -java $$(pkg-config wholeslide --cflags-only-I) -package edu.cmu.cs.wholeslide.glue -outdir src/edu/cmu/cs/wholeslide/glue $<
+	swig -includeall -Wall -I/usr/include -java $$(pkg-config wholeslide --cflags-only-I) -package edu.cmu.cs.wholeslide.glue -outdir src/edu/cmu/cs/wholeslide/glue $<
 
 
 libwholeslidejava.so: wholeslide_wrap.c

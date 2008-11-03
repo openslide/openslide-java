@@ -1,6 +1,15 @@
 package edu.cmu.cs.wholeslide.gui;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.Transparency;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -11,7 +20,12 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 import edu.cmu.cs.wholeslide.Wholeslide;
 
@@ -43,19 +57,27 @@ public class WholeslideView extends JComponent {
     private int tmpZoomX;
 
     private int tmpZoomY;
-    
+
     private final boolean startWithZoomFit;
 
     public WholeslideView(Wholeslide w) {
         this(w, false);
     }
-    
+
     public WholeslideView(Wholeslide w, boolean startWithZoomFit) {
         this(w, 1.2, 40, startWithZoomFit);
     }
 
     public WholeslideView(Wholeslide w, double downsampleBase,
             int maxDownsampleExponent, boolean startWithZoomFit) {
+        // TODO support w > 2^31 and h > 2^31
+        if (w.getLayer0Width() > Integer.MAX_VALUE
+                || w.getLayer0Height() > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException(
+                    "Wholeslide size must not exceed (" + Integer.MAX_VALUE
+                            + "," + Integer.MAX_VALUE + ")");
+        }
+
         wsd = w;
         this.downsampleBase = downsampleBase;
         this.maxDownsampleExponent = maxDownsampleExponent;
@@ -518,7 +540,7 @@ public class WholeslideView extends JComponent {
         centerOnSelectionPrivate();
         repaint();
     }
-    
+
     private void centerOnSelectionPrivate() {
         if (selection != null) {
             Rectangle2D bb = selection.getBounds2D();
@@ -527,9 +549,8 @@ public class WholeslideView extends JComponent {
     }
 
     private void centerSlidePrivate() {
-        Dimension d = wsd.getLayer0Dimension();
-
-        centerSlidePrivate(d.width / 2, d.height / 2);
+        centerSlidePrivate((int) (wsd.getLayer0Width() / 2), (int) (wsd
+                .getLayer0Height() / 2));
     }
 
     private void centerSlidePrivate(int cX, int cY) {
@@ -565,9 +586,8 @@ public class WholeslideView extends JComponent {
             return;
         }
 
-        Dimension d = wsd.getLayer0Dimension();
-        double ws = (double) d.width / w;
-        double hs = (double) d.height / h;
+        double ws = (double) wsd.getLayer0Width() / w;
+        double hs = (double) wsd.getLayer0Height() / h;
 
         double maxS = Math.max(ws, hs);
 

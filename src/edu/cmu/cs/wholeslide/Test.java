@@ -1,12 +1,20 @@
 package edu.cmu.cs.wholeslide;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.io.File;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 public class Test extends JPanel {
 
@@ -39,19 +47,23 @@ public class Test extends JPanel {
     public Test(Wholeslide w) {
         wsd = w;
 
-        Dimension d = wsd.getLayer0Dimension();
-        maxDownsampleFactor = (int) Math.max(Math.log(d.getHeight() / MIN_SIZE)
-                / Math.log(DOWNSAMPLE_BASE), Math.log(d.getWidth() / MIN_SIZE)
+        maxDownsampleFactor = (int) Math.max(Math.log(wsd.getLayer0Height()
+                / MIN_SIZE)
+                / Math.log(DOWNSAMPLE_BASE), Math.log(wsd.getLayer0Width()
+                / MIN_SIZE)
                 / Math.log(DOWNSAMPLE_BASE));
 
         updateSize();
     }
 
     private void updateSize() {
-        Dimension d = wsd.getLayer0Dimension();
+        long w = wsd.getLayer0Width();
+        long h = wsd.getLayer0Height();
         double downsample = getDownsample();
-        d.height /= downsample;
-        d.width /= downsample;
+        w /= downsample;
+        h /= downsample;
+
+        Dimension d = new Dimension((int) w, (int) h);
 
         // System.out.println(d);
 
@@ -89,7 +101,7 @@ public class Test extends JPanel {
                     jsp.repaint();
                 }
             }
-            
+
             @Override
             public void mousePressed(MouseEvent e) {
                 if (!SwingUtilities.isLeftMouseButton(e)) {
@@ -118,7 +130,7 @@ public class Test extends JPanel {
                 int newX = sbx + x - e.getX();
                 int newY = sby + y - e.getY();
 
-//                System.out.println(newX + " " + newY);
+                // System.out.println(newX + " " + newY);
 
                 JScrollBar h = jsp.getHorizontalScrollBar();
                 JScrollBar v = jsp.getVerticalScrollBar();
@@ -156,9 +168,9 @@ public class Test extends JPanel {
 
                 double newDS = t.getDownsample();
 
-//                System.out.println("oldDS: " + oldDS);
-//                System.out.println("newDS: " + newDS);
-//                System.out.println();
+                // System.out.println("oldDS: " + oldDS);
+                // System.out.println("newDS: " + newDS);
+                // System.out.println();
 
                 JScrollBar hs = jsp.getHorizontalScrollBar();
                 JScrollBar vs = jsp.getVerticalScrollBar();
@@ -186,26 +198,28 @@ public class Test extends JPanel {
         int offsetX = 0;
         int offsetY = 0;
 
-        Dimension d = wsd.getLayer0Dimension();
+        long wsdW = wsd.getLayer0Width();
+        long wsdH = wsd.getLayer0Height();
         double downsample = getDownsample();
-        d.width /= downsample;
-        d.height /= downsample;
+        wsdW /= downsample;
+        wsdH /= downsample;
 
         int w = getWidth();
         int h = getHeight();
 
-        if (w > d.width) {
-            offsetX = (w - d.width) / 2;
+        if (w > wsdW) {
+            offsetX = (int) ((w - wsdW) / 2);
         }
-        if (h > d.height) {
-            offsetY = (h - d.height) / 2;
+        if (h > wsdH) {
+            offsetY = (int) ((h - wsdH) / 2);
         }
 
         Rectangle clip = g2.getClipBounds();
 
         g2.setColor(Color.BLACK);
         int rectVal = 3;
-        g2.fillRect(offsetX + rectVal, offsetY + rectVal, d.width, d.height);
+        g2.fillRect(offsetX + rectVal, offsetY + rectVal, (int) wsdW,
+                (int) wsdH);
 
         // System.out.println(clip);
         wsd.paintRegion(g2, clip.x, clip.y, clip.x - offsetX, clip.y - offsetY,

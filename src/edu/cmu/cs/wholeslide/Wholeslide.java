@@ -1,7 +1,6 @@
 package edu.cmu.cs.wholeslide;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -12,37 +11,41 @@ import edu.cmu.cs.wholeslide.glue.SWIGTYPE_p__wholeslide;
 public class Wholeslide {
     private SWIGTYPE_p__wholeslide wsd;
 
-    final private int baselineW;
+    final private long layerWidths[];
 
-    final private int baselineH;
+    final private long layerHeights[];
 
     final private int layerCount;
 
     public static boolean fileIsValid(File file) {
-        return edu.cmu.cs.wholeslide.glue.Wholeslide.ws_can_open(file
-                .getPath());
+        return edu.cmu.cs.wholeslide.glue.Wholeslide
+                .ws_can_open(file.getPath());
     }
 
     public Wholeslide(File file) {
-        wsd = edu.cmu.cs.wholeslide.glue.Wholeslide.ws_open(file
-                .getPath());
+        wsd = edu.cmu.cs.wholeslide.glue.Wholeslide.ws_open(file.getPath());
 
         if (wsd == null) {
             // TODO not just file not found
             throw new WholeslideException();
         }
 
-        // store baseline
-        int w[] = new int[1];
-        int h[] = new int[1];
-        edu.cmu.cs.wholeslide.glue.Wholeslide.ws_get_layer0_dimensions(
-                wsd, w, h);
-        baselineW = w[0];
-        baselineH = h[0];
-
         // store layer count
         layerCount = edu.cmu.cs.wholeslide.glue.Wholeslide
                 .ws_get_layer_count(wsd);
+
+        // store dimensions
+        layerWidths = new long[layerCount];
+        layerHeights = new long[layerCount];
+
+        for (int i = 0; i < layerCount; i++) {
+            long w[] = new long[1];
+            long h[] = new long[1];
+            edu.cmu.cs.wholeslide.glue.Wholeslide.ws_get_layer_dimensions(wsd,
+                    i, w, h);
+            layerWidths[i] = w[0];
+            layerHeights[i] = h[0];
+        }
     }
 
     public void dispose() {
@@ -68,28 +71,26 @@ public class Wholeslide {
         }
     }
 
-    public Dimension getLayer0Dimension() {
-        checkDisposed();
-
-        return new Dimension(baselineW, baselineH);
+    public long getLayer0Width() {
+        return layerWidths[0];
     }
 
-    public Dimension getLayerDimension(int layer) {
-        checkDisposed();
+    public long getLayer0Height() {
+        return layerHeights[0];
+    }
 
-        int[] x = new int[1];
-        int[] y = new int[1];
-        edu.cmu.cs.wholeslide.glue.Wholeslide.ws_get_layer_dimensions(
-                wsd, layer, x, y);
+    public long getLayerWidth(int layer) {
+        return layerWidths[layer];
+    }
 
-        return new Dimension(x[0], y[0]);
+    public long getLayerHeight(int layer) {
+        return layerHeights[layer];
     }
 
     public String getComment() {
         checkDisposed();
 
-        return edu.cmu.cs.wholeslide.glue.Wholeslide
-                .ws_get_comment(wsd);
+        return edu.cmu.cs.wholeslide.glue.Wholeslide.ws_get_comment(wsd);
     }
 
     public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
@@ -135,9 +136,8 @@ public class Wholeslide {
         int layerH = (int) Math.round(relativeDS * h);
 
         // clip to edge of image
-        Dimension d = getLayerDimension(layer);
-        layerW = Math.min(layerW, d.width - layerX);
-        layerH = Math.min(layerH, d.height - layerY);
+        layerW = (int) Math.min(layerW, getLayerWidth(layer) - layerX);
+        layerH = (int) Math.min(layerH, getLayerHeight(layer) - layerY);
         w = (int) Math.round(layerW / relativeDS);
         h = (int) Math.round(layerH / relativeDS);
 
@@ -157,8 +157,8 @@ public class Wholeslide {
         int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                 .getData();
 
-        edu.cmu.cs.wholeslide.glue.Wholeslide.ws_read_region(wsd, data,
-                baseX, baseY, layer, img.getWidth(), img.getHeight());
+        edu.cmu.cs.wholeslide.glue.Wholeslide.ws_read_region(wsd, data, baseX,
+                baseY, layer, img.getWidth(), img.getHeight());
 
         // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
         g.drawImage(img, dx, dy, w, h, null);
@@ -181,7 +181,7 @@ public class Wholeslide {
 
     private int debugThingy = 0;
 
-    public BufferedImage createThumbnailImage(int x, int y, int w, int h,
+    public BufferedImage createThumbnailImage(int x, int y, long w, long h,
             int maxSize) {
         double ds;
 
@@ -210,6 +210,7 @@ public class Wholeslide {
     }
 
     public BufferedImage createThumbnailImage(int maxSize) {
-        return createThumbnailImage(0, 0, baselineW, baselineH, maxSize);
+        return createThumbnailImage(0, 0, getLayer0Width(), getLayer0Height(),
+                maxSize);
     }
 }
