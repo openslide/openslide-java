@@ -1,0 +1,6 @@
+Fancy zooming/scrolling in WholeslideView
+
+Rotation in WholeslideView
+
+
+Make swig generated Java code not public
