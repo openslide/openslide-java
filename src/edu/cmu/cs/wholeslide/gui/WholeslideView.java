@@ -469,6 +469,21 @@ public class WholeslideView extends JComponent {
             }
         });
 
+        inputMap.put(KeyStroke.getKeyStroke("1"), "zoom to 1:1");
+        actionMap.put("zoom to 1:1", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("zoom 1:1");
+                double d1 = zoomHelper(WholeslideView.this, Integer.MIN_VALUE);
+                double d2 = zoomHelper(otherView, Integer.MIN_VALUE);
+                zoomHelper2(WholeslideView.this, d1);
+                zoomHelper2(otherView, d2);
+                zoomHelper3(WholeslideView.this, d1);
+                zoomHelper3(otherView, d2);
+                repaintHelper(WholeslideView.this);
+                repaintHelper(otherView);
+            }
+        });
+
         // install as parents
         InputMap oldInputMap = getInputMap();
         ActionMap oldActionMap = getActionMap();
