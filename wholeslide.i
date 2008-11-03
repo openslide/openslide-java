@@ -25,8 +25,8 @@
 
 %newobject ws_open;
 
-%apply int64_t[] {int64_t *};
-%apply int32_t[] {uint32_t *};
+%apply long long[] {int64_t *};
+%apply int[] {uint32_t *};
 
 typedef struct _wholeslide wholeslide_t;
 
