@@ -784,4 +784,12 @@ public class WholeslideView extends JComponent {
     public Wholeslide getWholeslide() {
         return wsd;
     }
+
+    public long getSlideX(int x) {
+        return (long) ((viewPosition.x + x) * getDownsample());
+    }
+
+    public long getSlideY(int y) {
+        return (long) ((viewPosition.y + y) * getDownsample());
+    }
 }
