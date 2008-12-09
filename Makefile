@@ -3,20 +3,20 @@
 CC = gcc
 JAVAC = javac
 
-all: libwholeslidejava.so src/edu/cmu/cs/wholeslide/glue/Wholeslide.java
+all: libopenslidejava.so src/edu/cmu/cs/openslide/glue/OpenSlide.java
 	ant
 
-wholeslide_wrap.c src/edu/cmu/cs/wholeslide/glue/Wholeslide.java: wholeslide.i
-	mkdir -p src/edu/cmu/cs/wholeslide/glue
-	swig -includeall -Wall -I/usr/include -java $$(pkg-config wholeslide --cflags-only-I) -package edu.cmu.cs.wholeslide.glue -outdir src/edu/cmu/cs/wholeslide/glue $<
+openslide_wrap.c src/edu/cmu/cs/openslide/glue/OpenSlide.java: openslide.i
+	mkdir -p src/edu/cmu/cs/openslide/glue
+	swig -includeall -Wall -I/usr/include -java $$(pkg-config openslide --cflags-only-I) -package edu.cmu.cs.openslide.glue -outdir src/edu/cmu/cs/openslide/glue $<
 
 
-libwholeslidejava.so: wholeslide_wrap.c
-	$(CC) $(CFLAGS) -fPIC -fno-strict-aliasing -shared -g -O2 -Wall -o $@ $< $$(pkg-config wholeslide --cflags --libs)
+libopenslidejava.so: openslide_wrap.c
+	$(CC) $(CFLAGS) -fPIC -fno-strict-aliasing -shared -g -O2 -Wall -o $@ $< $$(pkg-config openslide --cflags --libs)
 
 clean:
 	ant clean
-	$(RM) libwholeslidejava.so wholeslide_wrap.c src/edu/cmu/cs/wholeslide/glue/*.java *~ bin
+	$(RM) libopenslidejava.so openslide_wrap.c src/edu/cmu/cs/openslide/glue/*.java *~ bin
 
 
 

@@ -1,7 +1,7 @@
 /bin
-/wholeslide_wrap.c
-/wholeslidejava.jar
+/openslide_wrap.c
+/openslidejava.jar
 
-/src/edu/cmu/cs/wholeslide/glue
+/src/edu/cmu/cs/openslide/glue
 
 *.so

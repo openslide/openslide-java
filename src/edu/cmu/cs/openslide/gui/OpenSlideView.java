@@ -1,28 +1,28 @@
 /*
- *  Wholeslide, a library for reading whole slide image files
+ *  OpenSlide, a library for reading whole slide image files
  *
  *  Copyright (c) 2007-2008 Carnegie Mellon University
  *  All rights reserved.
  *
- *  Wholeslide is free software: you can redistribute it and/or modify
+ *  OpenSlide is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, version 2.
  *
- *  Wholeslide is distributed in the hope that it will be useful,
+ *  OpenSlide is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Wholeslide. If not, see <http://www.gnu.org/licenses/>.
+ *  along with OpenSlide. If not, see <http://www.gnu.org/licenses/>.
  *
- *  Linking Wholeslide statically or dynamically with other modules is
- *  making a combined work based on Wholeslide. Thus, the terms and
+ *  Linking OpenSlide statically or dynamically with other modules is
+ *  making a combined work based on OpenSlide. Thus, the terms and
  *  conditions of the GNU General Public License cover the whole
  *  combination.
  */
 
-package edu.cmu.cs.wholeslide.gui;
+package edu.cmu.cs.openslide.gui;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -33,16 +33,16 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
-import edu.cmu.cs.wholeslide.Wholeslide;
+import edu.cmu.cs.openslide.OpenSlide;
 
-public class WholeslideView extends JComponent {
+public class OpenSlideView extends JComponent {
     private static final int KEYBOARD_SCROLL_AMOUNT = 100;
 
     final private double downsampleBase;
 
     final private int maxDownsampleExponent;
 
-    transient final private Wholeslide wsd;
+    transient final private OpenSlide osr;
 
     private int rotation;
 
@@ -52,7 +52,7 @@ public class WholeslideView extends JComponent {
 
     private Point viewPosition = new Point();
 
-    private WholeslideView otherView;
+    private OpenSlideView otherView;
 
     protected Shape selection;
 
@@ -66,25 +66,25 @@ public class WholeslideView extends JComponent {
 
     private final boolean startWithZoomFit;
 
-    public WholeslideView(Wholeslide w) {
+    public OpenSlideView(OpenSlide w) {
         this(w, false);
     }
 
-    public WholeslideView(Wholeslide w, boolean startWithZoomFit) {
+    public OpenSlideView(OpenSlide w, boolean startWithZoomFit) {
         this(w, 1.2, 40, startWithZoomFit);
     }
 
-    public WholeslideView(Wholeslide w, double downsampleBase,
+    public OpenSlideView(OpenSlide w, double downsampleBase,
             int maxDownsampleExponent, boolean startWithZoomFit) {
         // TODO support w > 2^31 and h > 2^31
         if (w.getLayer0Width() > Integer.MAX_VALUE
                 || w.getLayer0Height() > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(
-                    "Wholeslide size must not exceed (" + Integer.MAX_VALUE
+                    "OpenSlide size must not exceed (" + Integer.MAX_VALUE
                             + "," + Integer.MAX_VALUE + ")");
         }
 
-        wsd = w;
+        osr = w;
         this.downsampleBase = downsampleBase;
         this.maxDownsampleExponent = maxDownsampleExponent;
         this.startWithZoomFit = startWithZoomFit;
@@ -104,14 +104,14 @@ public class WholeslideView extends JComponent {
         }
     }
 
-    static private void translateHelper(WholeslideView ws, int dX, int dY) {
+    static private void translateHelper(OpenSlideView ws, int dX, int dY) {
         if (ws == null) {
             return;
         }
         ws.translateSlidePrivate(dX, dY);
     }
 
-    static private void repaintHelper(WholeslideView w) {
+    static private void repaintHelper(OpenSlideView w) {
         if (w == null) {
             return;
         }
@@ -119,7 +119,7 @@ public class WholeslideView extends JComponent {
         w.repaint();
     }
 
-    static private void centerHelper(WholeslideView w) {
+    static private void centerHelper(OpenSlideView w) {
         if (w == null) {
             return;
         }
@@ -165,7 +165,7 @@ public class WholeslideView extends JComponent {
         g.dispose();
     }
 
-    static private double zoomHelper(WholeslideView w, int x, int y, int amount) {
+    static private double zoomHelper(OpenSlideView w, int x, int y, int amount) {
         if (w == null) {
             return 1.0;
         }
@@ -178,7 +178,7 @@ public class WholeslideView extends JComponent {
         return oldDS / newDS;
     }
 
-    static private void zoomHelper2(WholeslideView w, double relDS, int x, int y) {
+    static private void zoomHelper2(OpenSlideView w, double relDS, int x, int y) {
         if (w == null) {
             return;
         }
@@ -196,7 +196,7 @@ public class WholeslideView extends JComponent {
         }
     }
 
-    static private void zoomHelper3(WholeslideView w, double relDS) {
+    static private void zoomHelper3(OpenSlideView w, double relDS) {
         if (w == null) {
             return;
         }
@@ -210,15 +210,15 @@ public class WholeslideView extends JComponent {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
-                double ds1 = zoomHelper(WholeslideView.this, e.getX(),
-                        e.getY(), e.getWheelRotation());
+                double ds1 = zoomHelper(OpenSlideView.this, e.getX(), e.getY(),
+                        e.getWheelRotation());
                 double ds2 = zoomHelper(otherView, e.getX(), e.getY(), e
                         .getWheelRotation());
-                zoomHelper2(WholeslideView.this, ds1, e.getX(), e.getY());
+                zoomHelper2(OpenSlideView.this, ds1, e.getX(), e.getY());
                 zoomHelper2(otherView, ds2, e.getX(), e.getY());
-                zoomHelper3(WholeslideView.this, ds1);
+                zoomHelper3(OpenSlideView.this, ds1);
                 zoomHelper3(otherView, ds2);
-                repaintHelper(WholeslideView.this);
+                repaintHelper(OpenSlideView.this);
                 repaintHelper(otherView);
             }
         });
@@ -286,9 +286,9 @@ public class WholeslideView extends JComponent {
 
                 switch (selectionMode) {
                 case SELECTION_MODE_NONE:
-                    translateHelper(WholeslideView.this, relX, relY);
+                    translateHelper(OpenSlideView.this, relX, relY);
                     translateHelper(otherView, relX, relY);
-                    repaintHelper(WholeslideView.this);
+                    repaintHelper(OpenSlideView.this);
                     repaintHelper(otherView);
                     break;
 
@@ -362,9 +362,9 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("SPACE"), "center");
         actionMap.put("center", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                centerHelper(WholeslideView.this);
+                centerHelper(OpenSlideView.this);
                 centerHelper(otherView);
-                repaintHelper(WholeslideView.this);
+                repaintHelper(OpenSlideView.this);
                 repaintHelper(otherView);
             }
         });
@@ -373,9 +373,9 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("W"), "scroll up");
         actionMap.put("scroll up", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                translateHelper(WholeslideView.this, 0, -KEYBOARD_SCROLL_AMOUNT);
+                translateHelper(OpenSlideView.this, 0, -KEYBOARD_SCROLL_AMOUNT);
                 translateHelper(otherView, 0, -KEYBOARD_SCROLL_AMOUNT);
-                repaintHelper(WholeslideView.this);
+                repaintHelper(OpenSlideView.this);
                 repaintHelper(otherView);
             }
         });
@@ -384,9 +384,9 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("S"), "scroll down");
         actionMap.put("scroll down", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                translateHelper(WholeslideView.this, 0, KEYBOARD_SCROLL_AMOUNT);
+                translateHelper(OpenSlideView.this, 0, KEYBOARD_SCROLL_AMOUNT);
                 translateHelper(otherView, 0, KEYBOARD_SCROLL_AMOUNT);
-                repaintHelper(WholeslideView.this);
+                repaintHelper(OpenSlideView.this);
                 repaintHelper(otherView);
             }
         });
@@ -395,9 +395,9 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("A"), "scroll left");
         actionMap.put("scroll left", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                translateHelper(WholeslideView.this, -KEYBOARD_SCROLL_AMOUNT, 0);
+                translateHelper(OpenSlideView.this, -KEYBOARD_SCROLL_AMOUNT, 0);
                 translateHelper(otherView, -KEYBOARD_SCROLL_AMOUNT, 0);
-                repaintHelper(WholeslideView.this);
+                repaintHelper(OpenSlideView.this);
                 repaintHelper(otherView);
             }
         });
@@ -406,9 +406,9 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("D"), "scroll right");
         actionMap.put("scroll right", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                translateHelper(WholeslideView.this, KEYBOARD_SCROLL_AMOUNT, 0);
+                translateHelper(OpenSlideView.this, KEYBOARD_SCROLL_AMOUNT, 0);
                 translateHelper(otherView, KEYBOARD_SCROLL_AMOUNT, 0);
-                repaintHelper(WholeslideView.this);
+                repaintHelper(OpenSlideView.this);
                 repaintHelper(otherView);
             }
         });
@@ -439,13 +439,13 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("EQUALS"), "zoom in");
         actionMap.put("zoom in", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                double d1 = zoomHelper(WholeslideView.this, -1);
+                double d1 = zoomHelper(OpenSlideView.this, -1);
                 double d2 = zoomHelper(otherView, -1);
-                zoomHelper2(WholeslideView.this, d1);
+                zoomHelper2(OpenSlideView.this, d1);
                 zoomHelper2(otherView, d2);
-                zoomHelper3(WholeslideView.this, d1);
+                zoomHelper3(OpenSlideView.this, d1);
                 zoomHelper3(otherView, d2);
-                repaintHelper(WholeslideView.this);
+                repaintHelper(OpenSlideView.this);
                 repaintHelper(otherView);
             }
         });
@@ -453,13 +453,13 @@ public class WholeslideView extends JComponent {
         inputMap.put(KeyStroke.getKeyStroke("MINUS"), "zoom out");
         actionMap.put("zoom out", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                double d1 = zoomHelper(WholeslideView.this, 1);
+                double d1 = zoomHelper(OpenSlideView.this, 1);
                 double d2 = zoomHelper(otherView, 1);
-                zoomHelper2(WholeslideView.this, d1);
+                zoomHelper2(OpenSlideView.this, d1);
                 zoomHelper2(otherView, d2);
-                zoomHelper3(WholeslideView.this, d1);
+                zoomHelper3(OpenSlideView.this, d1);
                 zoomHelper3(otherView, d2);
-                repaintHelper(WholeslideView.this);
+                repaintHelper(OpenSlideView.this);
                 repaintHelper(otherView);
             }
         });
@@ -479,13 +479,13 @@ public class WholeslideView extends JComponent {
         actionMap.put("zoom to 1:1", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("zoom 1:1");
-                double d1 = zoomHelper(WholeslideView.this, Integer.MIN_VALUE);
+                double d1 = zoomHelper(OpenSlideView.this, Integer.MIN_VALUE);
                 double d2 = zoomHelper(otherView, Integer.MIN_VALUE);
-                zoomHelper2(WholeslideView.this, d1);
+                zoomHelper2(OpenSlideView.this, d1);
                 zoomHelper2(otherView, d2);
-                zoomHelper3(WholeslideView.this, d1);
+                zoomHelper3(OpenSlideView.this, d1);
                 zoomHelper3(otherView, d2);
-                repaintHelper(WholeslideView.this);
+                repaintHelper(OpenSlideView.this);
                 repaintHelper(otherView);
             }
         });
@@ -499,14 +499,14 @@ public class WholeslideView extends JComponent {
         oldActionMap.setParent(actionMap);
     }
 
-    protected void zoomHelper2(WholeslideView w, double d) {
+    protected void zoomHelper2(OpenSlideView w, double d) {
         if (w == null) {
             return;
         }
         zoomHelper2(w, d, w.getWidth() / 2, w.getHeight() / 2);
     }
 
-    static protected double zoomHelper(WholeslideView w, int i) {
+    static protected double zoomHelper(OpenSlideView w, int i) {
         if (w == null) {
             return 1.0;
         }
@@ -570,7 +570,7 @@ public class WholeslideView extends JComponent {
     }
 
     private void centerSlidePrivate() {
-        centerSlidePrivate((int) (wsd.getLayer0Width() / 2), (int) (wsd
+        centerSlidePrivate((int) (osr.getLayer0Width() / 2), (int) (osr
                 .getLayer0Height() / 2));
     }
 
@@ -607,8 +607,8 @@ public class WholeslideView extends JComponent {
             return;
         }
 
-        double ws = (double) wsd.getLayer0Width() / w;
-        double hs = (double) wsd.getLayer0Height() / h;
+        double ws = (double) osr.getLayer0Width() / w;
+        double hs = (double) osr.getLayer0Height() / h;
 
         double maxS = Math.max(ws, hs);
 
@@ -634,7 +634,7 @@ public class WholeslideView extends JComponent {
         }
     }
 
-    public void linkWithOther(WholeslideView otherView) {
+    public void linkWithOther(OpenSlideView otherView) {
         this.otherView = otherView;
         otherView.otherView = this;
     }
@@ -725,7 +725,7 @@ public class WholeslideView extends JComponent {
         g.setBackground(getBackground());
         g.clearRect(clip.x, clip.y, clip.width, clip.height);
 
-        wsd.paintRegion(g, clip.x, clip.y, offsetX + clip.x, offsetY + clip.y,
+        osr.paintRegion(g, clip.x, clip.y, offsetX + clip.x, offsetY + clip.y,
                 clip.width, clip.height, ds);
     }
 
@@ -787,8 +787,8 @@ public class WholeslideView extends JComponent {
         repaint();
     }
 
-    public Wholeslide getWholeslide() {
-        return wsd;
+    public OpenSlide getOpenSlide() {
+        return osr;
     }
 
     public long getSlideX(int x) {

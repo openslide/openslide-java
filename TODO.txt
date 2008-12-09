@@ -1,6 +1,6 @@
-Fancy zooming/scrolling in WholeslideView
+Fancy zooming/scrolling in OpenSlideView
 
-Rotation in WholeslideView
+Rotation in OpenSlideView
 
 
 Make swig generated Java code not public

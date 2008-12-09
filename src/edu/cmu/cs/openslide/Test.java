@@ -1,28 +1,28 @@
 /*
- *  Wholeslide, a library for reading whole slide image files
+ *  OpenSlide, a library for reading whole slide image files
  *
  *  Copyright (c) 2007-2008 Carnegie Mellon University
  *  All rights reserved.
  *
- *  Wholeslide is free software: you can redistribute it and/or modify
+ *  OpenSlide is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, version 2.
  *
- *  Wholeslide is distributed in the hope that it will be useful,
+ *  OpenSlide is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Wholeslide. If not, see <http://www.gnu.org/licenses/>.
+ *  along with OpenSlide. If not, see <http://www.gnu.org/licenses/>.
  *
- *  Linking Wholeslide statically or dynamically with other modules is
- *  making a combined work based on Wholeslide. Thus, the terms and
+ *  Linking OpenSlide statically or dynamically with other modules is
+ *  making a combined work based on OpenSlide. Thus, the terms and
  *  conditions of the GNU General Public License cover the whole
  *  combination.
  */
 
-package edu.cmu.cs.wholeslide;
+package edu.cmu.cs.openslide;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -36,7 +36,7 @@ public class Test extends JPanel {
 
     private static final int MIN_SIZE = 100;
 
-    final transient private Wholeslide wsd;
+    final transient private OpenSlide osr;
 
     private int downsampleFactor = 0;
 
@@ -60,12 +60,12 @@ public class Test extends JPanel {
         return Math.pow(DOWNSAMPLE_BASE, downsampleFactor);
     }
 
-    public Test(Wholeslide w) {
-        wsd = w;
+    public Test(OpenSlide w) {
+        osr = w;
 
-        maxDownsampleFactor = (int) Math.max(Math.log(wsd.getLayer0Height()
+        maxDownsampleFactor = (int) Math.max(Math.log(osr.getLayer0Height()
                 / MIN_SIZE)
-                / Math.log(DOWNSAMPLE_BASE), Math.log(wsd.getLayer0Width()
+                / Math.log(DOWNSAMPLE_BASE), Math.log(osr.getLayer0Width()
                 / MIN_SIZE)
                 / Math.log(DOWNSAMPLE_BASE));
 
@@ -73,8 +73,8 @@ public class Test extends JPanel {
     }
 
     private void updateSize() {
-        long w = wsd.getLayer0Width();
-        long h = wsd.getLayer0Height();
+        long w = osr.getLayer0Width();
+        long h = osr.getLayer0Height();
         double downsample = getDownsample();
         w /= downsample;
         h /= downsample;
@@ -94,7 +94,7 @@ public class Test extends JPanel {
     public static void main(String[] args) {
         File f = new File(args[0]);
 
-        Wholeslide w = new Wholeslide(f);
+        OpenSlide w = new OpenSlide(f);
 
         JFrame j = new JFrame("OMG");
 
@@ -214,31 +214,31 @@ public class Test extends JPanel {
         int offsetX = 0;
         int offsetY = 0;
 
-        long wsdW = wsd.getLayer0Width();
-        long wsdH = wsd.getLayer0Height();
+        long osrW = osr.getLayer0Width();
+        long osrH = osr.getLayer0Height();
         double downsample = getDownsample();
-        wsdW /= downsample;
-        wsdH /= downsample;
+        osrW /= downsample;
+        osrH /= downsample;
 
         int w = getWidth();
         int h = getHeight();
 
-        if (w > wsdW) {
-            offsetX = (int) ((w - wsdW) / 2);
+        if (w > osrW) {
+            offsetX = (int) ((w - osrW) / 2);
         }
-        if (h > wsdH) {
-            offsetY = (int) ((h - wsdH) / 2);
+        if (h > osrH) {
+            offsetY = (int) ((h - osrH) / 2);
         }
 
         Rectangle clip = g2.getClipBounds();
 
         g2.setColor(Color.BLACK);
         int rectVal = 3;
-        g2.fillRect(offsetX + rectVal, offsetY + rectVal, (int) wsdW,
-                (int) wsdH);
+        g2.fillRect(offsetX + rectVal, offsetY + rectVal, (int) osrW,
+                (int) osrH);
 
         // System.out.println(clip);
-        wsd.paintRegion(g2, clip.x, clip.y, clip.x - offsetX, clip.y - offsetY,
+        osr.paintRegion(g2, clip.x, clip.y, clip.x - offsetX, clip.y - offsetY,
                 clip.width, clip.height, downsample);
     }
 }

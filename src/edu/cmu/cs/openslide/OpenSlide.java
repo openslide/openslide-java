@@ -1,28 +1,28 @@
 /*
- *  Wholeslide, a library for reading whole slide image files
+ *  OpenSlide, a library for reading whole slide image files
  *
  *  Copyright (c) 2007-2008 Carnegie Mellon University
  *  All rights reserved.
  *
- *  Wholeslide is free software: you can redistribute it and/or modify
+ *  OpenSlide is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, version 2.
  *
- *  Wholeslide is distributed in the hope that it will be useful,
+ *  OpenSlide is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Wholeslide. If not, see <http://www.gnu.org/licenses/>.
+ *  along with OpenSlide. If not, see <http://www.gnu.org/licenses/>.
  *
- *  Linking Wholeslide statically or dynamically with other modules is
- *  making a combined work based on Wholeslide. Thus, the terms and
+ *  Linking OpenSlide statically or dynamically with other modules is
+ *  making a combined work based on OpenSlide. Thus, the terms and
  *  conditions of the GNU General Public License cover the whole
  *  combination.
  */
 
-package edu.cmu.cs.wholeslide;
+package edu.cmu.cs.openslide;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -30,10 +30,10 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
 
-import edu.cmu.cs.wholeslide.glue.SWIGTYPE_p__wholeslide;
+import edu.cmu.cs.openslide.glue.SWIGTYPE_p__openslide;
 
-public class Wholeslide {
-    private SWIGTYPE_p__wholeslide wsd;
+public class OpenSlide {
+    private SWIGTYPE_p__openslide osr;
 
     final private long layerWidths[];
 
@@ -42,21 +42,22 @@ public class Wholeslide {
     final private int layerCount;
 
     public static boolean fileIsValid(File file) {
-        return edu.cmu.cs.wholeslide.glue.Wholeslide
-                .ws_can_open(file.getPath());
+        return edu.cmu.cs.openslide.glue.OpenSlide.openslide_can_open(file
+                .getPath());
     }
 
-    public Wholeslide(File file) {
-        wsd = edu.cmu.cs.wholeslide.glue.Wholeslide.ws_open(file.getPath());
+    public OpenSlide(File file) {
+        osr = edu.cmu.cs.openslide.glue.OpenSlide
+                .openslide_open(file.getPath());
 
-        if (wsd == null) {
+        if (osr == null) {
             // TODO not just file not found
-            throw new WholeslideException();
+            throw new OpenSlideException();
         }
 
         // store layer count
-        layerCount = edu.cmu.cs.wholeslide.glue.Wholeslide
-                .ws_get_layer_count(wsd);
+        layerCount = edu.cmu.cs.openslide.glue.OpenSlide
+                .openslide_get_layer_count(osr);
 
         // store dimensions
         layerWidths = new long[layerCount];
@@ -65,17 +66,17 @@ public class Wholeslide {
         for (int i = 0; i < layerCount; i++) {
             long w[] = new long[1];
             long h[] = new long[1];
-            edu.cmu.cs.wholeslide.glue.Wholeslide.ws_get_layer_dimensions(wsd,
-                    i, w, h);
+            edu.cmu.cs.openslide.glue.OpenSlide.openslide_get_layer_dimensions(
+                    osr, i, w, h);
             layerWidths[i] = w[0];
             layerHeights[i] = h[0];
         }
     }
 
     public void dispose() {
-        if (wsd != null) {
-            edu.cmu.cs.wholeslide.glue.Wholeslide.ws_close(wsd);
-            wsd = null;
+        if (osr != null) {
+            edu.cmu.cs.openslide.glue.OpenSlide.openslide_close(osr);
+            osr = null;
         }
     }
 
@@ -90,8 +91,8 @@ public class Wholeslide {
     }
 
     private void checkDisposed() {
-        if (wsd == null) {
-            throw new WholeslideDisposedException();
+        if (osr == null) {
+            throw new OpenSlideDisposedException();
         }
     }
 
@@ -114,7 +115,7 @@ public class Wholeslide {
     public String getComment() {
         checkDisposed();
 
-        return edu.cmu.cs.wholeslide.glue.Wholeslide.ws_get_comment(wsd);
+        return edu.cmu.cs.openslide.glue.OpenSlide.openslide_get_comment(osr);
     }
 
     public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
@@ -127,12 +128,12 @@ public class Wholeslide {
         }
 
         // get the layer
-        int layer = edu.cmu.cs.wholeslide.glue.Wholeslide
-                .ws_get_best_layer_for_downsample(wsd, downsample);
+        int layer = edu.cmu.cs.openslide.glue.OpenSlide
+                .openslide_get_best_layer_for_downsample(osr, downsample);
 
         // figure out its downsample
-        double layerDS = edu.cmu.cs.wholeslide.glue.Wholeslide
-                .ws_get_layer_downsample(wsd, layer);
+        double layerDS = edu.cmu.cs.openslide.glue.OpenSlide
+                .openslide_get_layer_downsample(osr, layer);
 
         // compute the difference
         double relativeDS = downsample / layerDS;
@@ -181,8 +182,8 @@ public class Wholeslide {
         int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                 .getData();
 
-        edu.cmu.cs.wholeslide.glue.Wholeslide.ws_read_region(wsd, data, baseX,
-                baseY, layer, img.getWidth(), img.getHeight());
+        edu.cmu.cs.openslide.glue.OpenSlide.openslide_read_region(osr, data,
+                baseX, baseY, layer, img.getWidth(), img.getHeight());
 
         // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
         g.drawImage(img, dx, dy, w, h, null);

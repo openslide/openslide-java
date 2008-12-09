@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="jar" name="wholeslide java">
+<project basedir="." default="jar" name="openslide java">
 	<property environment="env"/>
 	<property name="debuglevel" value="source,lines,vars"/>
 	<property name="target" value="1.5"/>
 	<property name="source" value="1.5"/>
-	<path id="wholeslide java.classpath">
+	<path id="openslide java.classpath">
 		<pathelement location="bin"/>
 	</path>
 	<target name="init">
@@ -15,11 +15,11 @@
 	</target>
 	<target name="clean">
 		<delete dir="bin"/>
-		<delete file="wholeslidejava.jar" />
+		<delete file="openslidejava.jar" />
 	</target>
 	<target depends="clean" name="cleanall"/>
 	<target depends="build" name="jar">
-		<jar destfile="wholeslidejava.jar" basedir="bin"/>
+		<jar destfile="openslidejava.jar" basedir="bin"/>
 	</target>
 	<target depends="build-subprojects,build-project" name="build"/>
 	<target name="build-subprojects"/>
@@ -27,7 +27,7 @@
 		<echo message="${ant.project.name}: ${ant.file}"/>
 		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
 			<src path="src"/>
-			<classpath refid="wholeslide java.classpath"/>
+			<classpath refid="openslide java.classpath"/>
 		</javac>
 	</target>
 	<target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
