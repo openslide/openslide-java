@@ -29,7 +29,9 @@
 %include "arrays_java.i"
 %include "various.i"
 
-#include <stdint.h>
+typedef unsigned int uint32_t;
+typedef int int32_t;
+typedef long long int int64_t;
 
 %javaconst(1);
 

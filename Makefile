@@ -8,7 +8,7 @@ all: libopenslidejava.so src/edu/cmu/cs/openslide/glue/OpenSlide.java
 
 openslide_wrap.c src/edu/cmu/cs/openslide/glue/OpenSlide.java: openslide.i
 	mkdir -p src/edu/cmu/cs/openslide/glue
-	swig -includeall -Wall -I/usr/include -java $$(pkg-config openslide --cflags-only-I) -package edu.cmu.cs.openslide.glue -outdir src/edu/cmu/cs/openslide/glue $<
+	swig -Wall -I/usr/include -java $$(pkg-config openslide --cflags-only-I) -package edu.cmu.cs.openslide.glue -outdir src/edu/cmu/cs/openslide/glue $<
 
 
 libopenslidejava.so: openslide_wrap.c
