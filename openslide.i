@@ -37,6 +37,11 @@ typedef long long int int64_t;
 
 %{
 #include "openslide.h"
+
+char *deref_char_p_p(char **c, int index) {
+  return c[index];
+}
+
 %}
 
 %pragma(java) jniclasscode=%{
@@ -53,6 +58,10 @@ typedef long long int int64_t;
 
 %apply long long[] {int64_t *};
 %apply int[] {uint32_t *};
+
+
+char *deref_char_p_p(char **c, int index);
+
 
 typedef struct _openslide openslide_t;
 
@@ -79,3 +88,16 @@ void openslide_read_region(openslide_t *osr,
 			   int64_t x, int64_t y,
 			   int32_t layer,
 			   int64_t w, int64_t h);
+
+const char * const *openslide_get_property_names(openslide_t *osr);
+
+const char *openslide_get_property_value(openslide_t *osr, const char *name);
+
+const char * const *openslide_get_associated_image_names(openslide_t *osr);
+
+void openslide_get_associated_image_dimensions(openslide_t *osr, const char *name,
+					       int64_t *w, int64_t *h);
+
+void openslide_read_associated_image(openslide_t *osr,
+				     const char *name,
+				     uint32_t *dest);

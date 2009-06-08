@@ -29,8 +29,10 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
+import java.util.*;
 
 import edu.cmu.cs.openslide.glue.SWIGTYPE_p__openslide;
+import edu.cmu.cs.openslide.glue.SWIGTYPE_p_p_char;
 
 public class OpenSlide {
     private SWIGTYPE_p__openslide osr;
@@ -39,7 +41,13 @@ public class OpenSlide {
 
     final private long layerHeights[];
 
+    final private double layerDownsamples[];
+
     final private int layerCount;
+
+    final private Map<String, String> properties;
+
+    final private AssociatedImageMap associatedImages;
 
     public static boolean fileIsValid(File file) {
         return edu.cmu.cs.openslide.glue.OpenSlide.openslide_can_open(file
@@ -62,6 +70,7 @@ public class OpenSlide {
         // store dimensions
         layerWidths = new long[layerCount];
         layerHeights = new long[layerCount];
+        layerDownsamples = new double[layerCount];
 
         for (int i = 0; i < layerCount; i++) {
             long w[] = new long[1];
@@ -70,7 +79,37 @@ public class OpenSlide {
                     osr, i, w, h);
             layerWidths[i] = w[0];
             layerHeights[i] = h[0];
+            layerDownsamples[i] = edu.cmu.cs.openslide.glue.OpenSlide
+                    .openslide_get_layer_downsample(osr, i);
         }
+
+        // properties
+        HashMap<String, String> props = new HashMap<String, String>();
+        SWIGTYPE_p_p_char propNames = edu.cmu.cs.openslide.glue.OpenSlide
+                .openslide_get_property_names(osr);
+        int i = 0;
+        String currentName;
+        while ((currentName = edu.cmu.cs.openslide.glue.OpenSlide
+                .deref_char_p_p(propNames, i++)) != null) {
+            String value = edu.cmu.cs.openslide.glue.OpenSlide
+                    .openslide_get_property_value(osr, currentName);
+            props.put(currentName, value);
+        }
+        properties = Collections.unmodifiableMap(props);
+
+        // associated images
+        // make names
+        Set<String> names = new HashSet<String>();
+        SWIGTYPE_p_p_char imgNames = edu.cmu.cs.openslide.glue.OpenSlide
+                .openslide_get_associated_image_names(osr);
+        i = 0;
+        while ((currentName = edu.cmu.cs.openslide.glue.OpenSlide
+                .deref_char_p_p(imgNames, i++)) != null) {
+            names.add(currentName);
+        }
+
+        associatedImages = new AssociatedImageMap(Collections
+                .unmodifiableSet(names), this);
     }
 
     public void dispose() {
@@ -237,5 +276,52 @@ public class OpenSlide {
     public BufferedImage createThumbnailImage(int maxSize) {
         return createThumbnailImage(0, 0, getLayer0Width(), getLayer0Height(),
                 maxSize);
+    }
+
+    public double getLayerDownsample(int layer) {
+        return layerDownsamples[layer];
+    }
+
+    public int getBestLayerForDownsample(double downsample) {
+        // too small, return first
+        if (downsample < layerDownsamples[0]) {
+            return 0;
+        }
+
+        // find where we are in the middle
+        for (int i = 1; i < layerCount; i++) {
+            if (downsample < layerDownsamples[i]) {
+                return i - 1;
+            }
+        }
+
+        // too big, return last
+        return layerCount - 1;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public Map<String, BufferedImage> getAssociatedImages() {
+        return associatedImages;
+    }
+
+    BufferedImage getAssociatedImage(String name) {
+        long ww[] = new long[1];
+        long hh[] = new long[1];
+        edu.cmu.cs.openslide.glue.OpenSlide
+                .openslide_get_associated_image_dimensions(osr, name, ww, hh);
+
+        BufferedImage img = new BufferedImage((int) ww[0], (int) hh[0],
+                BufferedImage.TYPE_INT_ARGB_PRE);
+
+        int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
+                .getData();
+
+        edu.cmu.cs.openslide.glue.OpenSlide.openslide_read_associated_image(
+                osr, name, data);
+
+        return img;
     }
 }

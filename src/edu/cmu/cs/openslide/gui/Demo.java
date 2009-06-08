@@ -26,7 +26,10 @@ package edu.cmu.cs.openslide.gui;
 
 import java.awt.BorderLayout;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.*;
 
@@ -37,18 +40,25 @@ public class Demo {
         JFrame jf = new JFrame("OpenSlide");
         jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        OpenSlide os;
         switch (args.length) {
         case 0:
             System.out.println("Give 1 or 2 files");
             return;
 
         case 1:
-            final OpenSlideView wv = new OpenSlideView(new OpenSlide(new File(
-                    args[0])), true);
+            os = new OpenSlide(new File(args[0]));
+            final OpenSlideView wv = new OpenSlideView(os, true);
             wv.setBorder(BorderFactory.createTitledBorder(args[0]));
             jf.getContentPane().add(wv);
 
             final JLabel l = new JLabel(" ");
+            System.out.println("comment: " + os.getComment());
+            System.out.println("properties:");
+            System.out.println(os.getProperties());
+
+            jf.getContentPane().add(new JLabel(os.getComment()),
+                    BorderLayout.NORTH);
             jf.getContentPane().add(l, BorderLayout.SOUTH);
             wv.addMouseMotionListener(new MouseMotionAdapter() {
                 @Override
@@ -64,6 +74,16 @@ public class Demo {
                     l.setText(" ");
                 }
             });
+
+            Map<String, BufferedImage> associatedImages = os
+                    .getAssociatedImages();
+            for (Entry<String, BufferedImage> e : associatedImages.entrySet()) {
+                JFrame j = new JFrame(e.getKey());
+                j.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                j.add(new JLabel(new ImageIcon(e.getValue())));
+                j.pack();
+                j.setVisible(true);
+            }
 
             break;
 
