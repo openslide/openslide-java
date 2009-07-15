@@ -221,8 +221,10 @@ public class OpenSlide {
         int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                 .getData();
 
-        edu.cmu.cs.openslide.glue.OpenSlide.openslide_read_region(osr, data,
-                baseX, baseY, layer, img.getWidth(), img.getHeight());
+        synchronized (osr) {
+            edu.cmu.cs.openslide.glue.OpenSlide.openslide_read_region(osr,
+                    data, baseX, baseY, layer, img.getWidth(), img.getHeight());
+        }
 
         // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
         g.drawImage(img, dx, dy, w, h, null);
