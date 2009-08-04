@@ -1,0 +1,5 @@
+* kill-at is required because JNI uses stdcall without @
+* Use classpath's jni.h instead of OpenJDK's, because it has all the
+  win32 conditionals
+
+i686-pc-mingw32-gcc -Wl,--kill-at -fPIC -fno-strict-aliasing -shared -g -O2 -Wall -o openslidejava.dll openslide_wrap.c -I/tmp/zzzzz/usr/i686-pc-mingw32/sys-root/mingw/include/openslide -I/usr/lib/gcc/x86_64-redhat-linux/4.4.0/include -lopenslide -L/tmp/zzzzz/usr/i686-pc-mingw32/sys-root/mingw/lib
