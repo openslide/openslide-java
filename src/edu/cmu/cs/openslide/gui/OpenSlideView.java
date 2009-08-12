@@ -35,7 +35,7 @@ import javax.swing.*;
 
 import edu.cmu.cs.openslide.OpenSlide;
 
-public class OpenSlideView extends JComponent {
+public class OpenSlideView extends JPanel {
     private static final int KEYBOARD_SCROLL_AMOUNT = 100;
 
     final private double downsampleBase;
@@ -648,6 +648,8 @@ public class OpenSlideView extends JComponent {
 
     @Override
     protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
         Insets insets = getInsets();
 
         int w = getWidth();
