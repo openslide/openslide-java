@@ -28,6 +28,8 @@ import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -84,6 +86,23 @@ public class Demo {
                 j.pack();
                 j.setVisible(true);
             }
+
+            Map<String, String> properties = os.getProperties();
+            List<Object[]> propList = new ArrayList<Object[]>();
+            for (Entry<String, String> e : properties.entrySet()) {
+                propList.add(new Object[] { e.getKey(), e.getValue() });
+            }
+            JTable propTable = new JTable(propList.toArray(new Object[1][0]),
+                    new String[] { "key", "value" }) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+            JFrame propFrame = new JFrame("properties");
+            propFrame.add(new JScrollPane(propTable));
+            propFrame.pack();
+            propFrame.setVisible(true);
 
             break;
 
