@@ -19,7 +19,12 @@
 	</target>
 	<target depends="clean" name="cleanall"/>
 	<target depends="build" name="jar">
-		<jar destfile="openslidejava.jar" basedir="bin"/>
+		<jar destfile="openslidejava.jar" basedir="bin">
+			<manifest>
+				<attribute name="Main-Class" value="edu.cmu.cs.openslide.gui.Demo"/>
+			</manifest>
+		</jar>
+
 	</target>
 	<target depends="build-subprojects,build-project" name="build"/>
 	<target name="build-subprojects"/>
