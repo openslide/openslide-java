@@ -31,9 +31,6 @@ import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.util.*;
 
-import edu.cmu.cs.openslide.glue.SWIGTYPE_p__openslide;
-import edu.cmu.cs.openslide.glue.SWIGTYPE_p_p_char;
-
 public class OpenSlide {
     private SWIGTYPE_p__openslide osr;
 
@@ -50,13 +47,11 @@ public class OpenSlide {
     final private AssociatedImageMap associatedImages;
 
     public static boolean fileIsValid(File file) {
-        return edu.cmu.cs.openslide.glue.OpenSlide.openslide_can_open(file
-                .getPath());
+        return OpenSlideGlue.openslide_can_open(file.getPath());
     }
 
     public OpenSlide(File file) {
-        osr = edu.cmu.cs.openslide.glue.OpenSlide
-                .openslide_open(file.getPath());
+        osr = OpenSlideGlue.openslide_open(file.getPath());
 
         if (osr == null) {
             // TODO not just file not found
@@ -64,8 +59,7 @@ public class OpenSlide {
         }
 
         // store layer count
-        layerCount = edu.cmu.cs.openslide.glue.OpenSlide
-                .openslide_get_layer_count(osr);
+        layerCount = OpenSlideGlue.openslide_get_layer_count(osr);
 
         // store dimensions
         layerWidths = new long[layerCount];
@@ -75,24 +69,22 @@ public class OpenSlide {
         for (int i = 0; i < layerCount; i++) {
             long w[] = new long[1];
             long h[] = new long[1];
-            edu.cmu.cs.openslide.glue.OpenSlide.openslide_get_layer_dimensions(
-                    osr, i, w, h);
+            OpenSlideGlue.openslide_get_layer_dimensions(osr, i, w, h);
             layerWidths[i] = w[0];
             layerHeights[i] = h[0];
-            layerDownsamples[i] = edu.cmu.cs.openslide.glue.OpenSlide
-                    .openslide_get_layer_downsample(osr, i);
+            layerDownsamples[i] = OpenSlideGlue.openslide_get_layer_downsample(
+                    osr, i);
         }
 
         // properties
         HashMap<String, String> props = new HashMap<String, String>();
-        SWIGTYPE_p_p_char propNames = edu.cmu.cs.openslide.glue.OpenSlide
+        SWIGTYPE_p_p_char propNames = OpenSlideGlue
                 .openslide_get_property_names(osr);
         int i = 0;
         String currentName;
-        while ((currentName = edu.cmu.cs.openslide.glue.OpenSlide
-                .deref_char_p_p(propNames, i++)) != null) {
-            String value = edu.cmu.cs.openslide.glue.OpenSlide
-                    .openslide_get_property_value(osr, currentName);
+        while ((currentName = OpenSlideGlue.deref_char_p_p(propNames, i++)) != null) {
+            String value = OpenSlideGlue.openslide_get_property_value(osr,
+                    currentName);
             props.put(currentName, value);
         }
         properties = Collections.unmodifiableMap(props);
@@ -100,11 +92,10 @@ public class OpenSlide {
         // associated images
         // make names
         Set<String> names = new HashSet<String>();
-        SWIGTYPE_p_p_char imgNames = edu.cmu.cs.openslide.glue.OpenSlide
+        SWIGTYPE_p_p_char imgNames = OpenSlideGlue
                 .openslide_get_associated_image_names(osr);
         i = 0;
-        while ((currentName = edu.cmu.cs.openslide.glue.OpenSlide
-                .deref_char_p_p(imgNames, i++)) != null) {
+        while ((currentName = OpenSlideGlue.deref_char_p_p(imgNames, i++)) != null) {
             names.add(currentName);
         }
 
@@ -114,7 +105,7 @@ public class OpenSlide {
 
     public void dispose() {
         if (osr != null) {
-            edu.cmu.cs.openslide.glue.OpenSlide.openslide_close(osr);
+            OpenSlideGlue.openslide_close(osr);
             osr = null;
         }
     }
@@ -154,7 +145,7 @@ public class OpenSlide {
     public String getComment() {
         checkDisposed();
 
-        return edu.cmu.cs.openslide.glue.OpenSlide.openslide_get_comment(osr);
+        return OpenSlideGlue.openslide_get_comment(osr);
     }
 
     public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
@@ -167,12 +158,12 @@ public class OpenSlide {
         }
 
         // get the layer
-        int layer = edu.cmu.cs.openslide.glue.OpenSlide
-                .openslide_get_best_layer_for_downsample(osr, downsample);
+        int layer = OpenSlideGlue.openslide_get_best_layer_for_downsample(osr,
+                downsample);
 
         // figure out its downsample
-        double layerDS = edu.cmu.cs.openslide.glue.OpenSlide
-                .openslide_get_layer_downsample(osr, layer);
+        double layerDS = OpenSlideGlue.openslide_get_layer_downsample(osr,
+                layer);
 
         // compute the difference
         double relativeDS = downsample / layerDS;
@@ -221,8 +212,8 @@ public class OpenSlide {
         int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                 .getData();
 
-        edu.cmu.cs.openslide.glue.OpenSlide.openslide_read_region(osr, data,
-                baseX, baseY, layer, img.getWidth(), img.getHeight());
+        OpenSlideGlue.openslide_read_region(osr, data, baseX, baseY, layer, img
+                .getWidth(), img.getHeight());
 
         // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
         g.drawImage(img, dx, dy, w, h, null);
@@ -310,8 +301,8 @@ public class OpenSlide {
     BufferedImage getAssociatedImage(String name) {
         long ww[] = new long[1];
         long hh[] = new long[1];
-        edu.cmu.cs.openslide.glue.OpenSlide
-                .openslide_get_associated_image_dimensions(osr, name, ww, hh);
+        OpenSlideGlue.openslide_get_associated_image_dimensions(osr, name, ww,
+                hh);
 
         BufferedImage img = new BufferedImage((int) ww[0], (int) hh[0],
                 BufferedImage.TYPE_INT_ARGB_PRE);
@@ -319,8 +310,7 @@ public class OpenSlide {
         int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                 .getData();
 
-        edu.cmu.cs.openslide.glue.OpenSlide.openslide_read_associated_image(
-                osr, name, data);
+        OpenSlideGlue.openslide_read_associated_image(osr, name, data);
 
         return img;
     }

@@ -23,7 +23,7 @@
  *  combination.
  */
 
-%module OpenSlide
+%module OpenSlideGlue
 
 %include "typemaps.i"
 %include "arrays_java.i"
@@ -53,6 +53,8 @@ char *deref_char_p_p(char **c, int index) {
     }
   }
 %}
+
+%pragma(java) moduleclassmodifiers="class"
 
 %newobject openslide_open;
 

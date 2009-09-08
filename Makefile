@@ -3,12 +3,12 @@
 CC = gcc
 JAVAC = javac
 
-all: libopenslidejava.so src/edu/cmu/cs/openslide/glue/OpenSlide.java
+all: libopenslidejava.so src/edu/cmu/cs/openslide/OpenSlideGlue.java
 	ant
 
-openslide_wrap.c src/edu/cmu/cs/openslide/glue/OpenSlide.java: openslide.i
-	mkdir -p src/edu/cmu/cs/openslide/glue
-	swig -Wall -I/usr/include -java $$(pkg-config openslide --cflags-only-I) -package edu.cmu.cs.openslide.glue -outdir src/edu/cmu/cs/openslide/glue $<
+openslide_wrap.c src/edu/cmu/cs/openslide/OpenSlideGlue.java: openslide.i
+	mkdir -p src/edu/cmu/cs/openslide
+	swig -Wall -I/usr/include -java $$(pkg-config openslide --cflags-only-I) -package edu.cmu.cs.openslide -outdir src/edu/cmu/cs/openslide $<
 
 
 libopenslidejava.so: openslide_wrap.c
@@ -16,7 +16,7 @@ libopenslidejava.so: openslide_wrap.c
 
 clean:
 	ant clean
-	$(RM) libopenslidejava.so openslide_wrap.c src/edu/cmu/cs/openslide/glue/*.java *~ bin
+	$(RM) libopenslidejava.so openslide_wrap.c *~ bin src/edu/cmu/cs/openslide/SWIGTYPE*.java src/edu/cmu/cs/openslide/*JNI.java src/edu/cmu/cs/openslide/OpenSlideGlue.java
 
 
 
