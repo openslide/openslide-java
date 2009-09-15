@@ -9,6 +9,7 @@ all: libopenslidejava.so src/edu/cmu/cs/openslide/OpenSlideGlue.java
 openslide_wrap.c src/edu/cmu/cs/openslide/OpenSlideGlue.java: openslide.i
 	mkdir -p src/edu/cmu/cs/openslide
 	swig -Wall -I/usr/include -java $$(pkg-config openslide --cflags-only-I) -package edu.cmu.cs.openslide -outdir src/edu/cmu/cs/openslide $<
+	sed -i 's/public class SWIGTYPE/class SWIGTYPE/g' src/edu/cmu/cs/openslide/SWIGTYPE*.java
 
 
 libopenslidejava.so: openslide_wrap.c
