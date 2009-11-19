@@ -38,107 +38,116 @@ import javax.swing.*;
 import edu.cmu.cs.openslide.OpenSlide;
 
 public class Demo {
-    public static void main(String[] args) {
-        JFrame jf = new JFrame("OpenSlide");
-        jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    public static void main(final String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
 
-        OpenSlide os;
-        switch (args.length) {
-        case 0:
-            System.out.println("Give 1 or 2 files");
-            return;
+            @Override
+            public void run() {
 
-        case 1:
-            os = new OpenSlide(new File(args[0]));
-            final OpenSlideView wv = new OpenSlideView(os, true);
-            wv.setBorder(BorderFactory.createTitledBorder(args[0]));
-            jf.getContentPane().add(wv);
+                JFrame jf = new JFrame("OpenSlide");
+                jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            final JLabel l = new JLabel(" ");
-            System.out.println("comment: " + os.getComment());
-            System.out.println("properties:");
-            System.out.println(os.getProperties());
+                OpenSlide os;
+                switch (args.length) {
+                case 0:
+                    System.out.println("Give 1 or 2 files");
+                    return;
 
-            jf.getContentPane().add(new JLabel(os.getComment()),
-                    BorderLayout.NORTH);
-            jf.getContentPane().add(l, BorderLayout.SOUTH);
-            wv.addMouseMotionListener(new MouseMotionAdapter() {
-                @Override
-                public void mouseMoved(MouseEvent e) {
-                    long x = wv.getSlideX(e.getX());
-                    long y = wv.getSlideY(e.getY());
-                    l.setText("(" + x + "," + y + ")");
-                }
-            });
-            wv.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    l.setText(" ");
-                }
-            });
+                case 1:
+                    os = new OpenSlide(new File(args[0]));
+                    final OpenSlideView wv = new OpenSlideView(os, true);
+                    wv.setBorder(BorderFactory.createTitledBorder(args[0]));
+                    jf.getContentPane().add(wv);
 
-            Map<String, BufferedImage> associatedImages = os
-                    .getAssociatedImages();
-            for (Entry<String, BufferedImage> e : associatedImages.entrySet()) {
-                JFrame j = new JFrame(e.getKey());
-                j.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                j.add(new JLabel(new ImageIcon(e.getValue())));
-                j.pack();
-                j.setVisible(true);
-            }
+                    final JLabel l = new JLabel(" ");
+                    System.out.println("comment: " + os.getComment());
+                    System.out.println("properties:");
+                    System.out.println(os.getProperties());
 
-            Map<String, String> properties = os.getProperties();
-            List<Object[]> propList = new ArrayList<Object[]>();
-            for (Entry<String, String> e : properties.entrySet()) {
-                propList.add(new Object[] { e.getKey(), e.getValue() });
-            }
-            JTable propTable = new JTable(propList.toArray(new Object[1][0]),
-                    new String[] { "key", "value" }) {
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
-                }
-            };
-            JFrame propFrame = new JFrame("properties");
-            propFrame.add(new JScrollPane(propTable));
-            propFrame.pack();
-            propFrame.setVisible(true);
+                    jf.getContentPane().add(new JLabel(os.getComment()),
+                            BorderLayout.NORTH);
+                    jf.getContentPane().add(l, BorderLayout.SOUTH);
+                    wv.addMouseMotionListener(new MouseMotionAdapter() {
+                        @Override
+                        public void mouseMoved(MouseEvent e) {
+                            long x = wv.getSlideX(e.getX());
+                            long y = wv.getSlideY(e.getY());
+                            l.setText("(" + x + "," + y + ")");
+                        }
+                    });
+                    wv.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseExited(MouseEvent e) {
+                            l.setText(" ");
+                        }
+                    });
 
-            break;
-
-        case 2:
-            final OpenSlideView w1 = new OpenSlideView(new OpenSlide(new File(
-                    args[0])), true);
-            final OpenSlideView w2 = new OpenSlideView(new OpenSlide(new File(
-                    args[1])), true);
-            Box b = Box.createHorizontalBox();
-            b.add(w1);
-            b.add(w2);
-            jf.getContentPane().add(b);
-
-            JToggleButton linker = new JToggleButton("Link");
-            jf.getContentPane().add(linker, BorderLayout.SOUTH);
-            linker.addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent e) {
-                    switch (e.getStateChange()) {
-                    case ItemEvent.SELECTED:
-                        w1.linkWithOther(w2);
-                        break;
-                    case ItemEvent.DESELECTED:
-                        w1.unlinkOther();
-                        break;
+                    Map<String, BufferedImage> associatedImages = os
+                            .getAssociatedImages();
+                    for (Entry<String, BufferedImage> e : associatedImages
+                            .entrySet()) {
+                        JFrame j = new JFrame(e.getKey());
+                        j.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        j.add(new JLabel(new ImageIcon(e.getValue())));
+                        j.pack();
+                        j.setVisible(true);
                     }
+
+                    Map<String, String> properties = os.getProperties();
+                    List<Object[]> propList = new ArrayList<Object[]>();
+                    for (Entry<String, String> e : properties.entrySet()) {
+                        propList.add(new Object[] { e.getKey(), e.getValue() });
+                    }
+                    JTable propTable = new JTable(propList
+                            .toArray(new Object[1][0]), new String[] { "key",
+                            "value" }) {
+                        @Override
+                        public boolean isCellEditable(int row, int column) {
+                            return false;
+                        }
+                    };
+                    JFrame propFrame = new JFrame("properties");
+                    propFrame.add(new JScrollPane(propTable));
+                    propFrame.pack();
+                    propFrame.setVisible(true);
+
+                    break;
+
+                case 2:
+                    final OpenSlideView w1 = new OpenSlideView(new OpenSlide(
+                            new File(args[0])), true);
+                    final OpenSlideView w2 = new OpenSlideView(new OpenSlide(
+                            new File(args[1])), true);
+                    Box b = Box.createHorizontalBox();
+                    b.add(w1);
+                    b.add(w2);
+                    jf.getContentPane().add(b);
+
+                    JToggleButton linker = new JToggleButton("Link");
+                    jf.getContentPane().add(linker, BorderLayout.SOUTH);
+                    linker.addItemListener(new ItemListener() {
+                        public void itemStateChanged(ItemEvent e) {
+                            switch (e.getStateChange()) {
+                            case ItemEvent.SELECTED:
+                                w1.linkWithOther(w2);
+                                break;
+                            case ItemEvent.DESELECTED:
+                                w1.unlinkOther();
+                                break;
+                            }
+                        }
+                    });
+
+                    break;
+
+                default:
+                    return;
                 }
-            });
 
-            break;
+                jf.setSize(900, 700);
 
-        default:
-            return;
-        }
-
-        jf.setSize(900, 700);
-
-        jf.setVisible(true);
+                jf.setVisible(true);
+            }
+        });
     }
 }
