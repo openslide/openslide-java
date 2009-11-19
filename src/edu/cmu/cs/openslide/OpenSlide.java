@@ -237,7 +237,7 @@ public class OpenSlide {
     private int debugThingy = 0;
 
     public BufferedImage createThumbnailImage(int x, int y, long w, long h,
-            int maxSize) {
+            int maxSize, int bufferedImageType) {
         double ds;
 
         if (w > h) {
@@ -255,13 +255,18 @@ public class OpenSlide {
         int sx = (int) (x / ds);
         int sy = (int) (y / ds);
 
-        BufferedImage result = new BufferedImage(sw, sh,
-                BufferedImage.TYPE_INT_ARGB_PRE);
+        BufferedImage result = new BufferedImage(sw, sh, bufferedImageType);
 
         Graphics2D g = result.createGraphics();
         paintRegion(g, 0, 0, sx, sy, sw, sh, ds);
         g.dispose();
         return result;
+    }
+
+    public BufferedImage createThumbnailImage(int x, int y, long w, long h,
+            int maxSize) {
+        return createThumbnailImage(x, y, w, h, maxSize,
+                BufferedImage.TYPE_INT_RGB);
     }
 
     public BufferedImage createThumbnailImage(int maxSize) {
