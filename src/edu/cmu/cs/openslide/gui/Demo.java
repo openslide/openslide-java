@@ -28,9 +28,7 @@ import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.swing.*;
@@ -40,77 +38,26 @@ import edu.cmu.cs.openslide.OpenSlide;
 public class Demo {
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
-
             @Override
             public void run() {
-
                 JFrame jf = new JFrame("OpenSlide");
                 jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-                OpenSlide os;
                 switch (args.length) {
                 case 0:
-                    System.out.println("Give 1 or 2 files");
-                    return;
+                    JFileChooser jfc = new JFileChooser();
+                    jfc.setAcceptAllFileFilterUsed(false);
+                    jfc.setFileFilter(OpenSlide.getFileFilter());
+                    int result = jfc.showDialog(null, "Open");
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        openOne(jfc.getSelectedFile(), jf);
+                    } else {
+                        return;
+                    }
+                    break;
 
                 case 1:
-                    os = new OpenSlide(new File(args[0]));
-                    final OpenSlideView wv = new OpenSlideView(os, true);
-                    wv.setBorder(BorderFactory.createTitledBorder(args[0]));
-                    jf.getContentPane().add(wv);
-
-                    final JLabel l = new JLabel(" ");
-                    System.out.println("comment: " + os.getComment());
-                    System.out.println("properties:");
-                    System.out.println(os.getProperties());
-
-                    jf.getContentPane().add(new JLabel(os.getComment()),
-                            BorderLayout.NORTH);
-                    jf.getContentPane().add(l, BorderLayout.SOUTH);
-                    wv.addMouseMotionListener(new MouseMotionAdapter() {
-                        @Override
-                        public void mouseMoved(MouseEvent e) {
-                            long x = wv.getSlideX(e.getX());
-                            long y = wv.getSlideY(e.getY());
-                            l.setText("(" + x + "," + y + ")");
-                        }
-                    });
-                    wv.addMouseListener(new MouseAdapter() {
-                        @Override
-                        public void mouseExited(MouseEvent e) {
-                            l.setText(" ");
-                        }
-                    });
-
-                    Map<String, BufferedImage> associatedImages = os
-                            .getAssociatedImages();
-                    for (Entry<String, BufferedImage> e : associatedImages
-                            .entrySet()) {
-                        JFrame j = new JFrame(e.getKey());
-                        j.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                        j.add(new JLabel(new ImageIcon(e.getValue())));
-                        j.pack();
-                        j.setVisible(true);
-                    }
-
-                    Map<String, String> properties = os.getProperties();
-                    List<Object[]> propList = new ArrayList<Object[]>();
-                    for (Entry<String, String> e : properties.entrySet()) {
-                        propList.add(new Object[] { e.getKey(), e.getValue() });
-                    }
-                    JTable propTable = new JTable(propList
-                            .toArray(new Object[1][0]), new String[] { "key",
-                            "value" }) {
-                        @Override
-                        public boolean isCellEditable(int row, int column) {
-                            return false;
-                        }
-                    };
-                    JFrame propFrame = new JFrame("properties");
-                    propFrame.add(new JScrollPane(propTable));
-                    propFrame.pack();
-                    propFrame.setVisible(true);
-
+                    openOne(new File(args[0]), jf);
                     break;
 
                 case 2:
@@ -147,6 +94,77 @@ public class Demo {
                 jf.setSize(900, 700);
 
                 jf.setVisible(true);
+            }
+
+            private void openOne(File file, JFrame jf) {
+                OpenSlide os;
+                os = new OpenSlide(file);
+                final OpenSlideView wv = new OpenSlideView(os, true);
+                wv.setBorder(BorderFactory.createTitledBorder(file.getName()));
+                jf.getContentPane().add(wv);
+
+                final JLabel l = new JLabel(" ");
+                System.out.println("comment: " + os.getComment());
+                System.out.println("properties:");
+                System.out.println(os.getProperties());
+
+                jf.getContentPane().add(new JLabel(os.getComment()),
+                        BorderLayout.NORTH);
+                jf.getContentPane().add(l, BorderLayout.SOUTH);
+                wv.addMouseMotionListener(new MouseMotionAdapter() {
+                    @Override
+                    public void mouseMoved(MouseEvent e) {
+                        long x = wv.getSlideX(e.getX());
+                        long y = wv.getSlideY(e.getY());
+                        l.setText("(" + x + "," + y + ")");
+                    }
+                });
+                wv.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        l.setText(" ");
+                    }
+                });
+
+                Map<String, BufferedImage> associatedImages = os
+                        .getAssociatedImages();
+                for (Entry<String, BufferedImage> e : associatedImages
+                        .entrySet()) {
+                    JFrame j = new JFrame(e.getKey());
+                    j.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                    j.add(new JLabel(new ImageIcon(e.getValue())));
+                    j.pack();
+                    j.setVisible(true);
+                }
+
+                Map<String, String> properties = os.getProperties();
+                List<Object[]> propList = new ArrayList<Object[]>();
+                SortedSet<Entry<String, String>> sorted = new TreeSet<Entry<String, String>>(
+                        new Comparator<Entry<String, String>>() {
+                            @Override
+                            public int compare(Entry<String, String> o1,
+                                    Entry<String, String> o2) {
+                                String k1 = o1.getKey();
+                                String k2 = o2.getKey();
+                                return k1.compareTo(k2);
+                            }
+                        });
+                sorted.addAll(properties.entrySet());
+                for (Entry<String, String> e : sorted) {
+                    propList.add(new Object[] { e.getKey(), e.getValue() });
+                }
+                JTable propTable = new JTable(propList
+                        .toArray(new Object[1][0]), new String[] { "key",
+                        "value" }) {
+                    @Override
+                    public boolean isCellEditable(int row, int column) {
+                        return false;
+                    }
+                };
+                JFrame propFrame = new JFrame("properties");
+                propFrame.add(new JScrollPane(propTable));
+                propFrame.pack();
+                propFrame.setVisible(true);
             }
         });
     }
