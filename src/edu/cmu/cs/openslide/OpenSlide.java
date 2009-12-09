@@ -31,7 +31,21 @@ import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.util.*;
 
+import javax.swing.filechooser.FileFilter;
+
 public class OpenSlide {
+    private static final FileFilter FILE_FILTER = new FileFilter() {
+        @Override
+        public boolean accept(File f) {
+            return f.isDirectory() || OpenSlide.fileIsValid(f);
+        }
+
+        @Override
+        public String getDescription() {
+            return "Virtual slide";
+        }
+    };
+
     private SWIGTYPE_p__openslide osr;
 
     final private long layerWidths[];
@@ -318,5 +332,10 @@ public class OpenSlide {
         OpenSlideGlue.openslide_read_associated_image(osr, name, data);
 
         return img;
+    }
+
+    public static FileFilter getFileFilter() {
+        return FILE_FILTER;
+
     }
 }
