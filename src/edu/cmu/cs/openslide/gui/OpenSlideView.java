@@ -211,6 +211,10 @@ public class OpenSlideView extends JPanel {
         }
     }
 
+    private enum SelectionMode {
+        NONE, RECT, FREEHAND, ELLIPSE;
+    }
+
     private void registerEventHandlers() {
         // mouse wheel
         addMouseWheelListener(new MouseWheelListener() {
@@ -230,13 +234,7 @@ public class OpenSlideView extends JPanel {
 
         // mouse drag
         MouseAdapter ma = new MouseAdapter() {
-            final private static int SELECTION_MODE_NONE = 0;
-
-            final private static int SELECTION_MODE_RECT = 1;
-
-            final private static int SELECTION_MODE_FREEHAND = 2;
-
-            private int selectionMode;
+            private SelectionMode selectionMode;
 
             private int oldX;
 
@@ -258,14 +256,14 @@ public class OpenSlideView extends JPanel {
                     return;
                 }
 
+                    selectionMode = SelectionMode.FREEHAND;
                 if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == MouseEvent.CTRL_DOWN_MASK) {
-                    selectionMode = SELECTION_MODE_FREEHAND;
                     selection = null;
+                    selectionMode = SelectionMode.RECT;
                 } else if ((e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) == MouseEvent.SHIFT_DOWN_MASK) {
-                    selectionMode = SELECTION_MODE_RECT;
                     selection = null;
                 } else {
-                    selectionMode = SELECTION_MODE_NONE;
+                    selectionMode = SelectionMode.NONE;
                 }
 
                 oldX = e.getX();
@@ -290,14 +288,14 @@ public class OpenSlideView extends JPanel {
                 int dh;
 
                 switch (selectionMode) {
-                case SELECTION_MODE_NONE:
+                case NONE:
                     translateHelper(OpenSlideView.this, relX, relY);
                     translateHelper(otherView, relX, relY);
                     repaintHelper(OpenSlideView.this);
                     repaintHelper(otherView);
                     break;
 
-                case SELECTION_MODE_RECT:
+                case RECT:
                     ds = getDownsample();
                     int dx = slideStartX;
                     int dy = slideStartY;
@@ -318,7 +316,7 @@ public class OpenSlideView extends JPanel {
                     repaint();
                     break;
 
-                case SELECTION_MODE_FREEHAND:
+                case FREEHAND:
                     if (selection == null) {
                         // new selection
                         freehandPath = new GeneralPath();
@@ -342,10 +340,10 @@ public class OpenSlideView extends JPanel {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (selectionMode == SELECTION_MODE_FREEHAND) {
+                if (selectionMode == SelectionMode.FREEHAND) {
                     freehandPath.closePath();
                 }
-                selectionMode = SELECTION_MODE_NONE;
+                selectionMode = SelectionMode.NONE;
 
                 if (selection != null) {
                     Rectangle bb = selection.getBounds();
