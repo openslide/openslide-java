@@ -32,6 +32,7 @@ package edu.cmu.cs.openslide.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -256,11 +257,19 @@ public class OpenSlideView extends JPanel {
                     return;
                 }
 
-                    selectionMode = SelectionMode.FREEHAND;
-                if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == MouseEvent.CTRL_DOWN_MASK) {
+                final int ellipseMask = MouseEvent.CTRL_DOWN_MASK
+                        | MouseEvent.SHIFT_DOWN_MASK;
+                final int freehandMask = MouseEvent.CTRL_DOWN_MASK;
+                final int rectMask = MouseEvent.SHIFT_DOWN_MASK;
+
+                if ((e.getModifiersEx() & ellipseMask) == ellipseMask) {
+                    selectionMode = SelectionMode.ELLIPSE;
                     selection = null;
+                } else if ((e.getModifiersEx() & freehandMask) == freehandMask) {
+                    selectionMode = SelectionMode.FREEHAND;
+                    selection = null;
+                } else if ((e.getModifiersEx() & rectMask) == rectMask) {
                     selectionMode = SelectionMode.RECT;
-                } else if ((e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) == MouseEvent.SHIFT_DOWN_MASK) {
                     selection = null;
                 } else {
                     selectionMode = SelectionMode.NONE;
@@ -283,9 +292,20 @@ public class OpenSlideView extends JPanel {
                 int relX = oldX - e.getX();
                 int relY = oldY - e.getY();
 
-                double ds;
-                int dw;
-                int dh;
+                double ds = getDownsample();
+                int dx = slideStartX;
+                int dy = slideStartY;
+                int dw = (int) ((e.getX() + viewPosition.x) * ds) - dx;
+                int dh = (int) ((e.getY() + viewPosition.y) * ds) - dy;
+
+                if (dw < 0) {
+                    dx += dw;
+                    dw = -dw;
+                }
+                if (dh < 0) {
+                    dy += dh;
+                    dh = -dh;
+                }
 
                 switch (selectionMode) {
                 case NONE:
@@ -296,21 +316,6 @@ public class OpenSlideView extends JPanel {
                     break;
 
                 case RECT:
-                    ds = getDownsample();
-                    int dx = slideStartX;
-                    int dy = slideStartY;
-                    dw = (int) ((e.getX() + viewPosition.x) * ds) - dx;
-                    dh = (int) ((e.getY() + viewPosition.y) * ds) - dy;
-
-                    if (dw < 0) {
-                        dx += dw;
-                        dw = -dw;
-                    }
-                    if (dh < 0) {
-                        dy += dh;
-                        dh = -dh;
-                    }
-
                     selection = new Rectangle(dx, dy, dw, dh);
                     // System.out.println(selection);
                     repaint();
@@ -325,11 +330,15 @@ public class OpenSlideView extends JPanel {
                         freehandPath.moveTo(slideStartX, slideStartY);
                     }
 
-                    ds = getDownsample();
-                    dx = (int) ((e.getX() + viewPosition.x) * ds);
-                    dy = (int) ((e.getY() + viewPosition.y) * ds);
+                    freehandPath.lineTo((e.getX() + viewPosition.x) * ds, (e
+                            .getY() + viewPosition.y)
+                            * ds);
 
-                    freehandPath.lineTo(dx, dy);
+                    repaint();
+                    break;
+
+                case ELLIPSE:
+                    selection = new Ellipse2D.Double(dx, dy, dw, dh);
 
                     repaint();
                     break;
