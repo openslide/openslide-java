@@ -33,7 +33,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -245,7 +245,7 @@ public class OpenSlideView extends JPanel {
 
             private int slideStartY;
 
-            private GeneralPath freehandPath;
+            private Path2D.Double freehandPath;
 
             @Override
             public void mousePressed(MouseEvent e) {
@@ -324,7 +324,7 @@ public class OpenSlideView extends JPanel {
                 case FREEHAND:
                     if (selection == null) {
                         // new selection
-                        freehandPath = new GeneralPath();
+                        freehandPath = new Path2D.Double();
                         selection = freehandPath;
 
                         freehandPath.moveTo(slideStartX, slideStartY);
