@@ -22,6 +22,11 @@
  *  combination.
  */
 
+/*
+ * This should be rewritten. Problems include: very clunky handling of linked
+ * slides, non-pixel-perfect scrolling.
+ */
+
 package edu.cmu.cs.openslide.gui;
 
 import java.awt.*;
