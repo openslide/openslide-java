@@ -60,7 +60,9 @@ public class OpenSlideView extends JPanel {
 
     private OpenSlideView otherView;
 
-    protected Shape selection;
+    private final SelectionListModel selections = new SelectionListModel();
+
+    private Shape selectionBeingDrawn;
 
     transient private BufferedImage dbuf;
 
@@ -264,13 +266,10 @@ public class OpenSlideView extends JPanel {
 
                 if ((e.getModifiersEx() & ellipseMask) == ellipseMask) {
                     selectionMode = SelectionMode.ELLIPSE;
-                    selection = null;
                 } else if ((e.getModifiersEx() & freehandMask) == freehandMask) {
                     selectionMode = SelectionMode.FREEHAND;
-                    selection = null;
                 } else if ((e.getModifiersEx() & rectMask) == rectMask) {
                     selectionMode = SelectionMode.RECT;
-                    selection = null;
                 } else {
                     selectionMode = SelectionMode.NONE;
                 }
@@ -316,16 +315,16 @@ public class OpenSlideView extends JPanel {
                     break;
 
                 case RECT:
-                    selection = new Rectangle(dx, dy, dw, dh);
+                    selectionBeingDrawn = new Rectangle(dx, dy, dw, dh);
                     // System.out.println(selection);
                     repaint();
                     break;
 
                 case FREEHAND:
-                    if (selection == null) {
+                    if (selectionBeingDrawn == null) {
                         // new selection
                         freehandPath = new Path2D.Double();
-                        selection = freehandPath;
+                        selectionBeingDrawn = freehandPath;
 
                         freehandPath.moveTo(slideStartX, slideStartY);
                     }
@@ -338,7 +337,7 @@ public class OpenSlideView extends JPanel {
                     break;
 
                 case ELLIPSE:
-                    selection = new Ellipse2D.Double(dx, dy, dw, dh);
+                    selectionBeingDrawn = new Ellipse2D.Double(dx, dy, dw, dh);
 
                     repaint();
                     break;
@@ -354,10 +353,11 @@ public class OpenSlideView extends JPanel {
                 }
                 selectionMode = SelectionMode.NONE;
 
-                if (selection != null) {
-                    Rectangle bb = selection.getBounds();
-                    if (bb.height == 0 || bb.width == 0) {
-                        selection = null;
+                if (selectionBeingDrawn != null) {
+                    Rectangle bb = selectionBeingDrawn.getBounds();
+                    if (bb.height != 0 && bb.width != 0) {
+                        selections.add(selectionBeingDrawn);
+                        selectionBeingDrawn = null;
                     }
                 }
                 repaint();
@@ -422,14 +422,6 @@ public class OpenSlideView extends JPanel {
                 translateHelper(otherView, KEYBOARD_SCROLL_AMOUNT, 0);
                 repaintHelper(OpenSlideView.this);
                 repaintHelper(otherView);
-            }
-        });
-
-        inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "clear selection");
-        actionMap.put("clear selection", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                selection = null;
-                repaint();
             }
         });
 
@@ -569,13 +561,16 @@ public class OpenSlideView extends JPanel {
         repaint();
     }
 
-    public void centerOnSelection() {
-        centerOnSelectionPrivate();
+    public void centerOnSelection(int selection) {
+        centerOnSelectionPrivate(selection);
         repaint();
     }
 
-    private void centerOnSelectionPrivate() {
-        if (selection != null) {
+    private void centerOnSelectionPrivate(int s) {
+        if (selections.isEmpty()) {
+            centerSlidePrivate();
+        } else {
+            Shape selection = selections.get(s);
             Rectangle2D bb = selection.getBounds2D();
             centerSlidePrivate((int) bb.getCenterX(), (int) bb.getCenterY());
         }
@@ -674,11 +669,8 @@ public class OpenSlideView extends JPanel {
                     zoomToFit();
                 }
 
-                if (selection != null) {
-                    centerOnSelectionPrivate();
-                } else {
-                    centerSlidePrivate();
-                }
+                centerOnSelectionPrivate(0);
+
                 paintBackingStore();
                 firstPaint = false;
             } else {
@@ -784,20 +776,18 @@ public class OpenSlideView extends JPanel {
     }
 
     private void paintSelection(Graphics2D g) {
-        if (selection == null) {
-            return;
+        if (selectionBeingDrawn != null) {
+            paintSelection(g, selectionBeingDrawn, -viewPosition.x,
+                    -viewPosition.y, getDownsample());
         }
-
-        paintSelection(g, selection, -viewPosition.x, -viewPosition.y,
-                getDownsample());
+        for (Shape selection : selections) {
+            paintSelection(g, selection, -viewPosition.x, -viewPosition.y,
+                    getDownsample());
+        }
     }
 
-    public Shape getSelection() {
-        return selection;
-    }
-
-    public void setSelection(Shape s) {
-        selection = s;
+    public void addSelection(Shape s) {
+        selections.add(s);
         repaint();
     }
 
@@ -811,5 +801,9 @@ public class OpenSlideView extends JPanel {
 
     public long getSlideY(int y) {
         return (long) ((viewPosition.y + y) * getDownsample());
+    }
+
+    public SelectionListModel getSelectionListModel() {
+        return selections;
     }
 }

@@ -165,6 +165,12 @@ public class Demo {
                 propFrame.add(new JScrollPane(propTable));
                 propFrame.pack();
                 propFrame.setVisible(true);
+
+                JFrame listFrame = new JFrame("selections");
+                listFrame.add(new JScrollPane(new JList(wv
+                        .getSelectionListModel())));
+                listFrame.pack();
+                listFrame.setVisible(true);
             }
         });
     }
