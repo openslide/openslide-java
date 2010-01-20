@@ -336,6 +336,5 @@ public class OpenSlide {
 
     public static FileFilter getFileFilter() {
         return FILE_FILTER;
-
     }
 }
