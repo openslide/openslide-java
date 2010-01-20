@@ -157,9 +157,8 @@ public class OpenSlide {
     }
 
     public String getComment() {
-        checkDisposed();
+        return properties.get("openslide.comment");
 
-        return OpenSlideGlue.openslide_get_comment(osr);
     }
 
     public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
