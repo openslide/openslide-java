@@ -158,7 +158,11 @@ public class OpenSlide {
 
     public String getComment() {
         return properties.get("openslide.comment");
+    }
 
+    public void paintRegionOfLayer(Graphics2D g, int dx, int dy, int sx,
+            int sy, int w, int h, int layer) {
+        paintRegion(g, dx, dy, sx, sy, w, h, layerDownsamples[layer]);
     }
 
     public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
