@@ -318,6 +318,8 @@ public class OpenSlide {
     }
 
     BufferedImage getAssociatedImage(String name) {
+        checkDisposed();
+
         long ww[] = new long[1];
         long hh[] = new long[1];
         OpenSlideGlue.openslide_get_associated_image_dimensions(osr, name, ww,
