@@ -171,12 +171,10 @@ public class OpenSlide {
         }
 
         // get the layer
-        int layer = OpenSlideGlue.openslide_get_best_layer_for_downsample(osr,
-                downsample);
+        int layer = getBestLayerForDownsample(downsample);
 
         // figure out its downsample
-        double layerDS = OpenSlideGlue.openslide_get_layer_downsample(osr,
-                layer);
+        double layerDS = layerDownsamples[layer];
 
         // compute the difference
         double relativeDS = downsample / layerDS;
