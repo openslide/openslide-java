@@ -78,11 +78,6 @@ int32_t openslide_get_layer_count(openslide_t *osr);
 
 void openslide_close(openslide_t *osr);
 
-const char *openslide_get_comment(openslide_t *osr);
-
-int32_t openslide_get_best_layer_for_downsample(openslide_t *osr,
-						double downsample);
-
 double openslide_get_layer_downsample(openslide_t *osr, int32_t layer);
 
 void openslide_read_region(openslide_t *osr,
