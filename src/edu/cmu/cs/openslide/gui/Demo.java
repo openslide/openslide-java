@@ -166,11 +166,12 @@ public class Demo {
                 propFrame.pack();
                 propFrame.setVisible(true);
 
-                JFrame listFrame = new JFrame("selections");
-                listFrame.add(new JScrollPane(new JList(wv
-                        .getSelectionListModel())));
-                listFrame.pack();
-                listFrame.setVisible(true);
+                /*
+                 * JFrame listFrame = new JFrame("selections");
+                 * listFrame.add(new JScrollPane(new JList(wv
+                 * .getSelectionListModel()))); listFrame.pack();
+                 * listFrame.setVisible(true);
+                 */
             }
         });
     }
