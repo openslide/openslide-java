@@ -1,5 +1,3 @@
 Fancy zooming/scrolling in OpenSlideView
 
 Rotation in OpenSlideView
-
-Make swig generated types not public
