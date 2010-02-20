@@ -101,9 +101,9 @@ public class Demo {
                 jf.getContentPane().add(wv);
 
                 final JLabel l = new JLabel(" ");
-                System.out.println("comment: " + os.getComment());
-                System.out.println("properties:");
-                System.out.println(os.getProperties());
+                // System.out.println("comment: " + os.getComment());
+                // System.out.println("properties:");
+                // System.out.println(os.getProperties());
 
                 jf.getContentPane().add(new JLabel(os.getComment()),
                         BorderLayout.NORTH);

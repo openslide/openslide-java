@@ -248,7 +248,7 @@ public class OpenSlideView extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                System.out.println(e);
+                // System.out.println(e);
 
                 requestFocusInWindow();
 
@@ -468,7 +468,7 @@ public class OpenSlideView extends JPanel {
         inputMap.put(KeyStroke.getKeyStroke("Z"), "zoom to fit");
         actionMap.put("zoom to fit", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println("zoom");
+                // System.out.println("zoom");
                 zoomToFit();
                 centerSlidePrivate();
                 paintBackingStore();
@@ -479,7 +479,7 @@ public class OpenSlideView extends JPanel {
         inputMap.put(KeyStroke.getKeyStroke("1"), "zoom to 1:1");
         actionMap.put("zoom to 1:1", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println("zoom 1:1");
+                // System.out.println("zoom 1:1");
                 double d1 = zoomHelper(OpenSlideView.this, Integer.MIN_VALUE);
                 double d2 = zoomHelper(otherView, Integer.MIN_VALUE);
                 zoomHelper2(OpenSlideView.this, d1);
