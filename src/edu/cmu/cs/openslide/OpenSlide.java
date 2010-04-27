@@ -43,7 +43,11 @@ public class OpenSlide {
         }
     };
 
-    private SWIGTYPE_p__openslide osr;
+    static {
+        System.loadLibrary("openslidejava");
+    }
+
+    private long osr;
 
     final private long layerWidths[];
 
@@ -57,20 +61,50 @@ public class OpenSlide {
 
     final private AssociatedImageMap associatedImages;
 
+    private native static boolean openslide_can_open(String file);
+
+    private native static long openslide_open(String file);
+
+    private native static int openslide_get_layer_count(long osr);
+
+    private native static void openslide_get_layer_dimensions(long osr,
+            int layer, long dim[]);
+
+    private native static double openslide_get_layer_downsample(long osr,
+            int layer);
+
+    private native static void openslide_close(long osr);
+
+    private native static String[] openslide_get_property_names(long osr);
+
+    private native static String openslide_get_property_value(long osr,
+            String name);
+
+    private native static String[] openslide_get_associated_image_names(long osr);
+
+    private native static void openslide_read_region(long osr, int dest[],
+            int x, int y, int layer, int w, int h);
+
+    private native static void openslide_get_associated_image_dimensions(
+            long osr, String name, long dim[]);
+
+    private native static void openslide_read_associated_image(long osr,
+            String name, int dest[]);
+
     public static boolean fileIsValid(File file) {
-        return OpenSlideGlue.openslide_can_open(file.getPath());
+        return openslide_can_open(file.getPath());
     }
 
     public OpenSlide(File file) {
-        osr = OpenSlideGlue.openslide_open(file.getPath());
+        osr = openslide_open(file.getPath());
 
-        if (osr == null) {
+        if (osr == 0) {
             // TODO not just file not found
             throw new OpenSlideException();
         }
 
         // store layer count
-        layerCount = OpenSlideGlue.openslide_get_layer_count(osr);
+        layerCount = openslide_get_layer_count(osr);
 
         // store dimensions
         layerWidths = new long[layerCount];
@@ -78,46 +112,34 @@ public class OpenSlide {
         layerDownsamples = new double[layerCount];
 
         for (int i = 0; i < layerCount; i++) {
-            long w[] = new long[1];
-            long h[] = new long[1];
-            OpenSlideGlue.openslide_get_layer_dimensions(osr, i, w, h);
-            layerWidths[i] = w[0];
-            layerHeights[i] = h[0];
-            layerDownsamples[i] = OpenSlideGlue.openslide_get_layer_downsample(
-                    osr, i);
+            long dim[] = new long[2];
+            openslide_get_layer_dimensions(osr, i, dim);
+            layerWidths[i] = dim[0];
+            layerHeights[i] = dim[1];
+            layerDownsamples[i] = openslide_get_layer_downsample(osr, i);
         }
 
         // properties
         HashMap<String, String> props = new HashMap<String, String>();
-        SWIGTYPE_p_p_char propNames = OpenSlideGlue
-                .openslide_get_property_names(osr);
-        int i = 0;
-        String currentName;
-        while ((currentName = OpenSlideGlue.deref_char_p_p(propNames, i++)) != null) {
-            String value = OpenSlideGlue.openslide_get_property_value(osr,
-                    currentName);
-            props.put(currentName, value);
+        for (String s : openslide_get_property_names(osr)) {
+            props.put(s, openslide_get_property_value(osr, s));
         }
+
         properties = Collections.unmodifiableMap(props);
 
         // associated images
         // make names
-        Set<String> names = new HashSet<String>();
-        SWIGTYPE_p_p_char imgNames = OpenSlideGlue
-                .openslide_get_associated_image_names(osr);
-        i = 0;
-        while ((currentName = OpenSlideGlue.deref_char_p_p(imgNames, i++)) != null) {
-            names.add(currentName);
-        }
+        Set<String> names = new HashSet<String>(Arrays
+                .asList(openslide_get_associated_image_names(osr)));
 
         associatedImages = new AssociatedImageMap(Collections
                 .unmodifiableSet(names), this);
     }
 
     public void dispose() {
-        if (osr != null) {
-            OpenSlideGlue.openslide_close(osr);
-            osr = null;
+        if (osr != 0) {
+            openslide_close(osr);
+            osr = 0;
         }
     }
 
@@ -132,7 +154,7 @@ public class OpenSlide {
     }
 
     private void checkDisposed() {
-        if (osr == null) {
+        if (osr == 0) {
             throw new OpenSlideDisposedException();
         }
     }
@@ -224,8 +246,8 @@ public class OpenSlide {
         int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                 .getData();
 
-        OpenSlideGlue.openslide_read_region(osr, data, baseX, baseY, layer, img
-                .getWidth(), img.getHeight());
+        openslide_read_region(osr, data, baseX, baseY, layer, img.getWidth(),
+                img.getHeight());
 
         // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
         g.drawImage(img, dx, dy, w, h, null);
@@ -318,18 +340,16 @@ public class OpenSlide {
     BufferedImage getAssociatedImage(String name) {
         checkDisposed();
 
-        long ww[] = new long[1];
-        long hh[] = new long[1];
-        OpenSlideGlue.openslide_get_associated_image_dimensions(osr, name, ww,
-                hh);
+        long dim[] = new long[2];
+        openslide_get_associated_image_dimensions(osr, name, dim);
 
-        BufferedImage img = new BufferedImage((int) ww[0], (int) hh[0],
+        BufferedImage img = new BufferedImage((int) dim[0], (int) dim[1],
                 BufferedImage.TYPE_INT_ARGB_PRE);
 
         int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                 .getData();
 
-        OpenSlideGlue.openslide_read_associated_image(osr, name, data);
+        openslide_read_associated_image(osr, name, data);
 
         return img;
     }
