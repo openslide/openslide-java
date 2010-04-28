@@ -149,12 +149,6 @@ public class OpenSlide {
         }
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        dispose();
-    }
-
     public int getLayerCount() {
         return layerCount;
     }
