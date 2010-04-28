@@ -27,6 +27,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.filechooser.FileFilter;
 
@@ -54,6 +57,8 @@ public class OpenSlide {
     final public static String PROPERTY_NAME_QUICKHASH1 = "openslide.quickhash-1";
 
     private long osr;
+
+    final private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     final private long layerWidths[];
 
@@ -143,9 +148,15 @@ public class OpenSlide {
     }
 
     public void dispose() {
-        if (osr != 0) {
-            openslide_close(osr);
-            osr = 0;
+        Lock wl = lock.writeLock();
+        wl.lock();
+        try {
+            if (osr != 0) {
+                openslide_close(osr);
+                osr = 0;
+            }
+        } finally {
+            wl.unlock();
         }
     }
 
@@ -186,83 +197,89 @@ public class OpenSlide {
 
     public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
             int w, int h, double downsample) {
-        checkDisposed();
+        Lock rl = lock.readLock();
+        rl.lock();
+        try {
+            checkDisposed();
 
-        if (downsample < 1.0) {
-            throw new IllegalArgumentException("downsample (" + downsample
-                    + ") must be >= 1.0");
-        }
-
-        // get the layer
-        int layer = getBestLayerForDownsample(downsample);
-
-        // figure out its downsample
-        double layerDS = layerDownsamples[layer];
-
-        // compute the difference
-        double relativeDS = downsample / layerDS;
-
-        // translate if sx or sy are negative
-        if (sx < 0) {
-            dx -= sx;
-            w += sx; // shrink w
-            sx = 0;
-        }
-        if (sy < 0) {
-            dy -= sy;
-            h += sy; // shrink h
-            sy = 0;
-        }
-
-        // scale source coordinates into layer coordinates
-        int baseX = (int) (downsample * sx);
-        int baseY = (int) (downsample * sy);
-        int layerX = (int) (relativeDS * sx);
-        int layerY = (int) (relativeDS * sy);
-
-        // scale width and height by relative downsample
-        int layerW = (int) Math.round(relativeDS * w);
-        int layerH = (int) Math.round(relativeDS * h);
-
-        // clip to edge of image
-        layerW = (int) Math.min(layerW, getLayerWidth(layer) - layerX);
-        layerH = (int) Math.min(layerH, getLayerHeight(layer) - layerY);
-        w = (int) Math.round(layerW / relativeDS);
-        h = (int) Math.round(layerH / relativeDS);
-
-        if (debug) {
-            System.out.println("layerW " + layerW + ", layerH " + layerH
-                    + ", baseX " + baseX + ", baseY " + baseY);
-        }
-
-        if (layerW <= 0 || layerH <= 0) {
-            // nothing to draw
-            return;
-        }
-
-        BufferedImage img = new BufferedImage(layerW, layerH,
-                BufferedImage.TYPE_INT_ARGB_PRE);
-
-        int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
-                .getData();
-
-        openslide_read_region(osr, data, baseX, baseY, layer, img.getWidth(),
-                img.getHeight());
-
-        // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
-        g.drawImage(img, dx, dy, w, h, null);
-
-        if (debug) {
-            System.out.println(img);
-
-            if (debugThingy == 0) {
-                g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.4f));
-                debugThingy = 1;
-            } else {
-                g.setColor(new Color(0.0f, 1.0f, 0.0f, 0.4f));
-                debugThingy = 0;
+            if (downsample < 1.0) {
+                throw new IllegalArgumentException("downsample (" + downsample
+                        + ") must be >= 1.0");
             }
-            g.fillRect(dx, dy, w, h);
+
+            // get the layer
+            int layer = getBestLayerForDownsample(downsample);
+
+            // figure out its downsample
+            double layerDS = layerDownsamples[layer];
+
+            // compute the difference
+            double relativeDS = downsample / layerDS;
+
+            // translate if sx or sy are negative
+            if (sx < 0) {
+                dx -= sx;
+                w += sx; // shrink w
+                sx = 0;
+            }
+            if (sy < 0) {
+                dy -= sy;
+                h += sy; // shrink h
+                sy = 0;
+            }
+
+            // scale source coordinates into layer coordinates
+            int baseX = (int) (downsample * sx);
+            int baseY = (int) (downsample * sy);
+            int layerX = (int) (relativeDS * sx);
+            int layerY = (int) (relativeDS * sy);
+
+            // scale width and height by relative downsample
+            int layerW = (int) Math.round(relativeDS * w);
+            int layerH = (int) Math.round(relativeDS * h);
+
+            // clip to edge of image
+            layerW = (int) Math.min(layerW, getLayerWidth(layer) - layerX);
+            layerH = (int) Math.min(layerH, getLayerHeight(layer) - layerY);
+            w = (int) Math.round(layerW / relativeDS);
+            h = (int) Math.round(layerH / relativeDS);
+
+            if (debug) {
+                System.out.println("layerW " + layerW + ", layerH " + layerH
+                        + ", baseX " + baseX + ", baseY " + baseY);
+            }
+
+            if (layerW <= 0 || layerH <= 0) {
+                // nothing to draw
+                return;
+            }
+
+            BufferedImage img = new BufferedImage(layerW, layerH,
+                    BufferedImage.TYPE_INT_ARGB_PRE);
+
+            int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
+                    .getData();
+
+            openslide_read_region(osr, data, baseX, baseY, layer, img
+                    .getWidth(), img.getHeight());
+
+            // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
+            g.drawImage(img, dx, dy, w, h, null);
+
+            if (debug) {
+                System.out.println(img);
+
+                if (debugThingy == 0) {
+                    g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.4f));
+                    debugThingy = 1;
+                } else {
+                    g.setColor(new Color(0.0f, 1.0f, 0.0f, 0.4f));
+                    debugThingy = 0;
+                }
+                g.fillRect(dx, dy, w, h);
+            }
+        } finally {
+            rl.unlock();
         }
     }
 
@@ -338,20 +355,26 @@ public class OpenSlide {
     }
 
     BufferedImage getAssociatedImage(String name) {
-        checkDisposed();
+        Lock rl = lock.readLock();
+        rl.lock();
+        try {
+            checkDisposed();
 
-        long dim[] = new long[2];
-        openslide_get_associated_image_dimensions(osr, name, dim);
+            long dim[] = new long[2];
+            openslide_get_associated_image_dimensions(osr, name, dim);
 
-        BufferedImage img = new BufferedImage((int) dim[0], (int) dim[1],
-                BufferedImage.TYPE_INT_ARGB_PRE);
+            BufferedImage img = new BufferedImage((int) dim[0], (int) dim[1],
+                    BufferedImage.TYPE_INT_ARGB_PRE);
 
-        int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
-                .getData();
+            int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
+                    .getData();
 
-        openslide_read_associated_image(osr, name, data);
+            openslide_read_associated_image(osr, name, data);
 
-        return img;
+            return img;
+        } finally {
+            rl.unlock();
+        }
     }
 
     public static FileFilter getFileFilter() {
