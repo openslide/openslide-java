@@ -47,6 +47,12 @@ public class OpenSlide {
         System.loadLibrary("openslidejava");
     }
 
+    final public static String PROPERTY_NAME_COMMENT = "openslide.comment";
+
+    final public static String PROPERTY_NAME_VENDOR = "openslide.vendor";
+
+    final public static String PROPERTY_NAME_QUICKHASH1 = "openslide.quickhash-1";
+
     private long osr;
 
     final private long layerWidths[];
