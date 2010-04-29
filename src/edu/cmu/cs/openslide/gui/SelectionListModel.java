@@ -21,7 +21,6 @@
 
 package edu.cmu.cs.openslide.gui;
 
-import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,12 +28,12 @@ import java.util.List;
 import javax.swing.AbstractListModel;
 
 public class SelectionListModel extends AbstractListModel implements
-        Iterable<Shape> {
+        Iterable<Annotation> {
 
-    private final List<Shape> list = new ArrayList<Shape>();
+    private final List<Annotation> list = new ArrayList<Annotation>();
 
     @Override
-    public Shape getElementAt(int index) {
+    public Annotation getElementAt(int index) {
         return list.get(index);
     }
 
@@ -43,10 +42,20 @@ public class SelectionListModel extends AbstractListModel implements
         return list.size();
     }
 
-    public void add(Shape s) {
+    public void add(Annotation s) {
         list.add(s);
         int i = list.size() - 1;
         fireIntervalAdded(this, i, i);
+    }
+
+    public void add(int index, Annotation s) {
+        list.add(index, s);
+        fireIntervalAdded(this, index, index);
+    }
+
+    public void remove(int index) {
+        list.remove(index);
+        fireIntervalRemoved(this, index, index);
     }
 
     public void clear() {
@@ -59,12 +68,12 @@ public class SelectionListModel extends AbstractListModel implements
         return list.isEmpty();
     }
 
-    public Shape get(int index) {
+    public Annotation get(int index) {
         return list.get(index);
     }
 
     @Override
-    public Iterator<Shape> iterator() {
+    public Iterator<Annotation> iterator() {
         return list.iterator();
     }
 }

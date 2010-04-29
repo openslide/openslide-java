@@ -353,7 +353,7 @@ public class OpenSlideView extends JPanel {
                 if (selectionBeingDrawn != null) {
                     Rectangle bb = selectionBeingDrawn.getBounds();
                     if (bb.height != 0 && bb.width != 0) {
-                        selections.add(selectionBeingDrawn);
+                        selections.add(new Annotation(selectionBeingDrawn));
                         selectionBeingDrawn = null;
                     }
                 }
@@ -567,7 +567,7 @@ public class OpenSlideView extends JPanel {
         if (selections.isEmpty()) {
             centerSlidePrivate();
         } else {
-            Shape selection = selections.get(s);
+            Shape selection = selections.get(s).getShape();
             Rectangle2D bb = selection.getBounds2D();
             centerSlidePrivate((int) bb.getCenterX(), (int) bb.getCenterY());
         }
@@ -777,14 +777,14 @@ public class OpenSlideView extends JPanel {
             paintSelection(g, selectionBeingDrawn, -viewPosition.x,
                     -viewPosition.y, getDownsample());
         }
-        for (Shape selection : selections) {
-            paintSelection(g, selection, -viewPosition.x, -viewPosition.y,
-                    getDownsample());
+        for (Annotation selection : selections) {
+            paintSelection(g, selection.getShape(), -viewPosition.x,
+                    -viewPosition.y, getDownsample());
         }
     }
 
     public void addSelection(Shape s) {
-        selections.add(s);
+        selections.add(new Annotation(s));
         repaint();
     }
 
