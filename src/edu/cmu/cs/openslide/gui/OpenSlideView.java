@@ -564,7 +564,7 @@ public class OpenSlideView extends JPanel {
     }
 
     private void centerOnSelectionPrivate(int s) {
-        if (selections.isEmpty()) {
+        if (selections.isEmpty() || s == -1) {
             centerSlidePrivate();
         } else {
             Shape selection = selections.get(s).getShape();
