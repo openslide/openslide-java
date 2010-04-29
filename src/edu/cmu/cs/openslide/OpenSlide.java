@@ -72,6 +72,8 @@ public class OpenSlide {
 
     final private AssociatedImageMap associatedImages;
 
+    final private int hashCodeVal;
+
     private native static boolean openslide_can_open(String file);
 
     private native static long openslide_open(String file);
@@ -113,6 +115,10 @@ public class OpenSlide {
             // TODO not just file not found
             throw new OpenSlideException();
         }
+
+        // store hash
+        hashCodeVal = (int) Long.parseLong(getProperties().get(
+                PROPERTY_NAME_QUICKHASH1).substring(0, 8));
 
         // store layer count
         layerCount = openslide_get_layer_count(osr);
@@ -379,5 +385,25 @@ public class OpenSlide {
 
     public static FileFilter getFileFilter() {
         return FILE_FILTER;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCodeVal;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (obj instanceof OpenSlide) {
+            OpenSlide os2 = (OpenSlide) obj;
+            return getProperties().get(PROPERTY_NAME_QUICKHASH1).equals(
+                    os2.getProperties().get(PROPERTY_NAME_QUICKHASH1));
+        }
+
+        return false;
     }
 }
