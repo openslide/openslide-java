@@ -116,10 +116,6 @@ public class OpenSlide {
             throw new OpenSlideException();
         }
 
-        // store hash
-        hashCodeVal = (int) Long.parseLong(getProperties().get(
-                PROPERTY_NAME_QUICKHASH1).substring(0, 8));
-
         // store layer count
         layerCount = openslide_get_layer_count(osr);
 
@@ -151,6 +147,10 @@ public class OpenSlide {
 
         associatedImages = new AssociatedImageMap(Collections
                 .unmodifiableSet(names), this);
+
+        // store hash
+        hashCodeVal = (int) Long.parseLong(getProperties().get(
+                PROPERTY_NAME_QUICKHASH1).substring(0, 8), 16);
     }
 
     public void dispose() {
