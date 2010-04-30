@@ -6,27 +6,31 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Collections;
+import java.util.Map;
 
 public class Annotation {
-    final private String text;
+    final private Map<String, String> annotations;
 
     final private Shape shape;
 
-    public Annotation(Shape shape) {
-        this(shape, null);
-    }
+    final static private Map<String, String> EMPTY_MAP = Collections.emptyMap();
 
-    public Annotation(Shape shape, String text) {
+    public Annotation(Shape shape, Map<String, String> annotations) {
         if (shape == null) {
             throw new NullPointerException("shape cannot be null");
         }
-
-        this.text = text;
         this.shape = new ImmutableShape(shape);
+
+        this.annotations = Collections.unmodifiableMap(annotations);
     }
 
-    public String getText() {
-        return text;
+    public Annotation(Shape shape) {
+        this(shape, EMPTY_MAP);
+    }
+
+    public Map<String, String> getAnnotations() {
+        return annotations;
     }
 
     public Shape getShape() {
