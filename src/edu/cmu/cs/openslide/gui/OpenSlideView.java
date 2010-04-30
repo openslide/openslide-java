@@ -57,7 +57,7 @@ public class OpenSlideView extends JPanel {
 
     private OpenSlideView otherView;
 
-    private final SelectionListModel selections = new SelectionListModel();
+    private SelectionListModel selections = new SelectionListModel();
 
     private Shape selectionBeingDrawn;
 
@@ -802,5 +802,9 @@ public class OpenSlideView extends JPanel {
 
     public SelectionListModel getSelectionListModel() {
         return selections;
+    }
+
+    public void setSelectionListModel(SelectionListModel selections) {
+        this.selections = selections;
     }
 }
