@@ -71,6 +71,8 @@ public class OpenSlideView extends JPanel {
 
     private final boolean startWithZoomFit;
 
+    private boolean selectionsVisible;
+
     public OpenSlideView(OpenSlide w) {
         this(w, false);
     }
@@ -121,6 +123,15 @@ public class OpenSlideView extends JPanel {
             return;
         }
 
+        w.repaint();
+    }
+
+    static private void selectionsVisibleHelper(OpenSlideView w, boolean visible) {
+        if (w == null) {
+            return;
+        }
+
+        w.selectionsVisible = visible;
         w.repaint();
     }
 
@@ -360,6 +371,17 @@ public class OpenSlideView extends JPanel {
                 repaint();
             }
 
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                selectionsVisibleHelper(OpenSlideView.this, true);
+                selectionsVisibleHelper(otherView, true);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                selectionsVisibleHelper(OpenSlideView.this, false);
+                selectionsVisibleHelper(otherView, false);
+            }
         };
         addMouseListener(ma);
         addMouseMotionListener(ma);
@@ -684,7 +706,7 @@ public class OpenSlideView extends JPanel {
         Graphics2D g2 = (Graphics2D) scratchG;
         try {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
+                    RenderingHints.VALUE_ANTIALIAS_OFF);
 
             g2.clipRect(insets.left, insets.top,
                     w - insets.left - insets.right, h - insets.top
@@ -700,6 +722,12 @@ public class OpenSlideView extends JPanel {
             }
             g2.drawImage(dbuf, 0, 0, null);
             g2.setTransform(a);
+            if (selectionsVisible) {
+                g2.setComposite(AlphaComposite.SrcOver);
+            } else {
+                g2.setComposite(AlphaComposite.getInstance(
+                        AlphaComposite.SRC_OVER, 0.2f));
+            }
             paintSelection(g2);
         } finally {
             scratchG.dispose();
@@ -740,35 +768,12 @@ public class OpenSlideView extends JPanel {
 
         Shape s = at.createTransformedShape(selection);
 
-        Rectangle2D bb = s.getBounds2D();
-
-        float strokeWidth = 5;
-        double bw = bb.getWidth();
-        double bh = bb.getHeight();
-
-        if (bw < 6 && bh < 6) {
-            s = new Rectangle((int) bb.getCenterX() - 2,
-                    (int) bb.getCenterY() - 2, 4, 4);
-        }
-
-        if (bw < 10 || bh < 10) {
-            strokeWidth = 3;
-        }
-
-        g.setStroke(new BasicStroke(strokeWidth));
+        g.translate(1, 1);
         g.setColor(Color.BLACK);
         g.draw(s);
 
-        g.setStroke(new BasicStroke(strokeWidth - 2, BasicStroke.CAP_SQUARE,
-                BasicStroke.JOIN_BEVEL, 0, new float[] { 3, 9 }, 0f));
-        // g.setColor(Color.BLACK);
-        g.setColor(new Color(176, 255, 107));
-        g.draw(s);
-
-        g.setStroke(new BasicStroke(strokeWidth - 2, BasicStroke.CAP_SQUARE,
-                BasicStroke.JOIN_BEVEL, 0, new float[] { 3, 9 }, 6f));
-        // g.setColor(Color.YELLOW);
-        g.setColor(new Color(107, 176, 255));
+        g.translate(-1, -1);
+        g.setColor(Color.WHITE);
         g.draw(s);
     }
 
