@@ -201,7 +201,7 @@ public class OpenSlide {
         paintRegion(g, dx, dy, sx, sy, w, h, layerDownsamples[layer]);
     }
 
-    public void paintRegion(Graphics2D g, int dx, int dy, int sx, int sy,
+    public void paintRegion(Graphics2D g, int dx, int dy, long sx, long sy,
             int w, int h, double downsample) {
         Lock rl = lock.readLock();
         rl.lock();
@@ -235,10 +235,10 @@ public class OpenSlide {
             }
 
             // scale source coordinates into layer coordinates
-            int baseX = (int) (downsample * sx);
-            int baseY = (int) (downsample * sy);
-            int layerX = (int) (relativeDS * sx);
-            int layerY = (int) (relativeDS * sy);
+            long baseX = (long) (downsample * sx);
+            long baseY = (long) (downsample * sy);
+            long layerX = (long) (relativeDS * sx);
+            long layerY = (long) (relativeDS * sy);
 
             // scale width and height by relative downsample
             int layerW = (int) Math.round(relativeDS * w);
