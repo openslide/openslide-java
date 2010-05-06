@@ -812,4 +812,14 @@ public class OpenSlideView extends JPanel {
     public void setSelectionListModel(SelectionListModel selections) {
         this.selections = selections;
     }
+
+    public int getSelectionForPoint(int x, int y) {
+        for (int i = 0; i < selections.getSize(); i++) {
+            Shape s = selections.get(i).getShape();
+            if (s.contains(new Point(x, y))) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }
