@@ -128,7 +128,7 @@ static jobjectArray osj_get_associated_image_names(JNIEnv *env, jobject obj, jlo
 }
 
 static void osj_read_region(JNIEnv *env, jobject obj, jlong osr, jintArray dest,
-			    jint x, jint y, jint layer, jint w, jint h) {
+			    jlong x, jlong y, jint layer, jlong w, jlong h) {
   uint32_t *dest2 = (*env)->GetPrimitiveArrayCritical(env, dest, NULL);
   if (dest2 == NULL) {
     return;
@@ -183,7 +183,7 @@ static JNINativeMethod methods[] = {
   { "openslide_get_property_names", "(J)[Ljava/lang/String;", (void *) osj_get_property_names },
   { "openslide_get_property_value", "(JLjava/lang/String;)Ljava/lang/String;", (void *) osj_get_property_value },
   { "openslide_get_associated_image_names", "(J)[Ljava/lang/String;", (void *) osj_get_associated_image_names },
-  { "openslide_read_region", "(J[IIIIII)V", (void *) osj_read_region },
+  { "openslide_read_region", "(J[IJJIJJ)V", (void *) osj_read_region },
   { "openslide_get_associated_image_dimensions", "(JLjava/lang/String;[J)V", (void *) osj_get_associated_image_dimensions },
   { "openslide_read_associated_image", "(JLjava/lang/String;[I)V", (void *) osj_read_associated_image },
 };

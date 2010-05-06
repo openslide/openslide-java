@@ -96,7 +96,7 @@ public class OpenSlide {
     private native static String[] openslide_get_associated_image_names(long osr);
 
     private native static void openslide_read_region(long osr, int dest[],
-            int x, int y, int layer, int w, int h);
+            long x, long y, int layer, long w, long h);
 
     private native static void openslide_get_associated_image_dimensions(
             long osr, String name, long dim[]);
