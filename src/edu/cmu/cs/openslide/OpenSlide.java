@@ -201,6 +201,24 @@ public class OpenSlide {
         paintRegion(g, dx, dy, sx, sy, w, h, layerDownsamples[layer]);
     }
 
+    public void paintRegionARGB(int dest[], long x, long y, int layer, int w,
+            int h) {
+        if ((long) w * (long) h > dest.length) {
+            throw new ArrayIndexOutOfBoundsException("Size of data ("
+                    + dest.length + ") is less than w * h");
+        }
+
+        if (x < 0 || y < 0) {
+            throw new IllegalArgumentException("x and y must be nonnegative");
+        }
+
+        if (w <= 0 || h <= 0) {
+            throw new IllegalArgumentException("w and h must be positive");
+        }
+
+        openslide_read_region(osr, dest, x, y, layer, w, h);
+    }
+
     public void paintRegion(Graphics2D g, int dx, int dy, long sx, long sy,
             int w, int h, double downsample) {
         Lock rl = lock.readLock();
