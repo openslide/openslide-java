@@ -104,6 +104,8 @@ public class OpenSlide {
     private native static void openslide_read_associated_image(long osr,
             String name, int dest[]);
 
+    private native static String openslide_get_error(long osr);
+
     public static boolean fileIsValid(File file) {
         return openslide_can_open(file.getPath());
     }
