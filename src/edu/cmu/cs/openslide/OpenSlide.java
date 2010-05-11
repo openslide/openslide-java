@@ -26,6 +26,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -57,6 +58,8 @@ public class OpenSlide {
     final public static String PROPERTY_NAME_QUICKHASH1 = "openslide.quickhash-1";
 
     private long osr;
+
+    private Throwable disposedCause;
 
     final private ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -110,12 +113,12 @@ public class OpenSlide {
         return openslide_can_open(file.getPath());
     }
 
-    public OpenSlide(File file) {
+    public OpenSlide(File file) throws IOException {
         osr = openslide_open(file.getPath());
 
         if (osr == 0) {
             // TODO not just file not found
-            throw new OpenSlideException();
+            throw new IOException();
         }
 
         // store layer count
@@ -153,15 +156,44 @@ public class OpenSlide {
         // store hash
         hashCodeVal = (int) Long.parseLong(getProperties().get(
                 PROPERTY_NAME_QUICKHASH1).substring(0, 8), 16);
+
+        checkError();
+    }
+
+    // call with the reader lock held, or from the constructor
+    private void checkError() throws IOException {
+        String msg = openslide_get_error(osr);
+
+        if (msg != null) {
+            IOException e = new IOException(msg);
+            scheduleForDisposal(e);
+            throw e;
+        }
+    }
+
+    // TODO thread pool?
+    private void scheduleForDisposal(final Throwable cause) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                dispose(cause);
+            }
+        }).start();
     }
 
     public void dispose() {
+        dispose(null);
+    }
+
+    // takes the writer lock
+    private void dispose(Throwable cause) {
         Lock wl = lock.writeLock();
         wl.lock();
         try {
             if (osr != 0) {
                 openslide_close(osr);
                 osr = 0;
+                disposedCause = cause;
             }
         } finally {
             wl.unlock();
@@ -172,9 +204,14 @@ public class OpenSlide {
         return layerCount;
     }
 
+    // call with the reader lock held
     private void checkDisposed() {
         if (osr == 0) {
-            throw new OpenSlideDisposedException();
+            if (disposedCause == null) {
+                throw new OpenSlideDisposedException();
+            } else {
+                throw new OpenSlideDisposedException(disposedCause);
+            }
         }
     }
 
@@ -199,12 +236,13 @@ public class OpenSlide {
     }
 
     public void paintRegionOfLayer(Graphics2D g, int dx, int dy, int sx,
-            int sy, int w, int h, int layer) {
+            int sy, int w, int h, int layer) throws IOException {
         paintRegion(g, dx, dy, sx, sy, w, h, layerDownsamples[layer]);
     }
 
+    // takes the reader lock
     public void paintRegionARGB(int dest[], long x, long y, int layer, int w,
-            int h) {
+            int h) throws IOException {
         if ((long) w * (long) h > dest.length) {
             throw new ArrayIndexOutOfBoundsException("Size of data ("
                     + dest.length + ") is less than w * h");
@@ -218,94 +256,94 @@ public class OpenSlide {
             throw new IllegalArgumentException("w and h must be positive");
         }
 
-        openslide_read_region(osr, dest, x, y, layer, w, h);
-    }
-
-    public void paintRegion(Graphics2D g, int dx, int dy, long sx, long sy,
-            int w, int h, double downsample) {
         Lock rl = lock.readLock();
         rl.lock();
         try {
             checkDisposed();
-
-            if (downsample < 1.0) {
-                throw new IllegalArgumentException("downsample (" + downsample
-                        + ") must be >= 1.0");
-            }
-
-            // get the layer
-            int layer = getBestLayerForDownsample(downsample);
-
-            // figure out its downsample
-            double layerDS = layerDownsamples[layer];
-
-            // compute the difference
-            double relativeDS = downsample / layerDS;
-
-            // translate if sx or sy are negative
-            if (sx < 0) {
-                dx -= sx;
-                w += sx; // shrink w
-                sx = 0;
-            }
-            if (sy < 0) {
-                dy -= sy;
-                h += sy; // shrink h
-                sy = 0;
-            }
-
-            // scale source coordinates into layer coordinates
-            long baseX = (long) (downsample * sx);
-            long baseY = (long) (downsample * sy);
-            long layerX = (long) (relativeDS * sx);
-            long layerY = (long) (relativeDS * sy);
-
-            // scale width and height by relative downsample
-            int layerW = (int) Math.round(relativeDS * w);
-            int layerH = (int) Math.round(relativeDS * h);
-
-            // clip to edge of image
-            layerW = (int) Math.min(layerW, getLayerWidth(layer) - layerX);
-            layerH = (int) Math.min(layerH, getLayerHeight(layer) - layerY);
-            w = (int) Math.round(layerW / relativeDS);
-            h = (int) Math.round(layerH / relativeDS);
-
-            if (debug) {
-                System.out.println("layerW " + layerW + ", layerH " + layerH
-                        + ", baseX " + baseX + ", baseY " + baseY);
-            }
-
-            if (layerW <= 0 || layerH <= 0) {
-                // nothing to draw
-                return;
-            }
-
-            BufferedImage img = new BufferedImage(layerW, layerH,
-                    BufferedImage.TYPE_INT_ARGB_PRE);
-
-            int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
-                    .getData();
-
-            paintRegionARGB(data, baseX, baseY, layer, img.getWidth(), img
-                    .getHeight());
-
-            // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
-            g.drawImage(img, dx, dy, w, h, null);
-
-            if (debug) {
-                System.out.println(img);
-
-                if (debugThingy == 0) {
-                    g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.4f));
-                    debugThingy = 1;
-                } else {
-                    g.setColor(new Color(0.0f, 1.0f, 0.0f, 0.4f));
-                    debugThingy = 0;
-                }
-                g.fillRect(dx, dy, w, h);
-            }
+            openslide_read_region(osr, dest, x, y, layer, w, h);
+            checkError();
         } finally {
             rl.unlock();
+        }
+    }
+
+    public void paintRegion(Graphics2D g, int dx, int dy, long sx, long sy,
+            int w, int h, double downsample) throws IOException {
+        if (downsample < 1.0) {
+            throw new IllegalArgumentException("downsample (" + downsample
+                    + ") must be >= 1.0");
+        }
+
+        // get the layer
+        int layer = getBestLayerForDownsample(downsample);
+
+        // figure out its downsample
+        double layerDS = layerDownsamples[layer];
+
+        // compute the difference
+        double relativeDS = downsample / layerDS;
+
+        // translate if sx or sy are negative
+        if (sx < 0) {
+            dx -= sx;
+            w += sx; // shrink w
+            sx = 0;
+        }
+        if (sy < 0) {
+            dy -= sy;
+            h += sy; // shrink h
+            sy = 0;
+        }
+
+        // scale source coordinates into layer coordinates
+        long baseX = (long) (downsample * sx);
+        long baseY = (long) (downsample * sy);
+        long layerX = (long) (relativeDS * sx);
+        long layerY = (long) (relativeDS * sy);
+
+        // scale width and height by relative downsample
+        int layerW = (int) Math.round(relativeDS * w);
+        int layerH = (int) Math.round(relativeDS * h);
+
+        // clip to edge of image
+        layerW = (int) Math.min(layerW, getLayerWidth(layer) - layerX);
+        layerH = (int) Math.min(layerH, getLayerHeight(layer) - layerY);
+        w = (int) Math.round(layerW / relativeDS);
+        h = (int) Math.round(layerH / relativeDS);
+
+        if (debug) {
+            System.out.println("layerW " + layerW + ", layerH " + layerH
+                    + ", baseX " + baseX + ", baseY " + baseY);
+        }
+
+        if (layerW <= 0 || layerH <= 0) {
+            // nothing to draw
+            return;
+        }
+
+        BufferedImage img = new BufferedImage(layerW, layerH,
+                BufferedImage.TYPE_INT_ARGB_PRE);
+
+        int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
+                .getData();
+
+        paintRegionARGB(data, baseX, baseY, layer, img.getWidth(), img
+                .getHeight());
+
+        // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
+        g.drawImage(img, dx, dy, w, h, null);
+
+        if (debug) {
+            System.out.println(img);
+
+            if (debugThingy == 0) {
+                g.setColor(new Color(1.0f, 0.0f, 0.0f, 0.4f));
+                debugThingy = 1;
+            } else {
+                g.setColor(new Color(0.0f, 1.0f, 0.0f, 0.4f));
+                debugThingy = 0;
+            }
+            g.fillRect(dx, dy, w, h);
         }
     }
 
@@ -314,7 +352,7 @@ public class OpenSlide {
     private int debugThingy = 0;
 
     public BufferedImage createThumbnailImage(int x, int y, long w, long h,
-            int maxSize, int bufferedImageType) {
+            int maxSize, int bufferedImageType) throws IOException {
         double ds;
 
         if (w > h) {
@@ -341,12 +379,12 @@ public class OpenSlide {
     }
 
     public BufferedImage createThumbnailImage(int x, int y, long w, long h,
-            int maxSize) {
+            int maxSize) throws IOException {
         return createThumbnailImage(x, y, w, h, maxSize,
                 BufferedImage.TYPE_INT_RGB);
     }
 
-    public BufferedImage createThumbnailImage(int maxSize) {
+    public BufferedImage createThumbnailImage(int maxSize) throws IOException {
         return createThumbnailImage(0, 0, getLayer0Width(), getLayer0Height(),
                 maxSize);
     }
@@ -380,7 +418,8 @@ public class OpenSlide {
         return associatedImages;
     }
 
-    BufferedImage getAssociatedImage(String name) {
+    // takes the reader lock
+    BufferedImage getAssociatedImage(String name) throws IOException {
         Lock rl = lock.readLock();
         rl.lock();
         try {
@@ -396,7 +435,7 @@ public class OpenSlide {
                     .getData();
 
             openslide_read_associated_image(osr, name, data);
-
+            checkError();
             return img;
         } finally {
             rl.unlock();

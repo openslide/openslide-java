@@ -22,6 +22,7 @@
 package edu.cmu.cs.openslide;
 
 import java.io.File;
+import java.io.IOException;
 
 public class TestCLI {
     static void print_downsamples(OpenSlide osr) {
@@ -37,7 +38,7 @@ public class TestCLI {
                 layer, osr.getLayerDownsample(layer));
     }
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws IOException {
         if (args.length != 1) {
             System.out.printf("give file!\n");
             return;

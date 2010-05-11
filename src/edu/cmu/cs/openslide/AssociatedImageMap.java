@@ -23,6 +23,7 @@ package edu.cmu.cs.openslide;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.IOException;
 import java.util.*;
 
 class AssociatedImageMap implements Map<String, BufferedImage> {
@@ -114,7 +115,11 @@ class AssociatedImageMap implements Map<String, BufferedImage> {
     @Override
     public BufferedImage get(Object key) {
         if (key instanceof String) {
-            return os.getAssociatedImage((String) key);
+            try {
+                return os.getAssociatedImage((String) key);
+            } catch (IOException e) {
+                return null;
+            }
         } else {
             return null;
         }

@@ -33,6 +33,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 import javax.swing.*;
 
@@ -756,8 +757,12 @@ public class OpenSlideView extends JPanel {
         g.setBackground(getBackground());
         g.clearRect(clip.x, clip.y, clip.width, clip.height);
 
-        osr.paintRegion(g, clip.x, clip.y, offsetX + clip.x, offsetY + clip.y,
-                clip.width, clip.height, ds);
+        try {
+            osr.paintRegion(g, clip.x, clip.y, offsetX + clip.x, offsetY
+                    + clip.y, clip.width, clip.height, ds);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void paintSelection(Graphics2D g, Shape selection, int x,

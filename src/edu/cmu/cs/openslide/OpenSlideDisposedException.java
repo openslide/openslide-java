@@ -21,8 +21,14 @@
 
 package edu.cmu.cs.openslide;
 
-public class OpenSlideDisposedException extends OpenSlideException {
+public class OpenSlideDisposedException extends RuntimeException {
+    private static final String MSG = "OpenSlide object has been disposed";
+
     public OpenSlideDisposedException() {
-        super("OpenSlide object has been disposed");
+        super(MSG);
+    }
+
+    public OpenSlideDisposedException(Throwable cause) {
+        super(MSG, cause);
     }
 }

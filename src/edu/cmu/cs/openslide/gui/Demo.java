@@ -25,6 +25,7 @@ import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -40,52 +41,57 @@ public class Demo {
                 JFrame jf = new JFrame("OpenSlide");
                 jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-                switch (args.length) {
-                case 0:
-                    JFileChooser jfc = new JFileChooser();
-                    jfc.setAcceptAllFileFilterUsed(false);
-                    jfc.setFileFilter(OpenSlide.getFileFilter());
-                    int result = jfc.showDialog(null, "Open");
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        openOne(jfc.getSelectedFile(), jf);
-                    } else {
+                try {
+                    switch (args.length) {
+                    case 0:
+                        JFileChooser jfc = new JFileChooser();
+                        jfc.setAcceptAllFileFilterUsed(false);
+                        jfc.setFileFilter(OpenSlide.getFileFilter());
+                        int result = jfc.showDialog(null, "Open");
+                        if (result == JFileChooser.APPROVE_OPTION) {
+                            openOne(jfc.getSelectedFile(), jf);
+                        } else {
+                            return;
+                        }
+                        break;
+
+                    case 1:
+                        openOne(new File(args[0]), jf);
+                        break;
+
+                    case 2:
+                        final OpenSlideView w1 = new OpenSlideView(
+                                new OpenSlide(new File(args[0])), true);
+                        final OpenSlideView w2 = new OpenSlideView(
+                                new OpenSlide(new File(args[1])), true);
+                        Box b = Box.createHorizontalBox();
+                        b.add(w1);
+                        b.add(w2);
+                        jf.getContentPane().add(b);
+
+                        JToggleButton linker = new JToggleButton("Link");
+                        jf.getContentPane().add(linker, BorderLayout.SOUTH);
+                        linker.addItemListener(new ItemListener() {
+                            public void itemStateChanged(ItemEvent e) {
+                                switch (e.getStateChange()) {
+                                case ItemEvent.SELECTED:
+                                    w1.linkWithOther(w2);
+                                    break;
+                                case ItemEvent.DESELECTED:
+                                    w1.unlinkOther();
+                                    break;
+                                }
+                            }
+                        });
+
+                        break;
+
+                    default:
                         return;
                     }
-                    break;
-
-                case 1:
-                    openOne(new File(args[0]), jf);
-                    break;
-
-                case 2:
-                    final OpenSlideView w1 = new OpenSlideView(new OpenSlide(
-                            new File(args[0])), true);
-                    final OpenSlideView w2 = new OpenSlideView(new OpenSlide(
-                            new File(args[1])), true);
-                    Box b = Box.createHorizontalBox();
-                    b.add(w1);
-                    b.add(w2);
-                    jf.getContentPane().add(b);
-
-                    JToggleButton linker = new JToggleButton("Link");
-                    jf.getContentPane().add(linker, BorderLayout.SOUTH);
-                    linker.addItemListener(new ItemListener() {
-                        public void itemStateChanged(ItemEvent e) {
-                            switch (e.getStateChange()) {
-                            case ItemEvent.SELECTED:
-                                w1.linkWithOther(w2);
-                                break;
-                            case ItemEvent.DESELECTED:
-                                w1.unlinkOther();
-                                break;
-                            }
-                        }
-                    });
-
-                    break;
-
-                default:
-                    return;
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                    System.exit(1);
                 }
 
                 jf.setSize(900, 700);
@@ -93,7 +99,7 @@ public class Demo {
                 jf.setVisible(true);
             }
 
-            private void openOne(File file, JFrame jf) {
+            private void openOne(File file, JFrame jf) throws IOException {
                 OpenSlide os;
                 os = new OpenSlide(file);
                 final OpenSlideView wv = new OpenSlideView(os, true);
