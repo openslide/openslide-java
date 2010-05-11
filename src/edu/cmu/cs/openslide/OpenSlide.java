@@ -77,44 +77,12 @@ public class OpenSlide {
 
     final private int hashCodeVal;
 
-    private native static boolean openslide_can_open(String file);
-
-    private native static long openslide_open(String file);
-
-    private native static int openslide_get_layer_count(long osr);
-
-    private native static void openslide_get_layer_dimensions(long osr,
-            int layer, long dim[]);
-
-    private native static double openslide_get_layer_downsample(long osr,
-            int layer);
-
-    private native static void openslide_close(long osr);
-
-    private native static String[] openslide_get_property_names(long osr);
-
-    private native static String openslide_get_property_value(long osr,
-            String name);
-
-    private native static String[] openslide_get_associated_image_names(long osr);
-
-    private native static void openslide_read_region(long osr, int dest[],
-            long x, long y, int layer, long w, long h);
-
-    private native static void openslide_get_associated_image_dimensions(
-            long osr, String name, long dim[]);
-
-    private native static void openslide_read_associated_image(long osr,
-            String name, int dest[]);
-
-    private native static String openslide_get_error(long osr);
-
     public static boolean fileIsValid(File file) {
-        return openslide_can_open(file.getPath());
+        return OpenSlideJNI.openslide_can_open(file.getPath());
     }
 
     public OpenSlide(File file) throws IOException {
-        osr = openslide_open(file.getPath());
+        osr = OpenSlideJNI.openslide_open(file.getPath());
 
         if (osr == 0) {
             // TODO not just file not found
@@ -122,7 +90,7 @@ public class OpenSlide {
         }
 
         // store layer count
-        layerCount = openslide_get_layer_count(osr);
+        layerCount = OpenSlideJNI.openslide_get_layer_count(osr);
 
         // store dimensions
         layerWidths = new long[layerCount];
@@ -131,24 +99,25 @@ public class OpenSlide {
 
         for (int i = 0; i < layerCount; i++) {
             long dim[] = new long[2];
-            openslide_get_layer_dimensions(osr, i, dim);
+            OpenSlideJNI.openslide_get_layer_dimensions(osr, i, dim);
             layerWidths[i] = dim[0];
             layerHeights[i] = dim[1];
-            layerDownsamples[i] = openslide_get_layer_downsample(osr, i);
+            layerDownsamples[i] = OpenSlideJNI.openslide_get_layer_downsample(
+                    osr, i);
         }
 
         // properties
         HashMap<String, String> props = new HashMap<String, String>();
-        for (String s : openslide_get_property_names(osr)) {
-            props.put(s, openslide_get_property_value(osr, s));
+        for (String s : OpenSlideJNI.openslide_get_property_names(osr)) {
+            props.put(s, OpenSlideJNI.openslide_get_property_value(osr, s));
         }
 
         properties = Collections.unmodifiableMap(props);
 
         // associated images
         // make names
-        Set<String> names = new HashSet<String>(Arrays
-                .asList(openslide_get_associated_image_names(osr)));
+        Set<String> names = new HashSet<String>(Arrays.asList(OpenSlideJNI
+                .openslide_get_associated_image_names(osr)));
 
         associatedImages = new AssociatedImageMap(Collections
                 .unmodifiableSet(names), this);
@@ -162,7 +131,7 @@ public class OpenSlide {
 
     // call with the reader lock held, or from the constructor
     private void checkError() throws IOException {
-        String msg = openslide_get_error(osr);
+        String msg = OpenSlideJNI.openslide_get_error(osr);
 
         if (msg != null) {
             IOException e = new IOException(msg);
@@ -191,7 +160,7 @@ public class OpenSlide {
         wl.lock();
         try {
             if (osr != 0) {
-                openslide_close(osr);
+                OpenSlideJNI.openslide_close(osr);
                 osr = 0;
                 disposedCause = cause;
             }
@@ -260,7 +229,7 @@ public class OpenSlide {
         rl.lock();
         try {
             checkDisposed();
-            openslide_read_region(osr, dest, x, y, layer, w, h);
+            OpenSlideJNI.openslide_read_region(osr, dest, x, y, layer, w, h);
             checkError();
         } finally {
             rl.unlock();
@@ -426,7 +395,8 @@ public class OpenSlide {
             checkDisposed();
 
             long dim[] = new long[2];
-            openslide_get_associated_image_dimensions(osr, name, dim);
+            OpenSlideJNI.openslide_get_associated_image_dimensions(osr, name,
+                    dim);
 
             BufferedImage img = new BufferedImage((int) dim[0], (int) dim[1],
                     BufferedImage.TYPE_INT_ARGB_PRE);
@@ -434,7 +404,7 @@ public class OpenSlide {
             int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                     .getData();
 
-            openslide_read_associated_image(osr, name, data);
+            OpenSlideJNI.openslide_read_associated_image(osr, name, data);
             checkError();
             return img;
         } finally {

@@ -205,7 +205,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     return -1;
   }
 
-  jclass clazz = (*env)->FindClass(env, "edu/cmu/cs/openslide/OpenSlide");
+  jclass clazz = (*env)->FindClass(env, "edu/cmu/cs/openslide/OpenSlideJNI");
   if (clazz == NULL) {
     return -1;
   }
