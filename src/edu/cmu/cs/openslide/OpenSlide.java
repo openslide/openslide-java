@@ -26,6 +26,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -80,11 +81,15 @@ public class OpenSlide {
     }
 
     public OpenSlide(File file) throws IOException {
+        if (!file.exists()) {
+            throw new FileNotFoundException(file.toString());
+        }
+
         osr = OpenSlideJNI.openslide_open(file.getPath());
 
         if (osr == 0) {
-            // TODO not just file not found
-            throw new IOException();
+            throw new IOException(file
+                    + ": Not a file that OpenSlide can recognize");
         }
 
         // store layer count
