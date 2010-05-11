@@ -1,9 +1,4 @@
 /bin
-/openslide_wrap.c
-/openslidejava.jar
-
-/src/edu/cmu/cs/openslide/OpenSlideGlue.java
-/src/edu/cmu/cs/openslide/*JNI.java
-/src/edu/cmu/cs/openslide/SWIGTYPE*.java
-
+*.jar
 *.so
+*.dll
