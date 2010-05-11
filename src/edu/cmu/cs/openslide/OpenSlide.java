@@ -59,8 +59,6 @@ public class OpenSlide {
 
     private long osr;
 
-    private Throwable disposedCause;
-
     final private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     final private long layerWidths[];
@@ -126,7 +124,13 @@ public class OpenSlide {
         hashCodeVal = (int) Long.parseLong(getProperties().get(
                 PROPERTY_NAME_QUICKHASH1).substring(0, 8), 16);
 
-        checkError();
+        // dispose on error, we are in the constructor
+        try {
+            checkError();
+        } catch (IOException e) {
+            dispose();
+            throw e;
+        }
     }
 
     // call with the reader lock held, or from the constructor
@@ -134,35 +138,18 @@ public class OpenSlide {
         String msg = OpenSlideJNI.openslide_get_error(osr);
 
         if (msg != null) {
-            IOException e = new IOException(msg);
-            scheduleForDisposal(e);
-            throw e;
+            throw new IOException(msg);
         }
     }
 
-    // TODO thread pool?
-    private void scheduleForDisposal(final Throwable cause) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                dispose(cause);
-            }
-        }).start();
-    }
-
-    public void dispose() {
-        dispose(null);
-    }
-
     // takes the writer lock
-    private void dispose(Throwable cause) {
+    public void dispose() {
         Lock wl = lock.writeLock();
         wl.lock();
         try {
             if (osr != 0) {
                 OpenSlideJNI.openslide_close(osr);
                 osr = 0;
-                disposedCause = cause;
             }
         } finally {
             wl.unlock();
@@ -176,11 +163,7 @@ public class OpenSlide {
     // call with the reader lock held
     private void checkDisposed() {
         if (osr == 0) {
-            if (disposedCause == null) {
-                throw new OpenSlideDisposedException();
-            } else {
-                throw new OpenSlideDisposedException(disposedCause);
-            }
+            throw new OpenSlideDisposedException();
         }
     }
 

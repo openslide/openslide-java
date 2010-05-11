@@ -27,8 +27,4 @@ public class OpenSlideDisposedException extends RuntimeException {
     public OpenSlideDisposedException() {
         super(MSG);
     }
-
-    public OpenSlideDisposedException(Throwable cause) {
-        super(MSG, cause);
-    }
 }
