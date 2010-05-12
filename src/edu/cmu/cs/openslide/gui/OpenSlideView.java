@@ -42,6 +42,8 @@ import edu.cmu.cs.openslide.OpenSlide;
 public class OpenSlideView extends JPanel {
     private static final int KEYBOARD_SCROLL_AMOUNT = 100;
 
+    private boolean selectionsAsPins;
+
     final private double downsampleBase;
 
     final private int maxDownsampleExponent;
@@ -514,6 +516,18 @@ public class OpenSlideView extends JPanel {
             }
         });
 
+        inputMap.put(KeyStroke.getKeyStroke("BACK_QUOTE"), "toggle pins");
+        actionMap.put("toggle pins", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                selectionsAsPins = !selectionsAsPins;
+                if (otherView != null) {
+                    otherView.selectionsAsPins = !otherView.selectionsAsPins;
+                }
+                repaintHelper(OpenSlideView.this);
+                repaintHelper(otherView);
+            }
+        });
+
         // install as parents
         InputMap oldInputMap = getInputMap();
         ActionMap oldActionMap = getActionMap();
@@ -767,29 +781,42 @@ public class OpenSlideView extends JPanel {
 
     public static void paintSelection(Graphics2D g, Shape selection, int x,
             int y, double downsample) {
+        paintSelection(g, selection, x, y, downsample, false);
+    }
+
+    public static void paintSelection(Graphics2D g, Shape selection, int x,
+            int y, double downsample, boolean asPins) {
         AffineTransform at = new AffineTransform();
         at.translate(x, y);
         at.scale(1 / downsample, 1 / downsample);
 
         Shape s = at.createTransformedShape(selection);
 
-        g.translate(1, 1);
-        g.setColor(Color.BLACK);
-        g.draw(s);
+        if (asPins) {
+            Rectangle2D r = s.getBounds2D();
+            int sx = (int) Math.round(r.getCenterX());
+            int sy = (int) Math.round(r.getCenterY());
+            g.setColor(Color.RED);
+            g.fillRect(sx - 2, sy - 2, 4, 4);
+        } else {
+            g.translate(1, 1);
+            g.setColor(Color.BLACK);
+            g.draw(s);
 
-        g.translate(-1, -1);
-        g.setColor(Color.WHITE);
-        g.draw(s);
+            g.translate(-1, -1);
+            g.setColor(Color.WHITE);
+            g.draw(s);
+        }
     }
 
     private void paintSelection(Graphics2D g) {
         if (selectionBeingDrawn != null) {
             paintSelection(g, selectionBeingDrawn, -viewPosition.x,
-                    -viewPosition.y, getDownsample());
+                    -viewPosition.y, getDownsample(), false);
         }
         for (Annotation selection : selections) {
             paintSelection(g, selection.getShape(), -viewPosition.x,
-                    -viewPosition.y, getDownsample());
+                    -viewPosition.y, getDownsample(), selectionsAsPins);
         }
     }
 
