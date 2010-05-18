@@ -73,33 +73,38 @@ public class Annotation {
             }
 
             String[] segs = shape.split(" ");
-            Path2D p = new Path2D.Double(Integer.parseInt(segs[0]));
-            for (int i = 1; i < segs.length; i += 7) {
-                double x1 = Double.parseDouble(segs[i + 1]);
-                double y1 = Double.parseDouble(segs[i + 2]);
-                double x2 = Double.parseDouble(segs[i + 3]);
-                double y2 = Double.parseDouble(segs[i + 4]);
-                double x3 = Double.parseDouble(segs[i + 5]);
-                double y3 = Double.parseDouble(segs[i + 6]);
-                switch (Integer.parseInt(segs[i])) {
-                case PathIterator.SEG_CLOSE:
+            Path2D p = new Path2D.Double();
+
+            int i = 0;
+            while (i < segs.length) {
+                switch (segs[i++].charAt(0)) {
+                case 'Z':
                     p.closePath();
                     break;
-                case PathIterator.SEG_CUBICTO:
-                    p.curveTo(x1, y1, x2, y2, x3, y3);
+                case 'C':
+                    p.curveTo(Double.parseDouble(segs[i++]), Double
+                            .parseDouble(segs[i++]), Double
+                            .parseDouble(segs[i++]), Double
+                            .parseDouble(segs[i++]), Double
+                            .parseDouble(segs[i++]), Double
+                            .parseDouble(segs[i++]));
                     break;
-                case PathIterator.SEG_LINETO:
-                    p.lineTo(x1, y1);
+                case 'L':
+                    p.lineTo(Double.parseDouble(segs[i++]), Double
+                            .parseDouble(segs[i++]));
                     break;
-                case PathIterator.SEG_MOVETO:
-                    p.moveTo(x1, y1);
+                case 'M':
+                    p.moveTo(Double.parseDouble(segs[i++]), Double
+                            .parseDouble(segs[i++]));
                     break;
-                case PathIterator.SEG_QUADTO:
-                    p.quadTo(x1, y1, x2, y2);
+                case 'Q':
+                    p.quadTo(Double.parseDouble(segs[i++]), Double
+                            .parseDouble(segs[i++]), Double
+                            .parseDouble(segs[i++]), Double
+                            .parseDouble(segs[i++]));
                     break;
                 }
             }
-
             return new Annotation(p, annotations);
         }
 
@@ -116,19 +121,47 @@ public class Annotation {
         private static String serialize(Shape s) {
             PathIterator p = s.getPathIterator(null);
             StringBuilder sb = new StringBuilder();
-            sb.append(p.getWindingRule());
 
             while (!p.isDone()) {
                 double coords[] = new double[6];
-                sb.append(" ");
-                sb.append(p.currentSegment(coords));
-                for (int i = 0; i < 6; i++) {
-                    sb.append(" ");
-                    sb.append(coords[i]);
+
+                switch (p.currentSegment(coords)) {
+                case PathIterator.SEG_CLOSE:
+                    sb.append(" Z");
+                    break;
+                case PathIterator.SEG_CUBICTO:
+                    sb.append(" C");
+                    sb.append(" " + coords[0]);
+                    sb.append(" " + coords[1]);
+                    sb.append(" " + coords[2]);
+                    sb.append(" " + coords[3]);
+                    sb.append(" " + coords[4]);
+                    sb.append(" " + coords[5]);
+                    break;
+                case PathIterator.SEG_LINETO:
+                    sb.append(" L");
+                    sb.append(" " + coords[0]);
+                    sb.append(" " + coords[1]);
+                    break;
+                case PathIterator.SEG_MOVETO:
+                    sb.append(" M");
+                    sb.append(" " + coords[0]);
+                    sb.append(" " + coords[1]);
+                    break;
+                case PathIterator.SEG_QUADTO:
+                    sb.append(" Q");
+                    sb.append(" " + coords[0]);
+                    sb.append(" " + coords[1]);
+                    sb.append(" " + coords[2]);
+                    sb.append(" " + coords[3]);
+                    sb.append(" " + coords[4]);
+                    sb.append(" " + coords[5]);
+                    break;
                 }
+
                 p.next();
             }
-            return sb.toString();
+            return sb.toString().trim();
         }
     }
 
