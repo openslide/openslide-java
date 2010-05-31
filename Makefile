@@ -11,7 +11,7 @@ libopenslidejava.so: openslide-jni.c
 
 clean:
 	ant clean
-	$(RM) libopenslidejava.so openslide_wrap.c *~ bin src/edu/cmu/cs/openslide/SWIGTYPE*.java src/edu/cmu/cs/openslide/*JNI.java src/edu/cmu/cs/openslide/OpenSlideGlue.java
+	$(RM) libopenslidejava.so openslide_wrap.c *~ bin
 
 
 
