@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.filechooser.FileFilter;
 
-public class OpenSlide {
+public final class OpenSlide {
     private static final FileFilter FILE_FILTER = new FileFilter() {
         @Override
         public boolean accept(File f) {
