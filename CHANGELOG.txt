@@ -1,6 +1,12 @@
 Notable Changes in OpenSlide Java
 =================================
 
+Version 0.9.0, 2010-06-01
+ * Eliminate swig dependency
+ * Support new error handling from OpenSlide 3.2.0
+ * Add new methods for painting
+ * Add some Annotation stuff
+
 Version 0.8.0, 2010-01-28
  * Switch from GPLv2 to LGPLv2
  * More selection types
