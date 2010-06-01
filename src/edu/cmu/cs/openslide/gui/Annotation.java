@@ -63,13 +63,15 @@ public class Annotation {
         }
 
         public Annotation toAnnotation() {
-            Map<String, String> annotations = null;
+            Map<String, String> annotations;
             if (this.annotations != null) {
                 annotations = new HashMap<String, String>();
                 for (int i = 0; i < this.annotations.length; i++) {
                     Pair p = this.annotations[i];
                     annotations.put(p.getName(), p.getValue());
                 }
+            } else {
+                annotations = Collections.emptyMap();
             }
 
             String[] segs = shape.split(" ");
