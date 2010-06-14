@@ -205,12 +205,8 @@ public final class OpenSlide {
                     + dest.length + ") is less than w * h");
         }
 
-        if (x < 0 || y < 0) {
-            throw new IllegalArgumentException("x and y must be nonnegative");
-        }
-
-        if (w <= 0 || h <= 0) {
-            throw new IllegalArgumentException("w and h must be positive");
+        if (w < 0 || h < 0) {
+            throw new IllegalArgumentException("w and h must be nonnegative");
         }
 
         Lock rl = lock.readLock();
@@ -239,18 +235,6 @@ public final class OpenSlide {
 
         // compute the difference
         double relativeDS = downsample / layerDS;
-
-        // translate if sx or sy are negative
-        if (sx < 0) {
-            dx -= sx;
-            w += sx; // shrink w
-            sx = 0;
-        }
-        if (sy < 0) {
-            dy -= sy;
-            h += sy; // shrink h
-            sy = 0;
-        }
 
         // scale source coordinates into layer coordinates
         long baseX = (long) (downsample * sx);
