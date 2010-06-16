@@ -1,6 +1,10 @@
 Notable Changes in OpenSlide Java
 =================================
 
+Version 0.9.1, 2010-06-16
+ * Fix build on Windows
+ * Remove some checks for zero dimensions and negative coordinates
+
 Version 0.9.0, 2010-06-01
  * Eliminate swig dependency
  * Support new error handling from OpenSlide 3.2.0
