@@ -25,6 +25,10 @@ class OpenSlideJNI {
     private OpenSlideJNI() {
     }
 
+    static {
+        System.loadLibrary("openslidejava");
+    }
+
     native static boolean openslide_can_open(String file);
 
     native static long openslide_open(String file);

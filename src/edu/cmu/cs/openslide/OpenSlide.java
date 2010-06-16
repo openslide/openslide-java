@@ -48,10 +48,6 @@ public final class OpenSlide {
         }
     };
 
-    static {
-        System.loadLibrary("openslidejava");
-    }
-
     final public static String PROPERTY_NAME_COMMENT = "openslide.comment";
 
     final public static String PROPERTY_NAME_VENDOR = "openslide.vendor";
