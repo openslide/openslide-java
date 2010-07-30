@@ -23,8 +23,23 @@ package edu.cmu.cs.openslide.gui;
 
 import java.awt.Shape;
 
-public interface Annotation {
+// very minimal class, does not do defensive copying of shape
+class DefaultAnnotation implements Annotation {
+    final private Shape shape;
 
-    Shape getShape();
+    public DefaultAnnotation(Shape shape) {
+        if (shape == null) {
+            throw new NullPointerException("shape cannot be null");
+        }
+        this.shape = shape;
+    }
 
+    public Shape getShape() {
+        return shape;
+    }
+
+    @Override
+    public String toString() {
+        return shape.toString();
+    }
 }

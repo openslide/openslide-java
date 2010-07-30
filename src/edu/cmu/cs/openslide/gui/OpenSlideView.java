@@ -367,7 +367,7 @@ public class OpenSlideView extends JPanel {
                 if (selectionBeingDrawn != null) {
                     Rectangle bb = selectionBeingDrawn.getBounds();
                     if (bb.height != 0 && bb.width != 0) {
-                        selections.add(new Annotation(selectionBeingDrawn));
+                        selections.add(new DefaultAnnotation(selectionBeingDrawn));
                         selectionBeingDrawn = null;
                     }
                 }
@@ -821,7 +821,7 @@ public class OpenSlideView extends JPanel {
     }
 
     public void addSelection(Shape s) {
-        selections.add(new Annotation(s));
+        selections.add(new DefaultAnnotation(s));
         repaint();
     }
 
