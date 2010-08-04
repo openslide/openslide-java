@@ -34,6 +34,7 @@ class DefaultAnnotation implements Annotation {
         this.shape = shape;
     }
 
+    @Override
     public Shape getShape() {
         return shape;
     }
