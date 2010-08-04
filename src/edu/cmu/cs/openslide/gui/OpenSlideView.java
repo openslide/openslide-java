@@ -60,7 +60,7 @@ public class OpenSlideView extends JPanel {
 
     private OpenSlideView otherView;
 
-    private SelectionListModel selections = new SelectionListModel();
+    private SelectionListModel selections = new DefaultSelectionListModel();
 
     private Shape selectionBeingDrawn;
 

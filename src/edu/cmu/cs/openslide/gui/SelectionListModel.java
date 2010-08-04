@@ -21,59 +21,21 @@
 
 package edu.cmu.cs.openslide.gui;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import javax.swing.ListModel;
 
-import javax.swing.AbstractListModel;
+public interface SelectionListModel extends ListModel, Iterable<Annotation> {
 
-public class SelectionListModel extends AbstractListModel implements
-        Iterable<Annotation> {
+    void add(Annotation annotation);
 
-    private final List<Annotation> list = new ArrayList<Annotation>();
+    boolean isEmpty();
 
-    @Override
-    public Annotation getElementAt(int index) {
-        return list.get(index);
-    }
+    Annotation get(int i);
 
-    @Override
-    public int getSize() {
-        return list.size();
-    }
+    void add(int index, Annotation annotation);
 
-    public void add(Annotation s) {
-        list.add(s);
-        int i = list.size() - 1;
-        fireIntervalAdded(this, i, i);
-    }
+    void remove(int index);
 
-    public void add(int index, Annotation s) {
-        list.add(index, s);
-        fireIntervalAdded(this, index, index);
-    }
+    void replace(int index, Annotation annotation);
 
-    public void remove(int index) {
-        list.remove(index);
-        fireIntervalRemoved(this, index, index);
-    }
-
-    public void clear() {
-        int oldSize = list.size();
-        list.clear();
-        fireIntervalRemoved(this, 0, oldSize - 1);
-    }
-
-    public boolean isEmpty() {
-        return list.isEmpty();
-    }
-
-    public Annotation get(int index) {
-        return list.get(index);
-    }
-
-    @Override
-    public Iterator<Annotation> iterator() {
-        return list.iterator();
-    }
+    void clear();
 }
