@@ -1,6 +1,10 @@
 Notable Changes in OpenSlide Java
 =================================
 
+Version 0.9.2, 2010-08-10
+ * Remove some Annotation stuff, try to be more extensible
+   and with simple defaults
+
 Version 0.9.1, 2010-06-16
  * Fix build on Windows
  * Remove some checks for zero dimensions and negative coordinates
