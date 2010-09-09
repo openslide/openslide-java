@@ -54,6 +54,8 @@ public final class OpenSlide {
 
     final public static String PROPERTY_NAME_QUICKHASH1 = "openslide.quickhash-1";
 
+    final public static String PROPERTY_NAME_BACKGROUND_COLOR = "openslide.background-color";
+
     private long osr;
 
     final private ReadWriteLock lock = new ReentrantReadWriteLock();
