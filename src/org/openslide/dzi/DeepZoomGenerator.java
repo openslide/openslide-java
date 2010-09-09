@@ -191,12 +191,33 @@ public class DeepZoomGenerator {
             int tileSize) {
         long t = 0;
         while (level >= 0) {
-            long ww = (w / TILE_SIZE) + ((w % TILE_SIZE) == 0 ? 0 : 1);
-            long hh = (h / TILE_SIZE) + ((h % TILE_SIZE) == 0 ? 0 : 1);
-            t += ww * hh;
+            for (int y = -OVERLAP; y < h; y += TILE_SIZE) {
+                int th = TILE_SIZE + 2 * OVERLAP;
+                if (y < 0) {
+                    th += y;
+                    y = 0;
+                }
+                if (y + th > h) {
+                    th = (int) (h - y);
+                }
 
-            w /= 2;
-            h /= 2;
+                for (int x = -OVERLAP; x < w; x += TILE_SIZE) {
+                    int tw = TILE_SIZE + 2 * OVERLAP;
+                    if (x < 0) {
+                        tw += x;
+                        x = 0;
+                    }
+                    if (x + tw > w) {
+                        th = (int) (w - x);
+                    }
+
+                    t++;
+                }
+            }
+
+            w = Math.max(w / 2, 1);
+            h = Math.max(h / 2, 1);
+
             level--;
         }
 
