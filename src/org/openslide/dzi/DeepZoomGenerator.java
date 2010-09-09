@@ -79,7 +79,7 @@ public class DeepZoomGenerator {
             for (int y = -OVERLAP; y < h; y += TILE_SIZE) {
                 int th = TILE_SIZE + 2 * OVERLAP;
                 if (y < 0) {
-                    th -= y;
+                    th += y;
                     y = 0;
                 }
                 if (y + th > h) {
@@ -92,7 +92,7 @@ public class DeepZoomGenerator {
                 for (int x = -OVERLAP; x < w; x += TILE_SIZE) {
                     int tw = TILE_SIZE + 2 * OVERLAP;
                     if (x < 0) {
-                        tw -= x;
+                        tw += x;
                         x = 0;
                     }
                     if (x + tw > w) {
