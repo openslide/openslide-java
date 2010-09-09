@@ -182,6 +182,8 @@ public class DeepZoomGenerator {
             }
             System.out.println();
             level--;
+            w = Math.max(w / 2, 1);
+            h = Math.max(h / 2, 1);
         }
 
         executor.shutdown();
