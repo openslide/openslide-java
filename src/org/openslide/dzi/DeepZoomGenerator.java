@@ -24,11 +24,8 @@ public class DeepZoomGenerator {
 
     static final int numThreads = Runtime.getRuntime().availableProcessors();
 
-    static final ExecutorService executor = new ThreadPoolExecutor(numThreads,
-            numThreads, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(
-                    numThreads * 2), new ThreadPoolExecutor.CallerRunsPolicy());
-
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException,
+            InterruptedException {
         File f = new File(args[0]);
 
         final OpenSlide os = new OpenSlide(f);
@@ -69,6 +66,10 @@ public class DeepZoomGenerator {
         final long totalTiles = computeTotalTiles(w, h, level, TILE_SIZE);
 
         while (level >= 0) {
+            final ExecutorService executor = new ThreadPoolExecutor(numThreads,
+                    numThreads, 5, TimeUnit.SECONDS,
+                    new ArrayBlockingQueue<Runnable>(numThreads * 2),
+                    new ThreadPoolExecutor.CallerRunsPolicy());
             System.out.println("generating level " + level + ": ("
                     + (w / TILE_SIZE) + "," + (h / TILE_SIZE) + ")");
 
@@ -180,13 +181,13 @@ public class DeepZoomGenerator {
                 }
                 j++;
             }
+            executor.shutdown();
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
             System.out.println();
             level--;
             w = Math.max(w / 2, 1);
             h = Math.max(h / 2, 1);
         }
-
-        executor.shutdown();
     }
 
     private static long computeTotalTiles(long w, long h, int level,
