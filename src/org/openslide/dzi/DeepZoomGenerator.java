@@ -120,6 +120,7 @@ public class DeepZoomGenerator {
                             }
 
                             try {
+                                // generate
                                 BufferedImage img = new BufferedImage(ftw, fth,
                                         BufferedImage.TYPE_INT_ARGB_PRE);
                                 if (prevDir == null) {
@@ -129,17 +130,17 @@ public class DeepZoomGenerator {
                                             .getData();
                                     os.paintRegionARGB(dest, fx, fy, 0, ftw,
                                             fth);
-
-                                    // png
-                                    File pngFile = new File(curDir, filename
-                                            + ".png");
-                                    ImageIO.write(img, "png", pngFile);
                                 } else {
                                     // TODO generate from previous dir
                                     return;
                                 }
 
-                                // jpeg
+                                // write png
+                                File pngFile = new File(curDir, filename
+                                        + ".png");
+                                ImageIO.write(img, "png", pngFile);
+
+                                // write jpeg
                                 BufferedImage img2 = new BufferedImage(ftw,
                                         fth, BufferedImage.TYPE_INT_RGB);
                                 Graphics2D g = img2.createGraphics();
