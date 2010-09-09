@@ -70,8 +70,8 @@ public class DeepZoomGenerator {
                     numThreads, 5, TimeUnit.SECONDS,
                     new ArrayBlockingQueue<Runnable>(numThreads * 2),
                     new ThreadPoolExecutor.CallerRunsPolicy());
-            System.out.println("generating level " + level + ": ("
-                    + (w / TILE_SIZE) + "," + (h / TILE_SIZE) + ")");
+
+            System.out.println("generating level " + level);
 
             final File curDir = new File(dir, Integer.toString(level));
             curDir.mkdirs();
@@ -174,7 +174,6 @@ public class DeepZoomGenerator {
                                         + (int) tilesPerSec
                                         + "                     \r");
                         System.out.flush();
-
                     }
 
                     i++;
@@ -183,7 +182,13 @@ public class DeepZoomGenerator {
             }
             executor.shutdown();
             executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-            System.out.println();
+
+            long tilesComputed = tileCount.longValue();
+            int percent = (int) (100 * tilesComputed / totalTiles);
+            System.out.println(" " + tilesComputed + "/" + totalTiles + " "
+                    + percent + "%, tiles per second: " + (int) tilesPerSec
+                    + "                     ");
+
             level--;
             w = Math.max(w / 2, 1);
             h = Math.max(h / 2, 1);
