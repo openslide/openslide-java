@@ -53,17 +53,12 @@ public class DeepZoomGenerator {
         long w = os.getLayer0Width();
         long h = os.getLayer0Height();
 
-        String dirname;
-        if (args.length > 1) {
-            dirname = args[1];
-        } else {
-            dirname = os.getProperties()
-                    .get(OpenSlide.PROPERTY_NAME_QUICKHASH1);
-        }
+        String dirname = os.getProperties().get(
+                OpenSlide.PROPERTY_NAME_QUICKHASH1);
 
+        // fall back to name
         if (dirname == null) {
-            System.out.println("Please give directory name on command line");
-            return;
+            dirname = f.getName();
         }
 
         File dir = new File(dirname);
