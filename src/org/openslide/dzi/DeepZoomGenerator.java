@@ -61,7 +61,8 @@ public class DeepZoomGenerator {
             dirname = f.getName();
         }
 
-        File dir = new File(dirname);
+        File dir = new File(dirname + "_files");
+        System.out.println("writing files to " + dir);
 
         String bgcolorStr = os.getProperties().get(
                 OpenSlide.PROPERTY_NAME_BACKGROUND_COLOR);
