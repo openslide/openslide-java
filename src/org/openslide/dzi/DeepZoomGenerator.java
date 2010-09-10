@@ -208,8 +208,8 @@ public class DeepZoomGenerator {
                     + "                     ");
 
             level--;
-            w = Math.max(w / 2, 1);
-            h = Math.max(h / 2, 1);
+            w = (w / 2) + ((w % 2) == 0 ? 0 : 1);
+            h = (h / 2) + ((h % 2) == 0 ? 0 : 1);
         }
     }
 
@@ -241,8 +241,8 @@ public class DeepZoomGenerator {
                 }
             }
 
-            w = Math.max(w / 2, 1);
-            h = Math.max(h / 2, 1);
+            w = (w / 2) + ((w % 2) == 0 ? 0 : 1);
+            h = (h / 2) + ((h % 2) == 0 ? 0 : 1);
 
             level--;
         }
