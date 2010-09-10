@@ -88,7 +88,7 @@ public class DeepZoomGenerator {
                     new ArrayBlockingQueue<Runnable>(numThreads * 2),
                     new ThreadPoolExecutor.CallerRunsPolicy());
 
-            System.out.println("generating level " + level);
+            System.out.printf("generating level %d (%d x %d)\n", level, w, h);
 
             final File curDir = new File(dir, Integer.toString(level));
             curDir.mkdirs();
