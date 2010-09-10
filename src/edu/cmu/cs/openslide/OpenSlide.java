@@ -25,6 +25,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,7 +36,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.filechooser.FileFilter;
 
-public final class OpenSlide {
+public final class OpenSlide implements Closeable {
     private static final FileFilter FILE_FILTER = new FileFilter() {
         @Override
         public boolean accept(File f) {
@@ -404,5 +405,10 @@ public final class OpenSlide {
         }
 
         return false;
+    }
+
+    @Override
+    public void close() {
+        dispose();
     }
 }
