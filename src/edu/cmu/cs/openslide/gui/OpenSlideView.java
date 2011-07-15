@@ -148,8 +148,16 @@ public class OpenSlideView extends JPanel {
     private void translateSlidePrivate(int dX, int dY) {
         int w = dbuf.getWidth();
         int h = dbuf.getHeight();
-
         Graphics2D g = dbuf.createGraphics();
+
+        if (Math.abs(dX) >= w || Math.abs(dY) >= h) {
+            viewPosition.translate(dX, dY);
+            g.setClip(0, 0, w, h);
+            paintBackingStore(g);
+            g.dispose();
+            return;
+        }
+
         g.copyArea(0, 0, w, h, -dX, -dY);
         viewPosition.translate(dX, dY);
 
