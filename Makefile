@@ -2,6 +2,8 @@
 
 CC = gcc
 JAVAC = javac
+JNI_INCLUDE = $(JAVA_HOME)/include
+export CPATH = $(JNI_INCLUDE)
 
 all: libopenslide-jni.so
 	ant
