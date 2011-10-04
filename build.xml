@@ -15,11 +15,11 @@
 	</target>
 	<target name="clean">
 		<delete dir="bin"/>
-		<delete file="openslidejava.jar" />
+		<delete file="openslide.jar" />
 	</target>
 	<target depends="clean" name="cleanall"/>
 	<target depends="build" name="jar">
-		<jar destfile="openslidejava.jar" basedir="bin">
+		<jar destfile="openslide.jar" basedir="bin">
 			<manifest>
 				<attribute name="Main-Class" value="edu.cmu.cs.openslide.gui.Demo"/>
 			</manifest>
