@@ -24,7 +24,7 @@
 #include <openslide.h>
 
 
-static jboolean osj_can_open(JNIEnv *env, jobject obj, jstring *filename) {
+static jboolean osj_can_open(JNIEnv *env, jobject obj, jstring filename) {
   const char *filename2 = (*env)->GetStringUTFChars(env, filename, NULL);
   if (filename2 == NULL) {
     return JNI_FALSE;
@@ -37,7 +37,7 @@ static jboolean osj_can_open(JNIEnv *env, jobject obj, jstring *filename) {
   return result;
 }
 
-static jlong osj_open(JNIEnv *env, jobject obj, jstring *filename) {
+static jlong osj_open(JNIEnv *env, jobject obj, jstring filename) {
   const char *filename2 = (*env)->GetStringUTFChars(env, filename, NULL);
   if (filename2 == NULL) {
     return 0;
