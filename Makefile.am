@@ -21,10 +21,10 @@ JAVA_SRC = build.xml \
 	src/org/openslide/dzi/DeepZoomGenerator.java
 
 openslide.jar: $(JAVA_SRC)
-	@$(ANT)
+	@$(ANT) -f $(srcdir)/build.xml -Dbuilddir=$(abs_builddir)
 
 mostlyclean-local:
-	@$(ANT) clean
+	@$(ANT) -f $(srcdir)/build.xml -Dbuilddir=$(abs_builddir) clean
 
 install-exec-hook:
 	chmod -x $(DESTDIR)$(pkglibdir)/libopenslide-jni.so
