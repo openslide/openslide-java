@@ -3,6 +3,7 @@ ACLOCAL_AMFLAGS = -I m4
 pkglib_LTLIBRARIES = libopenslide-jni.la
 libopenslide_jni_la_SOURCES = openslide-jni.c
 libopenslide_jni_la_CFLAGS = -Wall $(JNI_CFLAGS) $(OPENSLIDE_CFLAGS)
+libopenslide_jni_la_CFLAGS += -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
 libopenslide_jni_la_LDFLAGS = -avoid-version $(OPENSLIDE_LIBS)
 
 pkglib_DATA = openslide.jar
