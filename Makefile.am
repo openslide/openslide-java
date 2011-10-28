@@ -1,10 +1,21 @@
 ACLOCAL_AMFLAGS = -I m4
 
-pkglib_LTLIBRARIES = libopenslide-jni.la
+AM_CFLAGS = -Wall $(JNI_CFLAGS) $(OPENSLIDE_CFLAGS)
+AM_CFLAGS += -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
+AM_LDFLAGS = -avoid-version -no-undefined -module $(OPENSLIDE_LIBS)
+
+if DLL
+# JNI uses stdcall without @
+AM_LDFLAGS += -Wl,--kill-at
+JNI_LA = openslide-jni.la
+JNI_SO = openslide-jni.dll
+else
+JNI_LA = libopenslide-jni.la
+JNI_SO = libopenslide-jni.so
+endif
+
+pkglib_LTLIBRARIES = $(JNI_LA)
 libopenslide_jni_la_SOURCES = openslide-jni.c
-libopenslide_jni_la_CFLAGS = -Wall $(JNI_CFLAGS) $(OPENSLIDE_CFLAGS)
-libopenslide_jni_la_CFLAGS += -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
-libopenslide_jni_la_LDFLAGS = -avoid-version $(OPENSLIDE_LIBS)
 
 pkglib_DATA = openslide.jar
 JAVA_SRC = build.xml \
@@ -28,13 +39,13 @@ mostlyclean-local:
 	@$(ANT) -f $(srcdir)/build.xml -Dbuilddir=$(abs_builddir) clean
 
 install-exec-hook:
-	chmod -x $(DESTDIR)$(pkglibdir)/libopenslide-jni.so
-	rm -f $(DESTDIR)$(pkglibdir)/libopenslide-jni.la
+	chmod -x $(DESTDIR)$(pkglibdir)/$(JNI_SO)
+	rm -f $(DESTDIR)$(pkglibdir)/$(JNI_LA) \
+		$(DESTDIR)$(pkglibdir)/$(JNI_SO).a
 
 EXTRA_DIST = \
 	CHANGELOG.txt \
 	LICENSE.txt \
 	TODO.txt \
 	lgpl-2.1.txt \
-	mingw32-cheatsheet.txt \
 	$(JAVA_SRC)
