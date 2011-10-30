@@ -14,6 +14,10 @@ JNI_LA = libopenslide-jni.la
 JNI_SO = libopenslide-jni.so
 endif
 
+if EMBED_PATH
+JNI_EMBED_PATH = $(pkglibdir)/$(JNI_SO)
+endif
+
 pkglib_LTLIBRARIES = $(JNI_LA)
 libopenslide_jni_la_SOURCES = openslide-jni.c
 
@@ -32,8 +36,9 @@ JAVA_SRC = build.xml \
 	src/edu/cmu/cs/openslide/gui/SelectionListModel.java \
 	src/org/openslide/dzi/DeepZoomGenerator.java
 
-openslide.jar: $(JAVA_SRC)
-	@$(ANT) -f $(srcdir)/build.xml -Dbuilddir=$(abs_builddir)
+openslide.jar: $(JAVA_SRC) config.h
+	@$(ANT) -f $(srcdir)/build.xml -Dbuilddir=$(abs_builddir) \
+		-Dopenslide.jni.path=$(JNI_EMBED_PATH)
 
 mostlyclean-local:
 	@$(ANT) -f $(srcdir)/build.xml -Dbuilddir=$(abs_builddir) clean

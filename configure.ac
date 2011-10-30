@@ -83,6 +83,14 @@ else
 fi
 AM_CONDITIONAL([DLL], [test x$shrext_cmds = x.dll])
 
+AC_MSG_CHECKING([whether to embed library path in JAR])
+if test x$shrext_cmds = x.dll ; then
+    AC_MSG_RESULT([no])
+else
+    AC_MSG_RESULT([yes])
+fi
+AM_CONDITIONAL([EMBED_PATH], [test x$shrext_cmds != x.dll])
+
 # Checks for library functions.
 
 AC_CONFIG_FILES([Makefile])

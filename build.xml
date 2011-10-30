@@ -5,11 +5,12 @@
 	<property name="target" value="1.5"/>
 	<property name="source" value="1.5"/>
 	<property name="builddir" value="."/>
+	<property name="openslide.jni.path" value=""/>
 	<path id="openslide java.classpath">
 		<pathelement location="${builddir}/bin"/>
 	</path>
 	<target name="init">
-		<mkdir dir="${builddir}/bin"/>
+		<mkdir dir="${builddir}/bin/resources"/>
 		<copy includeemptydirs="false" todir="${builddir}/bin">
 			<fileset dir="src" excludes="**/*.launch, **/*.java"/>
 		</copy>
@@ -35,6 +36,9 @@
 			<src path="src"/>
 			<classpath refid="openslide java.classpath"/>
 		</javac>
+		<propertyfile file="${builddir}/bin/resources/openslide.properties">
+			<entry key="openslide.jni.path" value="${openslide.jni.path}"/>
+		</propertyfile>
 	</target>
 	<target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
 </project>
