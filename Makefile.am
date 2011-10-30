@@ -18,6 +18,9 @@ if EMBED_PATH
 JNI_EMBED_PATH = $(pkglibdir)/$(JNI_SO)
 endif
 
+export JAVA_HOME
+export ANT_HOME
+
 pkglib_LTLIBRARIES = $(JNI_LA)
 libopenslide_jni_la_SOURCES = openslide-jni.c
 

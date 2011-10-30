@@ -16,8 +16,14 @@ LT_INIT([win32-dll disable-static])
 PKG_PROG_PKG_CONFIG()
 AC_PROG_CC
 
+# For distribution-packaged Ant, $ANT may not be $ANT_HOME/bin/ant.
+# Use and pass through ANT_HOME if we receive it; otherwise, focus on ANT.
+AC_ARG_VAR([ANT], [path to ant program])
+AC_ARG_VAR([ANT_HOME], [path to ant installation directory])
+if test z$ANT = z -a z$ANT_HOME != z ; then
+    ANT=$ANT_HOME/bin/ant
+fi
 AC_PATH_PROG([ANT], [ant])
-AC_ARG_VAR([ANT], [path to ant])
 if test z$ANT = z ; then
     AC_MSG_ERROR([ant not found])
 fi
@@ -35,6 +41,7 @@ if test $host = $build; then
     # Find jni.h
     JOIN_EACH([include_paths], [$with_java], [include])
     FIND_FILE([jni_h_dir], [jni.h], [$include_paths])
+    JAVA_HOME=$(dirname $jni_h_dir)
     # Find jni_md.h
     AS_CASE([$host],
         [*-*-linux-gnu], [include_subdir=linux],
@@ -51,6 +58,8 @@ else
     # gcj include directory instead.  Autoconf doesn't give us a variable
     # for the build compiler, which is okay because anything other than
     # GCC probably won't support this syntax.
+    #
+    # Don't set JAVA_HOME unless it was specified on the command line.
     #
     # This is terrible.
     JNI_CFLAGS=
