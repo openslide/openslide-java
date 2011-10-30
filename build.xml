@@ -4,22 +4,24 @@
 	<property name="debuglevel" value="source,lines,vars"/>
 	<property name="target" value="1.5"/>
 	<property name="source" value="1.5"/>
+	<property name="builddir" value="."/>
+	<property name="openslide.jni.path" value=""/>
 	<path id="openslide java.classpath">
-		<pathelement location="bin"/>
+		<pathelement location="${builddir}/bin"/>
 	</path>
 	<target name="init">
-		<mkdir dir="bin"/>
-		<copy includeemptydirs="false" todir="bin">
+		<mkdir dir="${builddir}/bin/resources"/>
+		<copy includeemptydirs="false" todir="${builddir}/bin">
 			<fileset dir="src" excludes="**/*.launch, **/*.java"/>
 		</copy>
 	</target>
 	<target name="clean">
-		<delete dir="bin"/>
-		<delete file="openslide.jar" />
+		<delete dir="${builddir}/bin"/>
+		<delete file="${builddir}/openslide.jar" />
 	</target>
 	<target depends="clean" name="cleanall"/>
 	<target depends="build" name="jar">
-		<jar destfile="openslide.jar" basedir="bin">
+		<jar destfile="${builddir}/openslide.jar" basedir="${builddir}/bin">
 			<manifest>
 				<attribute name="Main-Class" value="edu.cmu.cs.openslide.gui.Demo"/>
 			</manifest>
@@ -30,10 +32,13 @@
 	<target name="build-subprojects"/>
 	<target depends="init" name="build-project">
 		<echo message="${ant.project.name}: ${ant.file}"/>
-		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${builddir}/bin" source="${source}" target="${target}" includeAntRuntime="false">
 			<src path="src"/>
 			<classpath refid="openslide java.classpath"/>
 		</javac>
+		<propertyfile file="${builddir}/bin/resources/openslide.properties">
+			<entry key="openslide.jni.path" value="${openslide.jni.path}"/>
+		</propertyfile>
 	</target>
 	<target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
 </project>
