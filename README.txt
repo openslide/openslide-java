@@ -23,6 +23,6 @@ this is in the libgcj-devel package.)
 
 PKG_CONFIG=pkg-config \
 	PKG_CONFIG_PATH=/path/to/cross/compiled/openslide/lib/pkgconfig \
-	./configure --host=i686-pc-mingw32
+	./configure --host=i686-pc-mingw32 --build=$(build-aux/config.guess)
 make
 make install
