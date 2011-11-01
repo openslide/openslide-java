@@ -21,12 +21,39 @@
 
 package edu.cmu.cs.openslide;
 
+import java.io.InputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 class OpenSlideJNI {
     private OpenSlideJNI() {
     }
 
     static {
-        System.loadLibrary("openslide-jni");
+        String libraryPath = null;
+
+        try {
+            InputStream is = OpenSlideJNI.class.getClassLoader().
+                    getResourceAsStream("resources/openslide.properties");
+            if (is != null) {
+                Properties p = new Properties();
+                p.load(is);
+                libraryPath = p.getProperty("openslide.jni.path");
+                if (libraryPath.equals("")) {
+                    libraryPath = null;
+                }
+            }
+        } catch (SecurityException e1) {
+            e1.printStackTrace();
+        } catch (IOException e2) {
+            e2.printStackTrace();
+        }
+
+        if (libraryPath != null) {
+            System.load(libraryPath);
+        } else {
+            System.loadLibrary("openslide-jni");
+        }
     }
 
     native static boolean openslide_can_open(String file);
