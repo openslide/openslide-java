@@ -19,7 +19,7 @@
  *
  */
 
-package edu.cmu.cs.openslide.gui;
+package org.openslide.gui;
 
 import java.util.ArrayList;
 import java.util.Iterator;

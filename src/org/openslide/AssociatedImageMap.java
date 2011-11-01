@@ -19,7 +19,7 @@
  *
  */
 
-package edu.cmu.cs.openslide;
+package org.openslide;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;

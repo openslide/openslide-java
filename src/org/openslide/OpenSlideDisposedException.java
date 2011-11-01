@@ -1,7 +1,7 @@
 /*
  *  OpenSlide, a library for reading whole slide image files
  *
- *  Copyright (c) 2007-2010 Carnegie Mellon University
+ *  Copyright (c) 2007-2008 Carnegie Mellon University
  *  All rights reserved.
  *
  *  OpenSlide is free software: you can redistribute it and/or modify
@@ -19,23 +19,12 @@
  *
  */
 
-package edu.cmu.cs.openslide.gui;
+package org.openslide;
 
-import javax.swing.ListModel;
+public class OpenSlideDisposedException extends RuntimeException {
+    private static final String MSG = "OpenSlide object has been disposed";
 
-public interface SelectionListModel extends ListModel, Iterable<Annotation> {
-
-    void add(Annotation annotation);
-
-    boolean isEmpty();
-
-    Annotation get(int i);
-
-    void add(int index, Annotation annotation);
-
-    void remove(int index);
-
-    void replace(int index, Annotation annotation);
-
-    void clear();
+    public OpenSlideDisposedException() {
+        super(MSG);
+    }
 }

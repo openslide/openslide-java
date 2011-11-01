@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.imageio.ImageIO;
 
-import edu.cmu.cs.openslide.OpenSlide;
+import org.openslide.OpenSlide;
 
 public class DeepZoomGenerator {
 

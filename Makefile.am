@@ -26,18 +26,18 @@ libopenslide_jni_la_SOURCES = openslide-jni.c
 
 pkglib_DATA = openslide.jar
 JAVA_SRC = build.xml \
-	src/edu/cmu/cs/openslide/AssociatedImageMap.java \
-	src/edu/cmu/cs/openslide/OpenSlideDisposedException.java \
-	src/edu/cmu/cs/openslide/OpenSlide.java \
-	src/edu/cmu/cs/openslide/OpenSlideJNI.java \
-	src/edu/cmu/cs/openslide/TestCLI.java \
-	src/edu/cmu/cs/openslide/gui/Annotation.java \
-	src/edu/cmu/cs/openslide/gui/DefaultAnnotation.java \
-	src/edu/cmu/cs/openslide/gui/DefaultSelectionListModel.java \
-	src/edu/cmu/cs/openslide/gui/Demo.java \
-	src/edu/cmu/cs/openslide/gui/OpenSlideView.java \
-	src/edu/cmu/cs/openslide/gui/SelectionListModel.java \
-	src/org/openslide/dzi/DeepZoomGenerator.java
+	src/org/openslide/AssociatedImageMap.java \
+	src/org/openslide/OpenSlideDisposedException.java \
+	src/org/openslide/OpenSlide.java \
+	src/org/openslide/OpenSlideJNI.java \
+	src/org/openslide/TestCLI.java \
+	src/org/openslide/dzi/DeepZoomGenerator.java \
+	src/org/openslide/gui/Annotation.java \
+	src/org/openslide/gui/DefaultAnnotation.java \
+	src/org/openslide/gui/DefaultSelectionListModel.java \
+	src/org/openslide/gui/Demo.java \
+	src/org/openslide/gui/OpenSlideView.java \
+	src/org/openslide/gui/SelectionListModel.java
 
 openslide.jar: $(JAVA_SRC) config.h
 	@$(ANT) -f $(srcdir)/build.xml -Dbuilddir=$(abs_builddir) \

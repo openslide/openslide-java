@@ -19,12 +19,23 @@
  *
  */
 
-package edu.cmu.cs.openslide.gui;
+package org.openslide.gui;
 
-import java.awt.Shape;
+import javax.swing.ListModel;
 
-public interface Annotation {
+public interface SelectionListModel extends ListModel, Iterable<Annotation> {
 
-    Shape getShape();
+    void add(Annotation annotation);
 
+    boolean isEmpty();
+
+    Annotation get(int i);
+
+    void add(int index, Annotation annotation);
+
+    void remove(int index);
+
+    void replace(int index, Annotation annotation);
+
+    void clear();
 }

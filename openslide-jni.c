@@ -205,7 +205,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     return -1;
   }
 
-  jclass clazz = (*env)->FindClass(env, "edu/cmu/cs/openslide/OpenSlideJNI");
+  jclass clazz = (*env)->FindClass(env, "org/openslide/OpenSlideJNI");
   if (clazz == NULL) {
     return -1;
   }

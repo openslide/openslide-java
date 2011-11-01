@@ -1,7 +1,7 @@
 /*
  *  OpenSlide, a library for reading whole slide image files
  *
- *  Copyright (c) 2007-2008 Carnegie Mellon University
+ *  Copyright (c) 2007-2010 Carnegie Mellon University
  *  All rights reserved.
  *
  *  OpenSlide is free software: you can redistribute it and/or modify
@@ -19,12 +19,28 @@
  *
  */
 
-package edu.cmu.cs.openslide;
+package org.openslide.gui;
 
-public class OpenSlideDisposedException extends RuntimeException {
-    private static final String MSG = "OpenSlide object has been disposed";
+import java.awt.Shape;
 
-    public OpenSlideDisposedException() {
-        super(MSG);
+// very minimal class, does not do defensive copying of shape
+class DefaultAnnotation implements Annotation {
+    final private Shape shape;
+
+    public DefaultAnnotation(Shape shape) {
+        if (shape == null) {
+            throw new NullPointerException("shape cannot be null");
+        }
+        this.shape = shape;
+    }
+
+    @Override
+    public Shape getShape() {
+        return shape;
+    }
+
+    @Override
+    public String toString() {
+        return shape.toString();
     }
 }

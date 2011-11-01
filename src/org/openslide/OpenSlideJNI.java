@@ -19,7 +19,7 @@
  *
  */
 
-package edu.cmu.cs.openslide;
+package org.openslide;
 
 import java.io.InputStream;
 import java.io.IOException;

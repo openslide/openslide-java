@@ -1,6 +1,6 @@
 OpenSlide
 
-Carnegie Mellon University
+Carnegie Mellon University and others
 
 http://openslide.org/
 

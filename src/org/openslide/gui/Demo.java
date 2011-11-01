@@ -19,7 +19,7 @@
  *
  */
 
-package edu.cmu.cs.openslide.gui;
+package org.openslide.gui;
 
 import java.awt.BorderLayout;
 import java.awt.event.*;
@@ -31,7 +31,7 @@ import java.util.Map.Entry;
 
 import javax.swing.*;
 
-import edu.cmu.cs.openslide.OpenSlide;
+import org.openslide.OpenSlide;
 
 public class Demo {
     public static void main(final String[] args) {

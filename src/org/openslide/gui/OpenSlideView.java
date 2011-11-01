@@ -24,7 +24,7 @@
  * slides, non-pixel-perfect scrolling.
  */
 
-package edu.cmu.cs.openslide.gui;
+package org.openslide.gui;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -37,7 +37,7 @@ import java.io.IOException;
 
 import javax.swing.*;
 
-import edu.cmu.cs.openslide.OpenSlide;
+import org.openslide.OpenSlide;
 
 public class OpenSlideView extends JPanel {
     private static final int KEYBOARD_SCROLL_AMOUNT = 100;
