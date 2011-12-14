@@ -26,7 +26,7 @@ import java.awt.image.DataBufferInt;
 import java.io.IOException;
 import java.util.*;
 
-class AssociatedImageMap implements Map<String, BufferedImage> {
+public class AssociatedImageMap implements Map<String, BufferedImage> {
     private static class ImageEntry implements Entry<String, BufferedImage> {
 
         final private String key;
@@ -58,7 +58,7 @@ class AssociatedImageMap implements Map<String, BufferedImage> {
 
     final private OpenSlide os;
 
-    public AssociatedImageMap(Set<String> names, OpenSlide os) {
+    AssociatedImageMap(Set<String> names, OpenSlide os) {
         this.names = names;
         this.os = os;
     }
@@ -112,14 +112,23 @@ class AssociatedImageMap implements Map<String, BufferedImage> {
         return result;
     }
 
+    // returns null if the image cannot be loaded
     @Override
     public BufferedImage get(Object key) {
-        if (key instanceof String && containsKey(key)) {
+        if (key instanceof String) {
             try {
-                return os.getAssociatedImage((String) key);
+                return getImage((String) key);
             } catch (IOException e) {
                 return null;
             }
+        } else {
+            return null;
+        }
+    }
+
+    public BufferedImage getImage(String name) throws IOException {
+        if (containsKey(name)) {
+            return os.getAssociatedImage(name);
         } else {
             return null;
         }
