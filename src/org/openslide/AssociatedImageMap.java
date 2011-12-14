@@ -114,7 +114,7 @@ class AssociatedImageMap implements Map<String, BufferedImage> {
 
     @Override
     public BufferedImage get(Object key) {
-        if (key instanceof String) {
+        if (key instanceof String && containsKey(key)) {
             try {
                 return os.getAssociatedImage((String) key);
             } catch (IOException e) {
