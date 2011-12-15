@@ -1,7 +1,7 @@
 /*
  *  OpenSlide, a library for reading whole slide image files
  *
- *  Copyright (c) 2007-2009 Carnegie Mellon University
+ *  Copyright (c) 2007-2011 Carnegie Mellon University
  *  All rights reserved.
  *
  *  OpenSlide is free software: you can redistribute it and/or modify
@@ -60,6 +60,13 @@ public class TestCLI {
         h = osr.getLayer0Height();
         System.out.printf("dimensions: %d x %d\n", w, h);
         System.out.printf("comment: %s\n", osr.getComment());
+
+        System.out.print("associated images:");
+        AssociatedImageMap associated = osr.getAssociatedImages();
+        for (String name : associated.getNames()) {
+            System.out.printf(" %s", name);
+        }
+        System.out.print("\n");
 
         int layers = osr.getLayerCount();
         System.out.printf("num layers: %d\n", layers);

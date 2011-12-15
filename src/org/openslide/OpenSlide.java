@@ -354,7 +354,7 @@ public final class OpenSlide implements Closeable {
         return properties;
     }
 
-    public Map<String, BufferedImage> getAssociatedImages() {
+    public AssociatedImageMap getAssociatedImages() {
         return associatedImages;
     }
 
