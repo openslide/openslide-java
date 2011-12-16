@@ -1,7 +1,7 @@
 /*
  *  OpenSlide, a library for reading whole slide image files
  *
- *  Copyright (c) 2007-2009 Carnegie Mellon University
+ *  Copyright (c) 2007-2011 Carnegie Mellon University
  *  All rights reserved.
  *
  *  OpenSlide is free software: you can redistribute it and/or modify
@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 import javax.swing.*;
 
 import org.openslide.OpenSlide;
+import org.openslide.AssociatedImage;
 
 public class Demo {
     public static void main(final String[] args) {
@@ -129,13 +130,11 @@ public class Demo {
                     }
                 });
 
-                Map<String, BufferedImage> associatedImages = os
-                        .getAssociatedImages();
-                for (Entry<String, BufferedImage> e : associatedImages
-                        .entrySet()) {
-                    JFrame j = new JFrame(e.getKey());
+                for (AssociatedImage img : os.getAssociatedImages()
+                        .values()) {
+                    JFrame j = new JFrame(img.getName());
                     j.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                    j.add(new JLabel(new ImageIcon(e.getValue())));
+                    j.add(new JLabel(new ImageIcon(img.toBufferedImage())));
                     j.pack();
                     j.setVisible(true);
                 }

@@ -1,7 +1,7 @@
 /*
  *  OpenSlide, a library for reading whole slide image files
  *
- *  Copyright (c) 2007-2010 Carnegie Mellon University
+ *  Copyright (c) 2007-2011 Carnegie Mellon University
  *  All rights reserved.
  *
  *  OpenSlide is free software: you can redistribute it and/or modify
@@ -71,7 +71,7 @@ public final class OpenSlide implements Closeable {
 
     final private Map<String, String> properties;
 
-    final private AssociatedImageMap associatedImages;
+    final private Map<String, AssociatedImage> associatedImages;
 
     final private int hashCodeVal;
 
@@ -117,12 +117,14 @@ public final class OpenSlide implements Closeable {
         properties = Collections.unmodifiableMap(props);
 
         // associated images
-        // make names
-        Set<String> names = new HashSet<String>(Arrays.asList(OpenSlideJNI
-                .openslide_get_associated_image_names(osr)));
+        HashMap<String, AssociatedImage> associated =
+                new HashMap<String, AssociatedImage>();
+        for (String s : OpenSlideJNI
+                .openslide_get_associated_image_names(osr)) {
+            associated.put(s, new AssociatedImage(s, this));
+        }
 
-        associatedImages = new AssociatedImageMap(Collections
-                .unmodifiableSet(names), this);
+        associatedImages = Collections.unmodifiableMap(associated);
 
         // store hash
         hashCodeVal = (int) Long.parseLong(getProperties().get(
@@ -354,7 +356,7 @@ public final class OpenSlide implements Closeable {
         return properties;
     }
 
-    public Map<String, BufferedImage> getAssociatedImages() {
+    public Map<String, AssociatedImage> getAssociatedImages() {
         return associatedImages;
     }
 
