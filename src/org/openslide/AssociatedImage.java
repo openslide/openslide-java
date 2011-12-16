@@ -31,6 +31,9 @@ public class AssociatedImage {
     private final OpenSlide os;
 
     AssociatedImage(String name, OpenSlide os) {
+        if (name == null || os == null) {
+            throw new NullPointerException("Arguments cannot be null");
+        }
         this.name = name;
         this.os = os;
     }
