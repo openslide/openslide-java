@@ -42,6 +42,10 @@ public class AssociatedImage {
         return name;
     }
 
+    public OpenSlide getOpenSlide() {
+        return os;
+    }
+
     public BufferedImage toBufferedImage() throws IOException {
         return os.getAssociatedImage(name);
     }
