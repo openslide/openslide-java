@@ -370,6 +370,11 @@ public final class OpenSlide implements Closeable {
             long dim[] = new long[2];
             OpenSlideJNI.openslide_get_associated_image_dimensions(osr, name,
                     dim);
+            checkError();
+            if (dim[0] == -1) {
+                // non-terminal error
+                throw new IOException("Failure reading associated image");
+            }
 
             BufferedImage img = new BufferedImage((int) dim[0], (int) dim[1],
                     BufferedImage.TYPE_INT_ARGB_PRE);
