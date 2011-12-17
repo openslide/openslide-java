@@ -1,6 +1,17 @@
 Notable Changes in OpenSlide Java
 =================================
 
+Version 0.10.0, 2011-12-16
+ * Change package namespace to org.openslide
+ * Add wrapper class for associated images
+ * Have OpenSlide implement Closeable
+ * Convert top-level build system to Autotools
+ * Rename JAR and JNI library (thanks, Mathieu Malaterre)
+ * Embed JNI library path in JAR on Linux
+ * Fix translation by large offsets in GUI (thanks, Jan Harkes)
+ * Fix IllegalArgumentException in associated image error cases
+ * Add build instructions
+
 Version 0.9.2, 2010-08-10
  * Remove some Annotation stuff, try to be more extensible
    and with simple defaults
