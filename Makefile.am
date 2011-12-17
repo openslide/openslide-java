@@ -26,7 +26,7 @@ libopenslide_jni_la_SOURCES = openslide-jni.c
 
 pkglib_DATA = openslide.jar
 JAVA_SRC = build.xml \
-	src/org/openslide/AssociatedImageMap.java \
+	src/org/openslide/AssociatedImage.java \
 	src/org/openslide/OpenSlideDisposedException.java \
 	src/org/openslide/OpenSlide.java \
 	src/org/openslide/OpenSlideJNI.java \
