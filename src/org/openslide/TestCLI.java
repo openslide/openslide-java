@@ -59,7 +59,6 @@ public class TestCLI {
         w = osr.getLevel0Width();
         h = osr.getLevel0Height();
         System.out.printf("dimensions: %d x %d\n", w, h);
-        System.out.printf("comment: %s\n", osr.getComment());
 
         int levels = osr.getLevelCount();
         System.out.printf("num levels: %d\n", levels);

@@ -189,10 +189,6 @@ public final class OpenSlide implements Closeable {
         return levelHeights[level];
     }
 
-    public String getComment() {
-        return properties.get(PROPERTY_NAME_COMMENT);
-    }
-
     public void paintRegionOfLevel(Graphics2D g, int dx, int dy, int sx,
             int sy, int w, int h, int level) throws IOException {
         paintRegion(g, dx, dy, sx, sy, w, h, levelDownsamples[level]);
