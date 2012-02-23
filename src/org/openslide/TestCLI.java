@@ -26,16 +26,16 @@ import java.io.IOException;
 
 public class TestCLI {
     static void print_downsamples(OpenSlide osr) {
-        for (int layer = 0; layer < osr.getLayerCount(); layer++) {
-            System.out.printf("layer %d: downsample: %g\n", layer, osr
-                    .getLayerDownsample(layer));
+        for (int level = 0; level < osr.getLevelCount(); level++) {
+            System.out.printf("level %d: downsample: %g\n", level, osr
+                    .getLevelDownsample(level));
         }
     }
 
     static void test_next_biggest(OpenSlide osr, double downsample) {
-        int layer = osr.getBestLayerForDownsample(downsample);
-        System.out.printf("layer for downsample %g: %d (%g)\n", downsample,
-                layer, osr.getLayerDownsample(layer));
+        int level = osr.getBestLevelForDownsample(downsample);
+        System.out.printf("level for downsample %g: %d (%g)\n", downsample,
+                level, osr.getLevelDownsample(level));
     }
 
     public static void main(String args[]) throws IOException {
@@ -56,13 +56,13 @@ public class TestCLI {
 
         osr = new OpenSlide(f);
 
-        w = osr.getLayer0Width();
-        h = osr.getLayer0Height();
+        w = osr.getLevel0Width();
+        h = osr.getLevel0Height();
         System.out.printf("dimensions: %d x %d\n", w, h);
         System.out.printf("comment: %s\n", osr.getComment());
 
-        int layers = osr.getLayerCount();
-        System.out.printf("num layers: %d\n", layers);
+        int levels = osr.getLevelCount();
+        System.out.printf("num levels: %d\n", levels);
 
         print_downsamples(osr);
 

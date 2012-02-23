@@ -61,13 +61,13 @@ public final class OpenSlide implements Closeable {
 
     final private ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    final private long layerWidths[];
+    final private long levelWidths[];
 
-    final private long layerHeights[];
+    final private long levelHeights[];
 
-    final private double layerDownsamples[];
+    final private double levelDownsamples[];
 
-    final private int layerCount;
+    final private int levelCount;
 
     final private Map<String, String> properties;
 
@@ -91,20 +91,20 @@ public final class OpenSlide implements Closeable {
                     + ": Not a file that OpenSlide can recognize");
         }
 
-        // store layer count
-        layerCount = OpenSlideJNI.openslide_get_layer_count(osr);
+        // store level count
+        levelCount = OpenSlideJNI.openslide_get_level_count(osr);
 
         // store dimensions
-        layerWidths = new long[layerCount];
-        layerHeights = new long[layerCount];
-        layerDownsamples = new double[layerCount];
+        levelWidths = new long[levelCount];
+        levelHeights = new long[levelCount];
+        levelDownsamples = new double[levelCount];
 
-        for (int i = 0; i < layerCount; i++) {
+        for (int i = 0; i < levelCount; i++) {
             long dim[] = new long[2];
-            OpenSlideJNI.openslide_get_layer_dimensions(osr, i, dim);
-            layerWidths[i] = dim[0];
-            layerHeights[i] = dim[1];
-            layerDownsamples[i] = OpenSlideJNI.openslide_get_layer_downsample(
+            OpenSlideJNI.openslide_get_level_dimensions(osr, i, dim);
+            levelWidths[i] = dim[0];
+            levelHeights[i] = dim[1];
+            levelDownsamples[i] = OpenSlideJNI.openslide_get_level_downsample(
                     osr, i);
         }
 
@@ -162,8 +162,8 @@ public final class OpenSlide implements Closeable {
         }
     }
 
-    public int getLayerCount() {
-        return layerCount;
+    public int getLevelCount() {
+        return levelCount;
     }
 
     // call with the reader lock held
@@ -173,33 +173,33 @@ public final class OpenSlide implements Closeable {
         }
     }
 
-    public long getLayer0Width() {
-        return layerWidths[0];
+    public long getLevel0Width() {
+        return levelWidths[0];
     }
 
-    public long getLayer0Height() {
-        return layerHeights[0];
+    public long getLevel0Height() {
+        return levelHeights[0];
     }
 
-    public long getLayerWidth(int layer) {
-        return layerWidths[layer];
+    public long getLevelWidth(int level) {
+        return levelWidths[level];
     }
 
-    public long getLayerHeight(int layer) {
-        return layerHeights[layer];
+    public long getLevelHeight(int level) {
+        return levelHeights[level];
     }
 
     public String getComment() {
         return properties.get(PROPERTY_NAME_COMMENT);
     }
 
-    public void paintRegionOfLayer(Graphics2D g, int dx, int dy, int sx,
-            int sy, int w, int h, int layer) throws IOException {
-        paintRegion(g, dx, dy, sx, sy, w, h, layerDownsamples[layer]);
+    public void paintRegionOfLevel(Graphics2D g, int dx, int dy, int sx,
+            int sy, int w, int h, int level) throws IOException {
+        paintRegion(g, dx, dy, sx, sy, w, h, levelDownsamples[level]);
     }
 
     // takes the reader lock
-    public void paintRegionARGB(int dest[], long x, long y, int layer, int w,
+    public void paintRegionARGB(int dest[], long x, long y, int level, int w,
             int h) throws IOException {
         if ((long) w * (long) h > dest.length) {
             throw new ArrayIndexOutOfBoundsException("Size of data ("
@@ -214,7 +214,7 @@ public final class OpenSlide implements Closeable {
         rl.lock();
         try {
             checkDisposed();
-            OpenSlideJNI.openslide_read_region(osr, dest, x, y, layer, w, h);
+            OpenSlideJNI.openslide_read_region(osr, dest, x, y, level, w, h);
             checkError();
         } finally {
             rl.unlock();
@@ -228,48 +228,48 @@ public final class OpenSlide implements Closeable {
                     + ") must be >= 1.0");
         }
 
-        // get the layer
-        int layer = getBestLayerForDownsample(downsample);
+        // get the level
+        int level = getBestLevelForDownsample(downsample);
 
         // figure out its downsample
-        double layerDS = layerDownsamples[layer];
+        double levelDS = levelDownsamples[level];
 
         // compute the difference
-        double relativeDS = downsample / layerDS;
+        double relativeDS = downsample / levelDS;
 
-        // scale source coordinates into layer coordinates
+        // scale source coordinates into level coordinates
         long baseX = (long) (downsample * sx);
         long baseY = (long) (downsample * sy);
-        long layerX = (long) (relativeDS * sx);
-        long layerY = (long) (relativeDS * sy);
+        long levelX = (long) (relativeDS * sx);
+        long levelY = (long) (relativeDS * sy);
 
         // scale width and height by relative downsample
-        int layerW = (int) Math.round(relativeDS * w);
-        int layerH = (int) Math.round(relativeDS * h);
+        int levelW = (int) Math.round(relativeDS * w);
+        int levelH = (int) Math.round(relativeDS * h);
 
         // clip to edge of image
-        layerW = (int) Math.min(layerW, getLayerWidth(layer) - layerX);
-        layerH = (int) Math.min(layerH, getLayerHeight(layer) - layerY);
-        w = (int) Math.round(layerW / relativeDS);
-        h = (int) Math.round(layerH / relativeDS);
+        levelW = (int) Math.min(levelW, getLevelWidth(level) - levelX);
+        levelH = (int) Math.min(levelH, getLevelHeight(level) - levelY);
+        w = (int) Math.round(levelW / relativeDS);
+        h = (int) Math.round(levelH / relativeDS);
 
         if (debug) {
-            System.out.println("layerW " + layerW + ", layerH " + layerH
+            System.out.println("levelW " + levelW + ", levelH " + levelH
                     + ", baseX " + baseX + ", baseY " + baseY);
         }
 
-        if (layerW <= 0 || layerH <= 0) {
+        if (levelW <= 0 || levelH <= 0) {
             // nothing to draw
             return;
         }
 
-        BufferedImage img = new BufferedImage(layerW, layerH,
+        BufferedImage img = new BufferedImage(levelW, levelH,
                 BufferedImage.TYPE_INT_ARGB_PRE);
 
         int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                 .getData();
 
-        paintRegionARGB(data, baseX, baseY, layer, img.getWidth(), img
+        paintRegionARGB(data, baseX, baseY, level, img.getWidth(), img
                 .getHeight());
 
         // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
@@ -327,29 +327,29 @@ public final class OpenSlide implements Closeable {
     }
 
     public BufferedImage createThumbnailImage(int maxSize) throws IOException {
-        return createThumbnailImage(0, 0, getLayer0Width(), getLayer0Height(),
+        return createThumbnailImage(0, 0, getLevel0Width(), getLevel0Height(),
                 maxSize);
     }
 
-    public double getLayerDownsample(int layer) {
-        return layerDownsamples[layer];
+    public double getLevelDownsample(int level) {
+        return levelDownsamples[level];
     }
 
-    public int getBestLayerForDownsample(double downsample) {
+    public int getBestLevelForDownsample(double downsample) {
         // too small, return first
-        if (downsample < layerDownsamples[0]) {
+        if (downsample < levelDownsamples[0]) {
             return 0;
         }
 
         // find where we are in the middle
-        for (int i = 1; i < layerCount; i++) {
-            if (downsample < layerDownsamples[i]) {
+        for (int i = 1; i < levelCount; i++) {
+            if (downsample < levelDownsamples[i]) {
                 return i - 1;
             }
         }
 
         // too big, return last
-        return layerCount - 1;
+        return levelCount - 1;
     }
 
     public Map<String, String> getProperties() {

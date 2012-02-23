@@ -50,8 +50,8 @@ public class DeepZoomGenerator {
         File f = new File(args[0]);
 
         final OpenSlide os = new OpenSlide(f);
-        long w = os.getLayer0Width();
-        long h = os.getLayer0Height();
+        long w = os.getLevel0Width();
+        long h = os.getLevel0Height();
 
         String dirname = os.getProperties().get(
                 OpenSlide.PROPERTY_NAME_QUICKHASH1);

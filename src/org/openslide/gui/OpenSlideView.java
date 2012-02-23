@@ -87,8 +87,8 @@ public class OpenSlideView extends JPanel {
     public OpenSlideView(OpenSlide w, double downsampleBase,
             int maxDownsampleExponent, boolean startWithZoomFit) {
         // TODO support w > 2^31 and h > 2^31
-        if (w.getLayer0Width() > Integer.MAX_VALUE
-                || w.getLayer0Height() > Integer.MAX_VALUE) {
+        if (w.getLevel0Width() > Integer.MAX_VALUE
+                || w.getLevel0Height() > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(
                     "OpenSlide size must not exceed (" + Integer.MAX_VALUE
                             + "," + Integer.MAX_VALUE + ")");
@@ -619,8 +619,8 @@ public class OpenSlideView extends JPanel {
     }
 
     private void centerSlidePrivate() {
-        centerSlidePrivate((int) (osr.getLayer0Width() / 2), (int) (osr
-                .getLayer0Height() / 2));
+        centerSlidePrivate((int) (osr.getLevel0Width() / 2), (int) (osr
+                .getLevel0Height() / 2));
     }
 
     private void centerSlidePrivate(int cX, int cY) {
@@ -656,8 +656,8 @@ public class OpenSlideView extends JPanel {
             return;
         }
 
-        double ws = (double) osr.getLayer0Width() / w;
-        double hs = (double) osr.getLayer0Height() / h;
+        double ws = (double) osr.getLevel0Width() / w;
+        double hs = (double) osr.getLevel0Height() / h;
 
         double maxS = Math.max(ws, hs);
 

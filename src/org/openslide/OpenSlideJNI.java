@@ -60,12 +60,12 @@ class OpenSlideJNI {
 
     native static long openslide_open(String file);
 
-    native static int openslide_get_layer_count(long osr);
+    native static int openslide_get_level_count(long osr);
 
-    native static void openslide_get_layer_dimensions(long osr, int layer,
+    native static void openslide_get_level_dimensions(long osr, int level,
             long dim[]);
 
-    native static double openslide_get_layer_downsample(long osr, int layer);
+    native static double openslide_get_level_downsample(long osr, int level);
 
     native static void openslide_close(long osr);
 
@@ -76,7 +76,7 @@ class OpenSlideJNI {
     native static String[] openslide_get_associated_image_names(long osr);
 
     native static void openslide_read_region(long osr, int dest[], long x,
-            long y, int layer, long w, long h);
+            long y, int level, long w, long h);
 
     native static void openslide_get_associated_image_dimensions(long osr,
             String name, long dim[]);

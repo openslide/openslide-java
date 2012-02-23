@@ -50,20 +50,20 @@ static jlong osj_open(JNIEnv *env, jobject obj, jstring filename) {
   return (jlong) osr;
 }
 
-static jint osj_get_layer_count(JNIEnv *env, jobject obj, jlong osr) {
-  return openslide_get_layer_count((openslide_t *) osr);
+static jint osj_get_level_count(JNIEnv *env, jobject obj, jlong osr) {
+  return openslide_get_level_count((openslide_t *) osr);
 }
 
-static void osj_get_layer_dimensions(JNIEnv *env, jobject obj, jlong osr, jint layer,
+static void osj_get_level_dimensions(JNIEnv *env, jobject obj, jlong osr, jint level,
 				     jlongArray dim) {
   int64_t dims[2];
-  openslide_get_layer_dimensions((openslide_t *) osr, layer, dims, dims + 1);
+  openslide_get_level_dimensions((openslide_t *) osr, level, dims, dims + 1);
 
   (*env)->SetLongArrayRegion(env, dim, 0, 2, dims);
 }
 
-static jdouble osj_get_layer_downsample(JNIEnv *env, jobject obj, jlong osr, jint layer) {
-  return openslide_get_layer_downsample((openslide_t *) osr, layer);
+static jdouble osj_get_level_downsample(JNIEnv *env, jobject obj, jlong osr, jint level) {
+  return openslide_get_level_downsample((openslide_t *) osr, level);
 }
 
 static void osj_close(JNIEnv *env, jobject obj, jlong osr) {
@@ -128,13 +128,13 @@ static jobjectArray osj_get_associated_image_names(JNIEnv *env, jobject obj, jlo
 }
 
 static void osj_read_region(JNIEnv *env, jobject obj, jlong osr, jintArray dest,
-			    jlong x, jlong y, jint layer, jlong w, jlong h) {
+			    jlong x, jlong y, jint level, jlong w, jlong h) {
   uint32_t *dest2 = (*env)->GetPrimitiveArrayCritical(env, dest, NULL);
   if (dest2 == NULL) {
     return;
   }
 
-  openslide_read_region((openslide_t *) osr, dest2, x, y, layer, w, h);
+  openslide_read_region((openslide_t *) osr, dest2, x, y, level, w, h);
 
   (*env)->ReleasePrimitiveArrayCritical(env, dest, dest2, 0);
 }
@@ -186,9 +186,9 @@ static jstring osj_get_error(JNIEnv *env, jobject obj, jlong osr) {
 static JNINativeMethod methods[] = {
   { "openslide_can_open", "(Ljava/lang/String;)Z", (void *) osj_can_open },
   { "openslide_open", "(Ljava/lang/String;)J", (void *) osj_open },
-  { "openslide_get_layer_count", "(J)I", (void *) osj_get_layer_count },
-  { "openslide_get_layer_dimensions", "(JI[J)V", (void *) osj_get_layer_dimensions },
-  { "openslide_get_layer_downsample", "(JI)D", (void *) osj_get_layer_downsample },
+  { "openslide_get_level_count", "(J)I", (void *) osj_get_level_count },
+  { "openslide_get_level_dimensions", "(JI[J)V", (void *) osj_get_level_dimensions },
+  { "openslide_get_level_downsample", "(JI)D", (void *) osj_get_level_downsample },
   { "openslide_close", "(J)V", (void *) osj_close },
   { "openslide_get_property_names", "(J)[Ljava/lang/String;", (void *) osj_get_property_names },
   { "openslide_get_property_value", "(JLjava/lang/String;)Ljava/lang/String;", (void *) osj_get_property_value },
