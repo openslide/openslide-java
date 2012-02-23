@@ -5,6 +5,7 @@
 	<property name="target" value="1.5"/>
 	<property name="source" value="1.5"/>
 	<property name="builddir" value="."/>
+	<property name="openslide.binding.version" value="UNKNOWN"/>
 	<property name="openslide.jni.path" value=""/>
 	<path id="openslide java.classpath">
 		<pathelement location="${builddir}/bin"/>
@@ -21,9 +22,13 @@
 	</target>
 	<target depends="clean" name="cleanall"/>
 	<target depends="build" name="jar">
+		<echo message="Setting Implementation-Version: ${openslide.binding.version}"/>
 		<jar destfile="${builddir}/openslide.jar" basedir="${builddir}/bin">
 			<manifest>
 				<attribute name="Main-Class" value="org.openslide.gui.Demo"/>
+				<attribute name="Implementation-Vendor" value="OpenSlide project"/>
+				<attribute name="Implementation-Title" value="OpenSlide Java"/>
+				<attribute name="Implementation-Version" value="${openslide.binding.version}"/>
 			</manifest>
 		</jar>
 

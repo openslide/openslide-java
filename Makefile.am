@@ -41,6 +41,7 @@ JAVA_SRC = build.xml \
 
 openslide.jar: $(JAVA_SRC) config.h
 	@$(ANT) -f $(srcdir)/build.xml -Dbuilddir=$(abs_builddir) \
+		-Dopenslide.binding.version=$(PACKAGE_VERSION) \
 		-Dopenslide.jni.path=$(JNI_EMBED_PATH)
 
 mostlyclean-local:
