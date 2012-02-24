@@ -44,6 +44,8 @@ public class TestCLI {
             return;
         }
 
+        System.out.printf("version: %s\n", OpenSlide.getLibraryVersion());
+
         File f = new File(args[0]);
 
         System.out.printf("openslide_can_open returns %s\n", OpenSlide

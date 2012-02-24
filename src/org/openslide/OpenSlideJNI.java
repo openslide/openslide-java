@@ -85,4 +85,6 @@ class OpenSlideJNI {
             int dest[]);
 
     native static String openslide_get_error(long osr);
+
+    native static String openslide_get_version();
 }

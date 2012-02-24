@@ -49,6 +49,9 @@ public final class OpenSlide implements Closeable {
         }
     };
 
+    private static final String LIBRARY_VERSION = OpenSlideJNI
+            .openslide_get_version();
+
     final public static String PROPERTY_NAME_COMMENT = "openslide.comment";
 
     final public static String PROPERTY_NAME_VENDOR = "openslide.vendor";
@@ -384,6 +387,10 @@ public final class OpenSlide implements Closeable {
         } finally {
             rl.unlock();
         }
+    }
+
+    public static String getLibraryVersion() {
+        return LIBRARY_VERSION;
     }
 
     public static FileFilter getFileFilter() {

@@ -183,6 +183,12 @@ static jstring osj_get_error(JNIEnv *env, jobject obj, jlong osr) {
   return (*env)->NewStringUTF(env, val);
 }
 
+static jstring osj_get_version(JNIEnv *env, jobject obj) {
+  const char *val = openslide_get_version();
+
+  return (*env)->NewStringUTF(env, val);
+}
+
 static JNINativeMethod methods[] = {
   { "openslide_can_open", "(Ljava/lang/String;)Z", (void *) osj_can_open },
   { "openslide_open", "(Ljava/lang/String;)J", (void *) osj_open },
@@ -197,6 +203,7 @@ static JNINativeMethod methods[] = {
   { "openslide_get_associated_image_dimensions", "(JLjava/lang/String;[J)V", (void *) osj_get_associated_image_dimensions },
   { "openslide_read_associated_image", "(JLjava/lang/String;[I)V", (void *) osj_read_associated_image },
   { "openslide_get_error", "(J)Ljava/lang/String;", (void *) osj_get_error },
+  { "openslide_get_version", "()Ljava/lang/String;", (void *) osj_get_version },
 };
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
@@ -210,7 +217,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     return -1;
   }
 
-  if ((*env)->RegisterNatives(env, clazz, methods, 13) != JNI_OK) {
+  if ((*env)->RegisterNatives(env, clazz, methods,
+      sizeof(methods) / sizeof(methods[0])) != JNI_OK) {
     return -1;
   }
 
