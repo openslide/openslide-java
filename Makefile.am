@@ -2,20 +2,13 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CFLAGS = -Wall $(JNI_CFLAGS) $(OPENSLIDE_CFLAGS)
 AM_CFLAGS += -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
-AM_LDFLAGS = -avoid-version -no-undefined -module $(OPENSLIDE_LIBS)
+AM_LDFLAGS = -avoid-version -no-undefined -module $(OPENSLIDE_LIBS) \
+	$(JNI_LDFLAGS)
 
 if DLL
-# JNI uses stdcall without @
-AM_LDFLAGS += -Wl,--kill-at
 JNI_LA = openslide-jni.la
-JNI_SO = openslide-jni.dll
 else
 JNI_LA = libopenslide-jni.la
-JNI_SO = libopenslide-jni.so
-endif
-
-if EMBED_PATH
-JNI_EMBED_PATH = $(pkglibdir)/$(JNI_SO)
 endif
 
 export JAVA_HOME

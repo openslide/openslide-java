@@ -86,19 +86,22 @@ AC_TYPE_UINT32_T
 
 AC_MSG_CHECKING([JNI library name])
 if test x$shrext_cmds = x.dll ; then
-    AC_MSG_RESULT([openslide-jni.dll])
+    AC_SUBST([JNI_SO], [openslide-jni.dll])
+    # JNI uses stdcall without @
+    AC_SUBST([JNI_LDFLAGS], [-Wl,--kill-at])
 else
-    AC_MSG_RESULT([libopenslide-jni.so])
+    AC_SUBST([JNI_SO], [libopenslide-jni.so])
 fi
+AC_MSG_RESULT([$JNI_SO])
 AM_CONDITIONAL([DLL], [test x$shrext_cmds = x.dll])
 
 AC_MSG_CHECKING([whether to embed library path in JAR])
-if test x$shrext_cmds = x.dll ; then
-    AC_MSG_RESULT([no])
-else
+if test x$shrext_cmds != x.dll ; then
+    AC_SUBST([JNI_EMBED_PATH], [$libdir/$PACKAGE/$JNI_SO])
     AC_MSG_RESULT([yes])
+else
+    AC_MSG_RESULT([no])
 fi
-AM_CONDITIONAL([EMBED_PATH], [test x$shrext_cmds != x.dll])
 
 # Checks for library functions.
 
