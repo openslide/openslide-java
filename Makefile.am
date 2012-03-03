@@ -2,8 +2,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CFLAGS = -Wall $(JNI_CFLAGS) $(OPENSLIDE_CFLAGS)
 AM_CFLAGS += -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
-AM_LDFLAGS = -avoid-version -no-undefined -module $(OPENSLIDE_LIBS) \
-	$(JNI_LDFLAGS)
+AM_LDFLAGS = -avoid-version -no-undefined $(OPENSLIDE_LIBS) $(JNI_LDFLAGS)
 
 if DLL
 JNI_LA = openslide-jni.la
@@ -16,6 +15,9 @@ export ANT_HOME
 
 pkglib_LTLIBRARIES = $(JNI_LA)
 libopenslide_jni_la_SOURCES = openslide-jni.c
+# Building without lib prefix requires -module.
+# On the other hand, the JNI ABI on Mac OS X precludes it.
+openslide_jni_la_LDFLAGS = -module
 
 # Automake insists that DATA not go in pkglibdir
 pkglibdatadir = $(pkglibdir)
@@ -43,6 +45,10 @@ mostlyclean-local:
 	@$(ANT) -f $(srcdir)/build.xml -Dbuilddir=$(abs_builddir) clean
 
 install-exec-hook:
+if RENAME_JNI
+	source ./$(JNI_LA) && mv $(DESTDIR)$(pkglibdir)/$$dlname \
+		$(DESTDIR)$(pkglibdir)/$(JNI_SO)
+endif
 	chmod -x $(DESTDIR)$(pkglibdir)/$(JNI_SO)
 	rm -f $(DESTDIR)$(pkglibdir)/$(JNI_LA) \
 		$(DESTDIR)$(pkglibdir)/$(JNI_SO).a

@@ -88,6 +88,11 @@ AC_TYPE_UINT32_T
 # $module matters on Mac OS X.
 module=no
 eval dynlib_ext=$shrext_cmds
+if test x$dynlib_ext = x.dylib ; then
+    # Mac OS X has a special file extension for JNI libraries
+    dynlib_ext=.jnilib
+fi
+AM_CONDITIONAL([RENAME_JNI], [test x$dynlib_ext = x.jnilib])
 
 AC_MSG_CHECKING([JNI library name])
 if test x$dynlib_ext = x.dll ; then
@@ -95,7 +100,7 @@ if test x$dynlib_ext = x.dll ; then
     # JNI uses stdcall without @
     AC_SUBST([JNI_LDFLAGS], [-Wl,--kill-at])
 else
-    AC_SUBST([JNI_SO], [libopenslide-jni.so])
+    AC_SUBST([JNI_SO], [libopenslide-jni$dynlib_ext])
 fi
 AC_MSG_RESULT([$JNI_SO])
 AM_CONDITIONAL([DLL], [test x$dynlib_ext = x.dll])

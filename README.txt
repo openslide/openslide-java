@@ -5,8 +5,8 @@ Build requirements
 - Apache Ant
 - OpenSlide
 
-Building on Linux
------------------
+Building on Linux or Mac OS X
+-----------------------------
 
 ./configure
 make
