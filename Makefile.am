@@ -24,7 +24,9 @@ export ANT_HOME
 pkglib_LTLIBRARIES = $(JNI_LA)
 libopenslide_jni_la_SOURCES = openslide-jni.c
 
-pkglib_DATA = openslide.jar
+# Automake insists that DATA not go in pkglibdir
+pkglibdatadir = $(pkglibdir)
+pkglibdata_DATA = openslide.jar
 JAVA_SRC = build.xml \
 	src/org/openslide/AssociatedImage.java \
 	src/org/openslide/OpenSlideDisposedException.java \
