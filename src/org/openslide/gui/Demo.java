@@ -36,6 +36,9 @@ import org.openslide.AssociatedImage;
 
 public class Demo {
     public static void main(final String[] args) {
+        // set application name on Mac OS X
+        System.setProperty("com.apple.mrj.application.apple.menu.about.name",
+                "OpenSlide Demo");
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
