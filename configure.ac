@@ -84,8 +84,13 @@ AC_SUBST([JNI_CFLAGS])
 AC_TYPE_INT64_T
 AC_TYPE_UINT32_T
 
+# Get the filename extension for dynamic libraries.
+# $module matters on Mac OS X.
+module=no
+eval dynlib_ext=$shrext_cmds
+
 AC_MSG_CHECKING([JNI library name])
-if test x$shrext_cmds = x.dll ; then
+if test x$dynlib_ext = x.dll ; then
     AC_SUBST([JNI_SO], [openslide-jni.dll])
     # JNI uses stdcall without @
     AC_SUBST([JNI_LDFLAGS], [-Wl,--kill-at])
@@ -93,10 +98,10 @@ else
     AC_SUBST([JNI_SO], [libopenslide-jni.so])
 fi
 AC_MSG_RESULT([$JNI_SO])
-AM_CONDITIONAL([DLL], [test x$shrext_cmds = x.dll])
+AM_CONDITIONAL([DLL], [test x$dynlib_ext = x.dll])
 
 AC_MSG_CHECKING([whether to embed library path in JAR])
-if test x$shrext_cmds != x.dll ; then
+if test x$dynlib_ext != x.dll ; then
     AC_SUBST([JNI_EMBED_PATH], [$libdir/$PACKAGE/$JNI_SO])
     AC_MSG_RESULT([yes])
 else
