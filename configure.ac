@@ -35,8 +35,12 @@ PKG_CHECK_MODULES([OPENSLIDE], [openslide])
 # Checks for header files.
 
 AC_ARG_VAR([JAVA_HOME], [path to JDK])
+# Dynamic default for Mac OS X
+if test -x /usr/libexec/java_home ; then
+    DEFAULT_JAVA_HOME=$(/usr/libexec/java_home)
+fi
 AC_ARG_WITH([java], [AS_HELP_STRING([--with-java], [path to JDK])], [],
-        [with_java="$JAVA_HOME /usr/lib/jvm/java"])
+        [with_java="$JAVA_HOME $DEFAULT_JAVA_HOME /usr/lib/jvm/java"])
 if test $host = $build; then
     # Find jni.h
     JOIN_EACH([include_paths], [$with_java], [include])
