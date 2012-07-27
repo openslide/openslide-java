@@ -40,7 +40,7 @@ if test -x /usr/libexec/java_home ; then
     DEFAULT_JAVA_HOME=$(/usr/libexec/java_home)
 fi
 AC_ARG_WITH([java], [AS_HELP_STRING([--with-java], [path to JDK])], [],
-        [with_java="$JAVA_HOME $DEFAULT_JAVA_HOME /usr/lib/jvm/java"])
+        [with_java="$JAVA_HOME:$DEFAULT_JAVA_HOME:/usr/lib/jvm/java"])
 AC_ARG_WITH([jni-headers], [AS_HELP_STRING([--with-jni-headers=PLATFORM],
         [use JNI headers for PLATFORM.  Specify "cross" to use Classpath
         headers from the build platform.])], [], [with_jni_headers=guess])
@@ -59,12 +59,12 @@ if test z$with_jni_headers != zcross ; then
     # Find jni.h
     JOIN_EACH([include_paths], [$with_java], [include])
     FIND_FILE([jni_h_dir], [jni.h], [$include_paths])
-    JAVA_HOME=$(dirname $jni_h_dir)
+    JAVA_HOME=$(dirname "$jni_h_dir")
     # Find jni_md.h
     JOIN_EACH([platform_include_paths], [$include_paths], [$with_jni_headers])
     FIND_FILE([jni_md_h_dir], [jni_md.h],
             [$platform_include_paths $include_paths])
-    JNI_CFLAGS="-I$jni_h_dir -I$jni_md_h_dir"
+    JNI_CFLAGS="\"-I$jni_h_dir\" \"-I$jni_md_h_dir\""
 else
     # For cross builds, we don't have the OpenJDK jni_md.h for the target
     # platform, so use the GNU Classpath JNI headers in the build system's
@@ -85,7 +85,7 @@ else
             break
         fi
     done
-    if test x$JNI_CFLAGS = x ; then
+    if test "x$JNI_CFLAGS" = x ; then
         AC_MSG_RESULT([not found])
         AC_MSG_ERROR([cannot find JNI headers])
     fi
