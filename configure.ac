@@ -41,18 +41,27 @@ if test -x /usr/libexec/java_home ; then
 fi
 AC_ARG_WITH([java], [AS_HELP_STRING([--with-java], [path to JDK])], [],
         [with_java="$JAVA_HOME $DEFAULT_JAVA_HOME /usr/lib/jvm/java"])
-if test $host = $build; then
+AC_ARG_WITH([jni-headers], [AS_HELP_STRING([--with-jni-headers=PLATFORM],
+        [use JNI headers for PLATFORM.  Specify "cross" to use Classpath
+        headers from the build platform.])], [], [with_jni_headers=guess])
+if test z$with_jni_headers = zguess ; then
+    if test $host = $build ; then
+        AS_CASE([$host],
+            [*-*-linux-gnu], [with_jni_headers=linux],
+            [*-*-mingw32], [with_jni_headers=win32],
+            [with_jni_headers=]
+        )
+    else
+        with_jni_headers=cross
+    fi
+fi
+if test z$with_jni_headers != zcross ; then
     # Find jni.h
     JOIN_EACH([include_paths], [$with_java], [include])
     FIND_FILE([jni_h_dir], [jni.h], [$include_paths])
     JAVA_HOME=$(dirname $jni_h_dir)
     # Find jni_md.h
-    AS_CASE([$host],
-        [*-*-linux-gnu], [include_subdir=linux],
-        [*-*-mingw32], [include_subdir=win32],
-        [include_subdir=]
-    )
-    JOIN_EACH([platform_include_paths], [$include_paths], [$include_subdir])
+    JOIN_EACH([platform_include_paths], [$include_paths], [$with_jni_headers])
     FIND_FILE([jni_md_h_dir], [jni_md.h],
             [$platform_include_paths $include_paths])
     JNI_CFLAGS="-I$jni_h_dir -I$jni_md_h_dir"
