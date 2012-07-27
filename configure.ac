@@ -20,11 +20,11 @@ AC_PROG_CC
 # Use and pass through ANT_HOME if we receive it; otherwise, focus on ANT.
 AC_ARG_VAR([ANT], [path to ant program])
 AC_ARG_VAR([ANT_HOME], [path to ant installation directory])
-if test z$ANT = z -a z$ANT_HOME != z ; then
-    ANT=$ANT_HOME/bin/ant
+if test "z$ANT" = z && test "z$ANT_HOME" != z ; then
+    ANT="$ANT_HOME/bin/ant"
 fi
 AC_PATH_PROG([ANT], [ant])
-if test z$ANT = z ; then
+if test "z$ANT" = z ; then
     AC_MSG_ERROR([ant not found])
 fi
 
