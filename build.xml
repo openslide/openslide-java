@@ -40,6 +40,7 @@
 		<javac debug="true" debuglevel="${debuglevel}" destdir="${builddir}/bin" source="${source}" target="${target}" includeAntRuntime="false">
 			<src path="src"/>
 			<classpath refid="openslide java.classpath"/>
+			<compilerarg value="-Xlint:-options"/>
 		</javac>
 		<propertyfile file="${builddir}/bin/resources/openslide.properties">
 			<entry key="openslide.jni.path" value="${openslide.jni.path}"/>
