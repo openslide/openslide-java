@@ -63,6 +63,10 @@ if test z$with_jni_headers = zguess ; then
         )
     else
         with_jni_headers=cross
+        # If building with MinGW inside Cygwin, the native headers are
+        # available, so use them.
+        AS_CASE([$build], [*-*-cygwin],
+            AS_CASE([$host], [*-*-mingw32], [with_jni_headers=win32]))
     fi
 fi
 if test z$with_jni_headers != zcross ; then
