@@ -79,7 +79,7 @@ else
     AC_MSG_CHECKING([for cross jni.h and jni_md.h])
     for word in $(gcc - -v -E < /dev/null 2>&1)
     do
-        if test -r "$word/jni.h" -a -r "$word/jni_md.h" ; then
+        if test -r "$word/jni.h" && test -r "$word/jni_md.h" ; then
             AC_MSG_RESULT([$word])
             JNI_CFLAGS="-I$word"
             break
