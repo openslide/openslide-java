@@ -29,19 +29,27 @@ For a 64-bit JRE, substitute --host=x86_64-w64-mingw32.
 Building on Windows
 -------------------
 
-Install a JDK, Apache Ant, MinGW, and MSYS.  Edit the MSYS fstab file
-(e.g. C:\MinGW\msys\1.0\etc\fstab) to mount your JDK and Apache Ant
-installations within the MSYS directory tree:
+Ensure that the path to the openslide-java source tree does not contain
+whitespace.
 
-C:\Progra~1\Java\jdk1.6.0_29   /java
-C:\ant                         /ant
+Install Cygwin, selecting these additional packages:
+- make
+- pkg-config
+- mingw64-i686-gcc-core and/or mingw64-x86_64-gcc-core
 
-You must use 8.3 short file names for path elements that contain spaces.
+(Cygwin is only needed for the build environment; the resulting binaries
+do not require Cygwin.)
+
+Also install a JDK and Apache Ant.
 
 Then:
 
-./configure --prefix=/path/to/install/dir JAVA_HOME=/java \
-	ANT_HOME=/ant OPENSLIDE_CFLAGS=-I/path/to/openslide/include \
-	OPENSLIDE_LIBS="-L/path/to/openslide/lib -lopenslide"
+./configure --prefix=/path/to/install/dir \
+	--host=i686-w64-mingw32 --build=$(build-aux/config.guess) \
+	PKG_CONFIG_PATH="/path/to/openslide/lib/pkgconfig" \
+	JAVA_HOME="$(cygpath c:/Program\ Files/Java/jdk*)" \
+	ANT_HOME="/path/to/ant/directory"
 make
 make install
+
+For a 64-bit JRE, substitute --host=x86_64-w64-mingw32.
