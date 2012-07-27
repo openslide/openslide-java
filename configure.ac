@@ -28,6 +28,16 @@ if test "z$ANT" = z ; then
     AC_MSG_ERROR([ant not found])
 fi
 
+# On Cygwin the JVM uses Windows paths.  The ant wrapper script converts
+# almost everything for us, but not the argument to -Dbuilddir.
+AC_MSG_CHECKING([Ant build path])
+AS_CASE([$build],
+    [*-*-cygwin], [ANT_BUILDDIR="$(cygpath -w "$(pwd)")"],
+    [ANT_BUILDDIR="$(pwd)"]
+)
+AC_SUBST([ANT_BUILDDIR])
+AC_MSG_RESULT([$ANT_BUILDDIR])
+
 # Checks for libraries.
 
 PKG_CHECK_MODULES([OPENSLIDE], [openslide])
