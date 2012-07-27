@@ -37,21 +37,21 @@ JAVA_SRC = build.xml \
 	src/org/openslide/gui/SelectionListModel.java
 
 openslide.jar: $(JAVA_SRC) config.h
-	@"$(ANT)" -f $(srcdir)/build.xml -Dbuilddir=$(abs_builddir) \
+	@"$(ANT)" -f "$(srcdir)/build.xml" -Dbuilddir="$(abs_builddir)" \
 		-Dopenslide.binding.version=$(PACKAGE_VERSION) \
-		-Dopenslide.jni.path=$(JNI_EMBED_PATH)
+		-Dopenslide.jni.path="$(JNI_EMBED_PATH)"
 
 mostlyclean-local:
-	@"$(ANT)" -f $(srcdir)/build.xml -Dbuilddir=$(abs_builddir) clean
+	@"$(ANT)" -f "$(srcdir)/build.xml" -Dbuilddir="$(abs_builddir)" clean
 
 install-exec-hook:
 if RENAME_JNI
-	source ./$(JNI_LA) && mv $(DESTDIR)$(pkglibdir)/$$dlname \
-		$(DESTDIR)$(pkglibdir)/$(JNI_SO)
+	source ./$(JNI_LA) && mv "$(DESTDIR)$(pkglibdir)/$$dlname" \
+		"$(DESTDIR)$(pkglibdir)/$(JNI_SO)"
 endif
-	chmod -x $(DESTDIR)$(pkglibdir)/$(JNI_SO)
-	rm -f $(DESTDIR)$(pkglibdir)/$(JNI_LA) \
-		$(DESTDIR)$(pkglibdir)/$(JNI_SO).a
+	chmod -x "$(DESTDIR)$(pkglibdir)/$(JNI_SO)"
+	rm -f "$(DESTDIR)$(pkglibdir)/$(JNI_LA)" \
+		"$(DESTDIR)$(pkglibdir)/$(JNI_SO).a"
 
 EXTRA_DIST = \
 	CHANGELOG.txt \
