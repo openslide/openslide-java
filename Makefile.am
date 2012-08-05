@@ -53,6 +53,9 @@ endif
 	rm -f "$(DESTDIR)$(pkglibdir)/$(JNI_LA)" \
 		"$(DESTDIR)$(pkglibdir)/$(JNI_SO).a"
 
+uninstall-hook:
+	rm -f "$(DESTDIR)$(pkglibdir)/$(JNI_SO)"
+
 EXTRA_DIST = \
 	CHANGELOG.txt \
 	LICENSE.txt \
