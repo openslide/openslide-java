@@ -17,7 +17,7 @@ pkglib_LTLIBRARIES = $(JNI_LA)
 libopenslide_jni_la_SOURCES = openslide-jni.c
 # Building without lib prefix requires -module.
 # On the other hand, the JNI ABI on Mac OS X precludes it.
-openslide_jni_la_LDFLAGS = -module
+openslide_jni_la_LDFLAGS = -module $(AM_LDFLAGS)
 
 # Automake insists that DATA not go in pkglibdir
 pkglibdatadir = $(pkglibdir)
