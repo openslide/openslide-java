@@ -93,6 +93,13 @@ public final class OpenSlide implements Closeable {
             throw new IOException(file
                     + ": Not a file that OpenSlide can recognize");
         }
+        // dispose on error, we are in the constructor
+        try {
+            checkError();
+        } catch (IOException e) {
+            dispose();
+            throw e;
+        }
 
         // store level count
         levelCount = OpenSlideJNI.openslide_get_level_count(osr);
