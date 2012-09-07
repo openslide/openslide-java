@@ -60,6 +60,12 @@ public final class OpenSlide implements Closeable {
 
     final public static String PROPERTY_NAME_BACKGROUND_COLOR = "openslide.background-color";
 
+    final public static String PROPERTY_NAME_OBJECTIVE_POWER = "openslide.objective-power";
+
+    final public static String PROPERTY_NAME_MPP_X = "openslide.mpp-x";
+
+    final public static String PROPERTY_NAME_MPP_Y = "openslide.mpp-y";
+
     private long osr;
 
     final private ReadWriteLock lock = new ReentrantReadWriteLock();
