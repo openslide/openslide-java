@@ -1,6 +1,15 @@
 Notable Changes in OpenSlide Java
 =================================
 
+Version 0.11.0, 2012-09-08
+ * Require OpenSlide 3.3.0
+ * Rename "layer" to "level" throughout API
+ * Add OpenSlide.getLibraryVersion()
+ * Set package Implementation-Version to OpenSlide Java version
+ * Drop getComment()
+ * Properly handle openslide_open() errors on OpenSlide 3.3.0
+ * Many build fixes for Linux, Mac OS X, Cygwin
+
 Version 0.10.0, 2011-12-16
  * Change package namespace to org.openslide
  * Add wrapper class for associated images
