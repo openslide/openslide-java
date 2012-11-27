@@ -49,7 +49,6 @@ if RENAME_JNI
 	source ./$(JNI_LA) && mv "$(DESTDIR)$(pkglibdir)/$$dlname" \
 		"$(DESTDIR)$(pkglibdir)/$(JNI_SO)"
 endif
-	chmod -x "$(DESTDIR)$(pkglibdir)/$(JNI_SO)"
 	rm -f "$(DESTDIR)$(pkglibdir)/$(JNI_LA)" \
 		"$(DESTDIR)$(pkglibdir)/$(JNI_SO).a"
 
