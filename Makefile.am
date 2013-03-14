@@ -28,7 +28,6 @@ JAVA_SRC = build.xml \
 	src/org/openslide/OpenSlide.java \
 	src/org/openslide/OpenSlideJNI.java \
 	src/org/openslide/TestCLI.java \
-	src/org/openslide/dzi/DeepZoomGenerator.java \
 	src/org/openslide/gui/Annotation.java \
 	src/org/openslide/gui/DefaultAnnotation.java \
 	src/org/openslide/gui/DefaultSelectionListModel.java \
