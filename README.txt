@@ -3,7 +3,7 @@ Build requirements
 
 - JDK
 - Apache Ant
-- OpenSlide
+- OpenSlide >= 3.4.0
 
 Building on Linux or Mac OS X
 -----------------------------

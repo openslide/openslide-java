@@ -56,7 +56,7 @@ class OpenSlideJNI {
         }
     }
 
-    native static boolean openslide_can_open(String file);
+    native static String openslide_detect_vendor(String file);
 
     native static long openslide_open(String file);
 

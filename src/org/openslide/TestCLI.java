@@ -48,8 +48,8 @@ public class TestCLI {
 
         File f = new File(args[0]);
 
-        System.out.printf("openslide_can_open returns %s\n", OpenSlide
-                .fileIsValid(f) ? "true" : "false");
+        System.out.printf("openslide_detect_vendor returns %s\n",
+                OpenSlide.detectVendor(f));
         OpenSlide osr = new OpenSlide(f);
 
         long w, h;

@@ -24,17 +24,20 @@
 #include <openslide.h>
 
 
-static jboolean osj_can_open(JNIEnv *env, jobject obj, jstring filename) {
+static jstring osj_detect_vendor(JNIEnv *env, jobject obj, jstring filename) {
   const char *filename2 = (*env)->GetStringUTFChars(env, filename, NULL);
   if (filename2 == NULL) {
-    return JNI_FALSE;
+    return NULL;
   }
 
-  jboolean result = openslide_can_open(filename2);
+  const char *val = openslide_detect_vendor(filename2);
 
   (*env)->ReleaseStringUTFChars(env, filename, filename2);
 
-  return result;
+  if (val == NULL) {
+    return NULL;
+  }
+  return (*env)->NewStringUTF(env, val);
 }
 
 static jlong osj_open(JNIEnv *env, jobject obj, jstring filename) {
@@ -190,7 +193,7 @@ static jstring osj_get_version(JNIEnv *env, jobject obj) {
 }
 
 static JNINativeMethod methods[] = {
-  { "openslide_can_open", "(Ljava/lang/String;)Z", (void *) osj_can_open },
+  { "openslide_detect_vendor", "(Ljava/lang/String;)Ljava/lang/String;", (void *) osj_detect_vendor },
   { "openslide_open", "(Ljava/lang/String;)J", (void *) osj_open },
   { "openslide_get_level_count", "(J)I", (void *) osj_get_level_count },
   { "openslide_get_level_dimensions", "(JI[J)V", (void *) osj_get_level_dimensions },

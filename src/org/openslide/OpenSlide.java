@@ -40,7 +40,7 @@ public final class OpenSlide implements Closeable {
     private static final FileFilter FILE_FILTER = new FileFilter() {
         @Override
         public boolean accept(File f) {
-            return f.isDirectory() || OpenSlide.fileIsValid(f);
+            return f.isDirectory() || OpenSlide.detectVendor(f) != null;
         }
 
         @Override
@@ -84,8 +84,8 @@ public final class OpenSlide implements Closeable {
 
     final private int hashCodeVal;
 
-    public static boolean fileIsValid(File file) {
-        return OpenSlideJNI.openslide_can_open(file.getPath());
+    public static String detectVendor(File file) {
+        return OpenSlideJNI.openslide_detect_vendor(file.getPath());
     }
 
     public OpenSlide(File file) throws IOException {
