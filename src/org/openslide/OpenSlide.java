@@ -82,6 +82,8 @@ public final class OpenSlide implements Closeable {
 
     final private Map<String, AssociatedImage> associatedImages;
 
+    final private File canonicalFile;
+
     final private int hashCodeVal;
 
     public static String detectVendor(File file) {
@@ -142,9 +144,14 @@ public final class OpenSlide implements Closeable {
 
         associatedImages = Collections.unmodifiableMap(associated);
 
-        // store hash
-        hashCodeVal = (int) Long.parseLong(getProperties().get(
-                PROPERTY_NAME_QUICKHASH1).substring(0, 8), 16);
+        // store info for hash and equals
+        canonicalFile = file.getCanonicalFile();
+        String quickhash1 = getProperties().get(PROPERTY_NAME_QUICKHASH1);
+        if (quickhash1 != null) {
+            hashCodeVal = (int) Long.parseLong(quickhash1.substring(0, 8), 16);
+        } else {
+            hashCodeVal = canonicalFile.hashCode();
+        }
 
         // dispose on error, we are in the constructor
         try {
@@ -423,8 +430,18 @@ public final class OpenSlide implements Closeable {
 
         if (obj instanceof OpenSlide) {
             OpenSlide os2 = (OpenSlide) obj;
-            return getProperties().get(PROPERTY_NAME_QUICKHASH1).equals(
-                    os2.getProperties().get(PROPERTY_NAME_QUICKHASH1));
+            String quickhash1 = getProperties()
+                    .get(PROPERTY_NAME_QUICKHASH1);
+            String os2_quickhash1 = os2.getProperties()
+                    .get(PROPERTY_NAME_QUICKHASH1);
+
+            if (quickhash1 != null && os2_quickhash1 != null) {
+                return quickhash1.equals(os2_quickhash1);
+            } else if (quickhash1 == null && os2_quickhash1 == null) {
+                return canonicalFile.equals(os2.canonicalFile);
+            } else {
+                return false;
+            }
         }
 
         return false;
