@@ -66,6 +66,14 @@ public final class OpenSlide implements Closeable {
 
     final public static String PROPERTY_NAME_MPP_Y = "openslide.mpp-y";
 
+    final public static String PROPERTY_NAME_BOUNDS_X = "openslide.bounds-x";
+
+    final public static String PROPERTY_NAME_BOUNDS_Y = "openslide.bounds-y";
+
+    final public static String PROPERTY_NAME_BOUNDS_WIDTH = "openslide.bounds-width";
+
+    final public static String PROPERTY_NAME_BOUNDS_HEIGHT = "openslide.bounds-height";
+
     private long osr;
 
     final private ReadWriteLock lock = new ReentrantReadWriteLock();
