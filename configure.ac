@@ -40,7 +40,7 @@ AC_MSG_RESULT([$ANT_BUILDDIR])
 
 # Checks for libraries.
 
-PKG_CHECK_MODULES([OPENSLIDE], [openslide])
+PKG_CHECK_MODULES([OPENSLIDE], [openslide >= 3.4.0])
 
 # Checks for header files.
 
