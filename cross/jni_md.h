@@ -27,7 +27,7 @@ executable file might be covered by the GNU General Public License. */
 #ifndef __GCJ_JNI_MD_H__
 #define __GCJ_JNI_MD_H__
 
-#include <gcj/libgcj-config.h>
+#define JV_HAVE_INTTYPES_H 1
 
 #ifdef __GCJ_JNI_IMPL__
 

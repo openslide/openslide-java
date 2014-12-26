@@ -15,9 +15,6 @@ make install
 Cross-compiling for Windows with MinGW-w64
 ------------------------------------------
 
-You will need the GNU Classpath version of jni.h installed.  (On Fedora
-this is in the libgcj-devel package.)
-
 PKG_CONFIG=pkg-config \
 	PKG_CONFIG_PATH=/path/to/cross/compiled/openslide/lib/pkgconfig \
 	./configure --host=i686-w64-mingw32 --build=$(build-aux/config.guess)

@@ -52,8 +52,8 @@ fi
 AC_ARG_WITH([java], [AS_HELP_STRING([--with-java], [path to JDK])], [],
         [with_java="$JAVA_HOME:$DEFAULT_JAVA_HOME:/usr/lib/jvm/java"])
 AC_ARG_WITH([jni-headers], [AS_HELP_STRING([--with-jni-headers=PLATFORM],
-        [use JNI headers for PLATFORM.  Specify "cross" to use Classpath
-        headers from the build platform.])], [], [with_jni_headers=guess])
+        [use JNI headers for PLATFORM.  Specify "cross" to use bundled
+        Classpath headers.])], [], [with_jni_headers=guess])
 if test z$with_jni_headers = zguess ; then
     if test $host = $build ; then
         AS_CASE([$host],
@@ -81,30 +81,15 @@ if test z$with_jni_headers != zcross ; then
     JNI_CFLAGS="\"-I$jni_h_dir\" \"-I$jni_md_h_dir\""
 else
     # For cross builds, we don't have the OpenJDK jni_md.h for the target
-    # platform, so use the GNU Classpath JNI headers in the build system's
-    # gcj include directory instead.  Autoconf doesn't give us a variable
-    # for the build compiler, which is okay because anything other than
-    # GCC probably won't support this syntax.
+    # platform, so use our own copy of the GNU Classpath JNI headers instead.
     #
     # Don't set JAVA_HOME unless it was specified on the command line.
-    #
-    # This is terrible.
-    JNI_CFLAGS=
-    AC_MSG_CHECKING([for cross jni.h and jni_md.h])
-    for word in $(gcc - -v -E < /dev/null 2>&1)
-    do
-        if test -r "$word/jni.h" && test -r "$word/jni_md.h" ; then
-            AC_MSG_RESULT([$word])
-            JNI_CFLAGS="-I$word"
-            break
-        fi
-    done
-    if test "x$JNI_CFLAGS" = x ; then
-        AC_MSG_RESULT([not found])
-        AC_MSG_ERROR([cannot find JNI headers])
-    fi
+    AC_MSG_CHECKING([whether to use bundled JNI headers])
+    AC_MSG_RESULT([yes])
+    JNI_CFLAGS='-I$(top_srcdir)/cross'
 fi
 AC_SUBST([JNI_CFLAGS])
+AM_CONDITIONAL([USE_CROSS_HEADERS], [test x$with_jni_headers = xcross])
 
 # Checks for typedefs, structures, and compiler characteristics.
 

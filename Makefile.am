@@ -10,11 +10,16 @@ else
 JNI_LA = libopenslide-jni.la
 endif
 
+if USE_CROSS_HEADERS
+CROSS_H = cross/jni.h cross/jni_md.h
+endif
+
 export JAVA_HOME
 export ANT_HOME
 
 pkglib_LTLIBRARIES = $(JNI_LA)
-libopenslide_jni_la_SOURCES = openslide-jni.c
+libopenslide_jni_la_SOURCES = openslide-jni.c $(CROSS_H)
+openslide_jni_la_SOURCES = $(libopenslide_jni_la_SOURCES)
 # Building without lib prefix requires -module.
 # On the other hand, the JNI ABI on Mac OS X precludes it.
 openslide_jni_la_LDFLAGS = -module $(AM_LDFLAGS)
