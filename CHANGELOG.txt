@@ -1,6 +1,9 @@
 Notable Changes in OpenSlide Java
 =================================
 
+Version 0.12.1, 2015-04-20
+ * Bundle Classpath JNI headers for Windows cross builds
+
 Version 0.12.0, 2014-01-25
  * Require OpenSlide 3.4.0
  * Replace OpenSlide.fileIsValid() with OpenSlide.detectVendor()
