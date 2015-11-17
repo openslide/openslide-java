@@ -59,6 +59,7 @@ if test z$with_jni_headers = zguess ; then
         AS_CASE([$host],
             [*-*-linux-gnu], [with_jni_headers=linux],
             [*-*-mingw32], [with_jni_headers=win32],
+            [*-*-darwin*], [with_jni_headers=darwin],
             [with_jni_headers=]
         )
     else
