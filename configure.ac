@@ -78,7 +78,7 @@ if test z$with_jni_headers != zcross ; then
     # Find jni_md.h
     JOIN_EACH([platform_include_paths], [$include_paths], [$with_jni_headers])
     FIND_FILE([jni_md_h_dir], [jni_md.h],
-            [$platform_include_paths $include_paths])
+            [$platform_include_paths:$include_paths])
     JNI_CFLAGS="\"-I$jni_h_dir\" \"-I$jni_md_h_dir\""
 else
     # For cross builds, we don't have the OpenJDK jni_md.h for the target

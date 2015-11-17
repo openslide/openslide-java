@@ -10,6 +10,8 @@ AC_DEFUN([FIND_FILE], [
     IFS=:
     for ac__path in $3
     do
+        # IFS doesn't consolidate consecutive delimiters
+        ac__path=$(echo "$ac__path" | sed 's/:*$//')
         if test -r "$ac__path/$2" ; then
             IFS="$ac__save_ifs"
             AC_MSG_RESULT([$ac__path])
