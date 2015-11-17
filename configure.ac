@@ -47,7 +47,7 @@ PKG_CHECK_MODULES([OPENSLIDE], [openslide >= 3.4.0])
 AC_ARG_VAR([JAVA_HOME], [path to JDK])
 # Dynamic default for Mac OS X
 if test -x /usr/libexec/java_home ; then
-    DEFAULT_JAVA_HOME=$(/usr/libexec/java_home)
+    DEFAULT_JAVA_HOME=$(/usr/libexec/java_home 2>/dev/null)
 fi
 AC_ARG_WITH([java], [AS_HELP_STRING([--with-java], [path to JDK])], [],
         [with_java="$JAVA_HOME:$DEFAULT_JAVA_HOME:/usr/lib/jvm/java"])
