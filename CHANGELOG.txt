@@ -1,6 +1,10 @@
 Notable Changes in OpenSlide Java
 =================================
 
+Version 0.12.2, 2016-09-11
+ * Change build target to Java 6 from 5, fixing build on JDK 9
+ * Properly detect JNI include paths on Mac OS X
+
 Version 0.12.1, 2015-04-20
  * Bundle Classpath JNI headers for Windows cross builds
 

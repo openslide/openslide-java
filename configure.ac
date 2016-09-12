@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([OpenSlide Java], [0.12.1], [openslide-users@lists.andrew.cmu.edu])
+AC_INIT([OpenSlide Java], [0.12.2], [openslide-users@lists.andrew.cmu.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([openslide-jni.c])
