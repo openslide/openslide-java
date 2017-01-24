@@ -62,7 +62,7 @@ uninstall-hook:
 EXTRA_DIST = \
 	CHANGELOG.txt \
 	LICENSE.txt \
-	README.txt \
+	README.md \
 	TODO.txt \
 	lgpl-2.1.txt \
 	$(JAVA_SRC)
