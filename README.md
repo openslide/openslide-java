@@ -1,3 +1,8 @@
+OpenSlide Java
+==============
+
+This is a Java binding to [OpenSlide](http://openslide.org/).
+
 Build requirements
 ------------------
 
@@ -35,9 +40,9 @@ whitespace.
 
 Install Cygwin, selecting these additional packages:
 
-- make
-- pkg-config
-- mingw64-i686-gcc-core and/or mingw64-x86_64-gcc-core
+- `make`
+- `pkg-config`
+- `mingw64-i686-gcc-core` and/or `mingw64-x86_64-gcc-core`
 
 (Cygwin is only needed for the build environment; the resulting binaries
 do not require Cygwin.)
