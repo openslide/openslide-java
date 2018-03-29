@@ -36,7 +36,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.filechooser.FileFilter;
 
-public final class OpenSlide implements Closeable {
+public class OpenSlide implements Closeable {
     private static final FileFilter FILE_FILTER = new FileFilter() {
         @Override
         public boolean accept(File f) {
