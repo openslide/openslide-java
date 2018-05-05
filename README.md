@@ -1,7 +1,7 @@
 OpenSlide Java
 ==============
 
-This is a Java binding to [OpenSlide](http://openslide.org/).
+This is a Java binding to [OpenSlide](https://openslide.org/).
 
 Build requirements
 ------------------
