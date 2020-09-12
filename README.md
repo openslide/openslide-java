@@ -17,10 +17,10 @@ Building on Linux or Mac OS X
 ./configure
 make
 make install
+```
 
 (If building from the Git repository, you will first need to install
-autoconf, automake, libtool, and pkg-config and run "autoreconf -i".)
-```
+autoconf, automake, libtool, and pkg-config and run `autoreconf -i`.)
 
 Cross-compiling for Windows with MinGW-w64
 ------------------------------------------
