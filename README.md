@@ -1,17 +1,16 @@
-OpenSlide Java
-==============
+# OpenSlide Java
 
 This is a Java binding to [OpenSlide](https://openslide.org/).
 
-Build requirements
-------------------
+
+## Build requirements
 
 - JDK
 - Apache Ant
-- OpenSlide >= 3.4.0
+- OpenSlide &ge; 3.4.0
 
-Building on Linux or Mac OS X
------------------------------
+
+## Building on Linux or Mac OS X
 
 ```
 ./configure
@@ -22,8 +21,8 @@ make install
 (If building from the Git repository, you will first need to install
 autoconf, automake, libtool, and pkg-config and run `autoreconf -i`.)
 
-Cross-compiling for Windows with MinGW-w64
-------------------------------------------
+
+## Cross-compiling for Windows with MinGW-w64
 
 ```
 PKG_CONFIG=pkg-config \
@@ -35,8 +34,8 @@ make install
 
 For a 64-bit JRE, substitute `--host=x86_64-w64-mingw32`.
 
-Building on Windows
--------------------
+
+## Building on Windows
 
 Ensure that the path to the openslide-java source tree does not contain
 whitespace.
