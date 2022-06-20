@@ -61,7 +61,6 @@ uninstall-hook:
 
 EXTRA_DIST = \
 	CHANGELOG.md \
-	LICENSE.txt \
 	README.md \
 	TODO.txt \
 	lgpl-2.1.txt \

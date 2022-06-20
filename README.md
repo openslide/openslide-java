@@ -64,3 +64,14 @@ make install
 ```
 
 For a 64-bit JRE, substitute `--host=x86_64-w64-mingw32`.
+
+
+## License
+
+OpenSlide Java is released under the terms of the [GNU Lesser General Public
+License, version 2.1](https://openslide.org/license/).
+
+OpenSlide Java is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+License for more details.
