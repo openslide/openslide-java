@@ -60,7 +60,7 @@ uninstall-hook:
 	rm -f "$(DESTDIR)$(pkglibdir)/$(JNI_SO)"
 
 EXTRA_DIST = \
-	CHANGELOG.txt \
+	CHANGELOG.md \
 	LICENSE.txt \
 	README.md \
 	TODO.txt \
