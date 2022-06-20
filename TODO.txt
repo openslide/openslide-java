@@ -1,3 +1,0 @@
-Fancy zooming/scrolling in OpenSlideView
-
-Rotation in OpenSlideView

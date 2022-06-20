@@ -62,5 +62,4 @@ uninstall-hook:
 EXTRA_DIST = \
 	CHANGELOG.md \
 	README.md \
-	TODO.txt \
 	$(JAVA_SRC)
