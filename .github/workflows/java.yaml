@@ -1,0 +1,36 @@
+name: Java
+
+on:
+  push:
+    branches: [main]
+    tags: ["*"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+    - name: Check out repo
+      uses: actions/checkout@v3
+    - name: Install dependencies (Linux)
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: sudo apt-get install libopenslide0-dev
+    - name: Install dependencies (macOS)
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: brew install automake openslide
+    - name: Build
+      run: |
+        autoreconf -i
+        ./configure --prefix=$HOME
+        make
+        make install
+    - name: Smoke test
+      run: java -cp openslide.jar org.openslide.TestCLI fixtures/small.svs
