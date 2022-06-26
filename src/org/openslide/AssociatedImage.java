@@ -25,7 +25,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class AssociatedImage {
-
     private final String name;
 
     private final OpenSlide os;

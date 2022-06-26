@@ -23,7 +23,6 @@
 
 #include <openslide.h>
 
-
 static jstring osj_detect_vendor(JNIEnv *env, jobject obj, jstring filename) {
   const char *filename2 = (*env)->GetStringUTFChars(env, filename, NULL);
   if (filename2 == NULL) {
@@ -227,4 +226,3 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
 
   return JNI_VERSION_1_4;
 }
-
