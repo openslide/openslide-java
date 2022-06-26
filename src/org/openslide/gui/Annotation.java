@@ -24,7 +24,5 @@ package org.openslide.gui;
 import java.awt.Shape;
 
 public interface Annotation {
-
     Shape getShape();
-
 }
