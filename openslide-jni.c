@@ -61,7 +61,7 @@ static void osj_get_level_dimensions(JNIEnv *env, jobject obj, jlong osr, jint l
   int64_t dims[2];
   openslide_get_level_dimensions((openslide_t *) osr, level, dims, dims + 1);
 
-  (*env)->SetLongArrayRegion(env, dim, 0, 2, dims);
+  (*env)->SetLongArrayRegion(env, dim, 0, 2, (jlong *) dims);
 }
 
 static jdouble osj_get_level_downsample(JNIEnv *env, jobject obj, jlong osr, jint level) {
@@ -152,7 +152,7 @@ static void osj_get_associated_image_dimensions(JNIEnv *env, jobject obj, jlong 
 
   openslide_get_associated_image_dimensions((openslide_t *) osr, name2, dims, dims + 1);
 
-  (*env)->SetLongArrayRegion(env, dim, 0, 2, dims);
+  (*env)->SetLongArrayRegion(env, dim, 0, 2, (jlong *) dims);
   (*env)->ReleaseStringUTFChars(env, name, name2);
 }
 
