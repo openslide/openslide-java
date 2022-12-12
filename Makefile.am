@@ -28,17 +28,17 @@ openslide_jni_la_LDFLAGS = -module $(AM_LDFLAGS)
 pkglibdatadir = $(pkglibdir)
 pkglibdata_DATA = openslide.jar
 JAVA_SRC = build.xml \
-	src/org/openslide/AssociatedImage.java \
-	src/org/openslide/OpenSlideDisposedException.java \
-	src/org/openslide/OpenSlide.java \
-	src/org/openslide/OpenSlideJNI.java \
-	src/org/openslide/TestCLI.java \
-	src/org/openslide/gui/Annotation.java \
-	src/org/openslide/gui/DefaultAnnotation.java \
-	src/org/openslide/gui/DefaultSelectionListModel.java \
-	src/org/openslide/gui/Demo.java \
-	src/org/openslide/gui/OpenSlideView.java \
-	src/org/openslide/gui/SelectionListModel.java
+	org/openslide/AssociatedImage.java \
+	org/openslide/OpenSlideDisposedException.java \
+	org/openslide/OpenSlide.java \
+	org/openslide/OpenSlideJNI.java \
+	org/openslide/TestCLI.java \
+	org/openslide/gui/Annotation.java \
+	org/openslide/gui/DefaultAnnotation.java \
+	org/openslide/gui/DefaultSelectionListModel.java \
+	org/openslide/gui/Demo.java \
+	org/openslide/gui/OpenSlideView.java \
+	org/openslide/gui/SelectionListModel.java
 
 openslide.jar: $(JAVA_SRC) config.h
 	@"$(ANT)" -f "$(srcdir)/build.xml" -Dbuilddir="$(ANT_BUILDDIR)" \
