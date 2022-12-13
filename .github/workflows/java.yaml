@@ -22,15 +22,17 @@ jobs:
       uses: actions/checkout@v3
     - name: Install dependencies (Linux)
       if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: sudo apt-get install libopenslide0-dev
+      run: |
+        sudo apt-get install libopenslide0-dev ninja-build
+        # Ubuntu 22.04 packages Meson 0.61
+        pip install --user meson
     - name: Install dependencies (macOS)
       if: ${{ matrix.os == 'macos-latest' }}
-      run: brew install automake openslide
+      run: brew install meson openslide
     - name: Build
       run: |
-        autoreconf -i
-        ./configure --prefix=$HOME
-        make
-        make install
+        meson setup builddir --prefix=$HOME
+        meson compile -C builddir
+        meson install -C builddir
     - name: Smoke test
-      run: java -cp openslide.jar org.openslide.TestCLI fixtures/small.svs
+      run: java -cp builddir/openslide.jar org.openslide.TestCLI fixtures/small.svs
