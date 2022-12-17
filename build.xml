@@ -12,8 +12,8 @@
 	</path>
 	<target name="init">
 		<mkdir dir="${builddir}/bin/resources"/>
-		<copy includeemptydirs="false" todir="${builddir}/bin">
-			<fileset dir="src" excludes="**/*.launch, **/*.java"/>
+		<copy includeemptydirs="false" todir="${builddir}/bin/org">
+			<fileset dir="org" excludes="**/*.launch, **/*.java"/>
 		</copy>
 	</target>
 	<target name="clean">
@@ -38,7 +38,7 @@
 	<target depends="init" name="build-project">
 		<echo message="${ant.project.name}: ${ant.file}"/>
 		<javac debug="true" debuglevel="${debuglevel}" destdir="${builddir}/bin" source="${source}" target="${target}" includeAntRuntime="false">
-			<src path="src"/>
+			<src path="org"/>
 			<classpath refid="openslide java.classpath"/>
 			<compilerarg value="-Xlint:-options"/>
 		</javac>

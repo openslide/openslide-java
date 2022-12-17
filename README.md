@@ -3,14 +3,41 @@
 This is a Java binding to [OpenSlide](https://openslide.org/).
 
 
-## Build requirements
+## Building with Meson
+
+This is the new method.
+
+### Build requirements
+
+- JDK
+- Meson &ge; 0.62
+- OpenSlide &ge; 3.4.0
+- pkg-config
+
+
+### Building
+
+```
+meson setup builddir
+meson compile -C builddir
+meson install -C builddir
+```
+
+
+## Building with Autotools and Ant
+
+This is the old method, and will eventually be removed.
+
+
+### Build requirements
 
 - JDK
 - Apache Ant
 - OpenSlide &ge; 3.4.0
+- pkg-config
 
 
-## Building on Linux or Mac OS X
+### Building on Linux or Mac OS X
 
 ```
 ./configure
@@ -22,7 +49,7 @@ make install
 autoconf, automake, libtool, and pkg-config and run `autoreconf -i`.)
 
 
-## Cross-compiling for Windows with MinGW-w64
+### Cross-compiling for Windows with MinGW-w64
 
 ```
 PKG_CONFIG=pkg-config \
@@ -35,7 +62,7 @@ make install
 For a 64-bit JRE, substitute `--host=x86_64-w64-mingw32`.
 
 
-## Building on Windows
+### Building on Windows
 
 Ensure that the path to the openslide-java source tree does not contain
 whitespace.
