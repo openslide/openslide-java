@@ -1,5 +1,7 @@
 
 
+
+
 # Notable Changes in OpenSlide Java
 
 ## Version 0.12.3, 2022-12-17
