@@ -1,5 +1,13 @@
 # Notable Changes in OpenSlide Java
 
+## Version 0.12.3, 2022-12-17
+
+* Add Meson build system and deprecate Autotools+Ant one
+* Change build target to Java 8 from 6, fixing build on newer JDK
+* Convert README and changelog to Markdown
+* Consolidate license files
+
+
 ## Version 0.12.2, 2016-09-11
 
 * Change build target to Java 6 from 5, fixing build on JDK 9

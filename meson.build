@@ -6,7 +6,7 @@ project(
   ],
   license : 'LGPL-2.1-only',
   meson_version : '>=0.62',
-  version : '0.12.2',
+  version : '0.12.3',
 )
 meson.add_dist_script(
   'scripts/dist.py'
