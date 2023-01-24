@@ -2,3 +2,12 @@
 configure.ac	eol=lf
 Makefile.am	eol=lf
 *.m4		eol=lf
+
+# Don't include Git/GitHub metadata in release tarballs
+.gitattributes	export-ignore
+.gitignore	export-ignore
+/.github	export-ignore
+
+# Fixtures are currently only used by GitHub Actions.  Omit from release
+# tarballs.
+/fixtures	export-ignore
