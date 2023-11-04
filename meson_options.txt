@@ -1,0 +1,6 @@
+option(
+  'embed_jni_path',
+  type : 'feature',
+  value : 'auto',
+  description : 'Embed path to JNI library in JAR',
+)
