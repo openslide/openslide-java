@@ -104,12 +104,21 @@ fs = import('fs')
 openslide_jni_path = install_dir / fs.name(openslide_jni.full_path())
 
 # jar
+# by default, don't embed JNI library path in jar on Windows
+embed_jni_path = get_option('embed_jni_path')
+embed_jni_path = (
+  embed_jni_path.enabled() or
+  embed_jni_path.auto() and host_machine.system() != 'windows'
+)
+summary(
+  'Embed JNI path in JAR', embed_jni_path,
+  bool_yn : true
+)
 jar_props = configure_file(
   input : 'meta/openslide.properties.in',
   output : 'openslide.properties',
   configuration : {
-    # don't embed JNI library path in jar on Windows
-    'jni_path': host_machine.system() == 'windows' ? '' : openslide_jni_path,
+    'jni_path': embed_jni_path ? openslide_jni_path : '',
   }
 )
 manifest_extra = configure_file(
