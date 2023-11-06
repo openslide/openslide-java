@@ -99,7 +99,8 @@ public final class OpenSlide implements Closeable {
     }
 
     public OpenSlide(File file) throws IOException {
-        if (!file.exists()) {
+        // allow opening the synthetic slide
+        if (!file.exists() && !file.getPath().equals("")) {
             throw new FileNotFoundException(file.toString());
         }
 
