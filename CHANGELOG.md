@@ -1,5 +1,12 @@
 # Notable Changes in OpenSlide Java
 
+## Version 0.12.4, 2023-11-07
+
+* Allow opening the synthetic test slide
+* Add Meson build option to configure embedding of JNI path in JAR
+* Fix `meson dist` failure when packaged as subproject
+
+
 ## Version 0.12.3, 2022-12-17
 
 * Add Meson build system and deprecate Autotools+Ant one
