@@ -3,8 +3,7 @@
 - [ ] Run test build and `meson dist`
 - [ ] Update `CHANGELOG.md` and versions in `configure.ac` and `meson.build`
 - [ ] Create and push signed tag
-- [ ] `git clean -dxf && meson setup builddir && meson dist -C builddir`
-- [ ] Attach release notes to [GitHub release](https://github.com/openslide/openslide-java/releases/new), set pre-release flag, and upload tarball
+- [ ] Verify that GitHub Actions created a [GitHub release](https://github.com/openslide/openslide-java/releases) with release notes and a source tarball
 - [ ] [Update openslide-bin](https://github.com/openslide/openslide-bin/issues/new?labels=release&template=release.md)
 - [ ] Update website: `_data/releases.yaml`, `_includes/news.md`
 - [ ] Send mail to -announce and -users
