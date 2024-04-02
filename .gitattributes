@@ -1,8 +1,3 @@
-# Shell scripts and Automake sources can't have CRLF line endings
-configure.ac	eol=lf
-Makefile.am	eol=lf
-*.m4		eol=lf
-
 # Don't include Git/GitHub metadata in release tarballs
 .gitattributes	export-ignore
 .gitignore	export-ignore
