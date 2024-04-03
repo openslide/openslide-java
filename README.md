@@ -12,7 +12,7 @@ This is a Java binding to [OpenSlide](https://openslide.org/).
 ## Runtime requirements
 
 - JRE ≥ 22
-- OpenSlide ≥ 3.4.0, in the system's library search path or preloaded with
+- OpenSlide ≥ 4.0.0, in the system's library search path or preloaded with
   `System.load()` or `System.loadLibrary()`
 
 

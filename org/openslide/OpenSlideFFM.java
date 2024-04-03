@@ -46,32 +46,29 @@ class OpenSlideFFM {
             return lookup;
         }
         String tmpl = System.mapLibraryName("openslide");
-        for (int ver = 1; ver >= 0; ver--) {
-            String lname;
-            if (tmpl.endsWith(".dll")) {
-                lname = String.format("libopenslide-%d.dll", ver);
-            } else if (tmpl.endsWith(".dylib")) {
-                lname = String.format("libopenslide.%d.dylib", ver);
-            } else {
-                lname = String.format("%s.%d", tmpl, ver);
-            }
-            try {
-                return SymbolLookup.libraryLookup(lname, LIBRARY_ARENA);
-            } catch (IllegalArgumentException ex) {
-                continue;
-            }
+        String lname;
+        if (tmpl.endsWith(".dll")) {
+            lname = "libopenslide-1.dll";
+        } else if (tmpl.endsWith(".dylib")) {
+            lname = "libopenslide.1.dylib";
+        } else {
+            lname = tmpl + ".1";
         }
-        throw new UnsatisfiedLinkError(
-                "Couldn't locate OpenSlide library; add it to the operating " +
-                "system's library search path or use System.load() or " +
-                "System.loadLibrary()");
+        try {
+            return SymbolLookup.libraryLookup(lname, LIBRARY_ARENA);
+        } catch (IllegalArgumentException ex) {
+            throw new UnsatisfiedLinkError(
+                    "Couldn't locate OpenSlide library; add it to the " +
+                    "operating system's library search path or use " +
+                    "System.load() or System.loadLibrary()");
+        }
     }
 
     private static MethodHandle function(MemoryLayout ret, String name,
             MemoryLayout... args) {
         MemorySegment symbol = SYMBOL_LOOKUP.find(name)
                 .orElseThrow(() -> new UnsatisfiedLinkError(
-                "Unresolved symbol " + name + "; need OpenSlide >= 3.4.0"));
+                "Unresolved symbol " + name + "; need OpenSlide >= 4.0.0"));
         FunctionDescriptor desc;
         if (ret != null) {
             desc = FunctionDescriptor.of(ret, args);
