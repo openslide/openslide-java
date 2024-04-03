@@ -33,19 +33,23 @@ jobs:
     - name: Install dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        sudo apt-get install libopenslide0-dev ninja-build
+        sudo apt-get install libopenslide0 ninja-build
         # Ubuntu 22.04 packages Meson 0.61
         pip install --user meson
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-14'
-      run: brew install meson openslide
+      run: |
+        brew install meson openslide
+        # allow smoke test to find OpenSlide
+        echo "DYLD_LIBRARY_PATH=/opt/homebrew/lib" >> $GITHUB_ENV
     - name: Build
       run: |
-        meson setup builddir --prefix=$HOME
+        meson setup builddir
         meson compile -C builddir
-        meson install -C builddir
     - name: Smoke test
-      run: java -cp builddir/openslide.jar org.openslide.TestCLI fixtures/small.svs
+      run: |
+        java --enable-native-access=ALL-UNNAMED -cp builddir/openslide.jar \
+            org.openslide.TestCLI fixtures/small.svs
     - name: Dist
       id: dist
       if: matrix.dist

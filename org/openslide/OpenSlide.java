@@ -49,7 +49,7 @@ public final class OpenSlide implements Closeable {
         }
     };
 
-    private static final String LIBRARY_VERSION = OpenSlideJNI
+    private static final String LIBRARY_VERSION = OpenSlideFFM
             .openslide_get_version();
 
     final public static String PROPERTY_NAME_COMMENT = "openslide.comment";
@@ -74,7 +74,7 @@ public final class OpenSlide implements Closeable {
 
     final public static String PROPERTY_NAME_BOUNDS_HEIGHT = "openslide.bounds-height";
 
-    private long osr;
+    private java.lang.foreign.MemorySegment osr;
 
     final private ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -95,7 +95,7 @@ public final class OpenSlide implements Closeable {
     final private int hashCodeVal;
 
     public static String detectVendor(File file) {
-        return OpenSlideJNI.openslide_detect_vendor(file.getPath());
+        return OpenSlideFFM.openslide_detect_vendor(file.getPath());
     }
 
     public OpenSlide(File file) throws IOException {
@@ -104,9 +104,9 @@ public final class OpenSlide implements Closeable {
             throw new FileNotFoundException(file.toString());
         }
 
-        osr = OpenSlideJNI.openslide_open(file.getPath());
+        osr = OpenSlideFFM.openslide_open(file.getPath());
 
-        if (osr == 0) {
+        if (osr == null) {
             throw new IOException(file
                     + ": Not a file that OpenSlide can recognize");
         }
@@ -119,7 +119,7 @@ public final class OpenSlide implements Closeable {
         }
 
         // store level count
-        levelCount = OpenSlideJNI.openslide_get_level_count(osr);
+        levelCount = OpenSlideFFM.openslide_get_level_count(osr);
 
         // store dimensions
         levelWidths = new long[levelCount];
@@ -128,17 +128,17 @@ public final class OpenSlide implements Closeable {
 
         for (int i = 0; i < levelCount; i++) {
             long dim[] = new long[2];
-            OpenSlideJNI.openslide_get_level_dimensions(osr, i, dim);
+            OpenSlideFFM.openslide_get_level_dimensions(osr, i, dim);
             levelWidths[i] = dim[0];
             levelHeights[i] = dim[1];
-            levelDownsamples[i] = OpenSlideJNI.openslide_get_level_downsample(
+            levelDownsamples[i] = OpenSlideFFM.openslide_get_level_downsample(
                     osr, i);
         }
 
         // properties
         HashMap<String, String> props = new HashMap<String, String>();
-        for (String s : OpenSlideJNI.openslide_get_property_names(osr)) {
-            props.put(s, OpenSlideJNI.openslide_get_property_value(osr, s));
+        for (String s : OpenSlideFFM.openslide_get_property_names(osr)) {
+            props.put(s, OpenSlideFFM.openslide_get_property_value(osr, s));
         }
 
         properties = Collections.unmodifiableMap(props);
@@ -146,7 +146,7 @@ public final class OpenSlide implements Closeable {
         // associated images
         HashMap<String, AssociatedImage> associated =
                 new HashMap<String, AssociatedImage>();
-        for (String s : OpenSlideJNI
+        for (String s : OpenSlideFFM
                 .openslide_get_associated_image_names(osr)) {
             associated.put(s, new AssociatedImage(s, this));
         }
@@ -173,7 +173,7 @@ public final class OpenSlide implements Closeable {
 
     // call with the reader lock held, or from the constructor
     private void checkError() throws IOException {
-        String msg = OpenSlideJNI.openslide_get_error(osr);
+        String msg = OpenSlideFFM.openslide_get_error(osr);
 
         if (msg != null) {
             throw new IOException(msg);
@@ -185,9 +185,9 @@ public final class OpenSlide implements Closeable {
         Lock wl = lock.writeLock();
         wl.lock();
         try {
-            if (osr != 0) {
-                OpenSlideJNI.openslide_close(osr);
-                osr = 0;
+            if (osr != null) {
+                OpenSlideFFM.openslide_close(osr);
+                osr = null;
             }
         } finally {
             wl.unlock();
@@ -200,7 +200,7 @@ public final class OpenSlide implements Closeable {
 
     // call with the reader lock held
     private void checkDisposed() {
-        if (osr == 0) {
+        if (osr == null) {
             throw new OpenSlideDisposedException();
         }
     }
@@ -242,7 +242,7 @@ public final class OpenSlide implements Closeable {
         rl.lock();
         try {
             checkDisposed();
-            OpenSlideJNI.openslide_read_region(osr, dest, x, y, level, w, h);
+            OpenSlideFFM.openslide_read_region(osr, dest, x, y, level, w, h);
             checkError();
         } finally {
             rl.unlock();
@@ -396,7 +396,7 @@ public final class OpenSlide implements Closeable {
             checkDisposed();
 
             long dim[] = new long[2];
-            OpenSlideJNI.openslide_get_associated_image_dimensions(osr, name,
+            OpenSlideFFM.openslide_get_associated_image_dimensions(osr, name,
                     dim);
             checkError();
             if (dim[0] == -1) {
@@ -410,7 +410,7 @@ public final class OpenSlide implements Closeable {
             int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
                     .getData();
 
-            OpenSlideJNI.openslide_read_associated_image(osr, name, data);
+            OpenSlideFFM.openslide_read_associated_image(osr, name, data);
             checkError();
             return img;
         } finally {
