@@ -18,7 +18,7 @@ jobs:
       dist-base: ${{ steps.dist.outputs.dist-base }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-14]
         include:
           - os: ubuntu-latest
             dist: dist
@@ -26,13 +26,13 @@ jobs:
     - name: Check out repo
       uses: actions/checkout@v4
     - name: Install dependencies (Linux)
-      if: ${{ matrix.os == 'ubuntu-latest' }}
+      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get install libopenslide0-dev ninja-build
         # Ubuntu 22.04 packages Meson 0.61
         pip install --user meson
     - name: Install dependencies (macOS)
-      if: ${{ matrix.os == 'macos-latest' }}
+      if: matrix.os == 'macos-14'
       run: brew install meson openslide
     - name: Build
       run: |
