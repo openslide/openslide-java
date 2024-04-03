@@ -76,11 +76,9 @@ jobs:
       if: matrix.dist
       run: |
         set -o pipefail
-        meson dist -C builddir
         dist="openslide-java-dist-$GITHUB_RUN_NUMBER-$(echo $GITHUB_SHA | cut -c-10)"
         echo "dist-base=$dist" >> $GITHUB_OUTPUT
         mkdir -p "artifacts/$dist"
-        mv builddir/meson-dist/*.tar.xz "artifacts/$dist"
         version=$(meson introspect --projectinfo builddir | jq -r .version)
         mv builddir/openslide.jar \
             "artifacts/${dist}/openslide-java-${version}.jar"
@@ -101,6 +99,8 @@ jobs:
     permissions:
       contents: write
     steps:
+    - name: Check out repo
+      uses: actions/checkout@v4
     - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
@@ -111,11 +111,10 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         version=$(echo "${{ github.ref_name }}" | sed "s/^v//")
-        tar xf "${{ needs.build.outputs.dist-base }}/openslide-java-${version}.tar.xz"
         awk -e '/^## / && ok {exit}' \
             -e '/^## / {ok=1; next}' \
             -e 'ok {print}' \
-            "openslide-java-${version}/CHANGELOG.md" > changes
+            CHANGELOG.md > changes
         gh release create --prerelease --verify-tag \
             --repo "${{ github.repository }}" \
             --title "OpenSlide Java $version" \
