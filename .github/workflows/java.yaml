@@ -75,11 +75,15 @@ jobs:
       id: dist
       if: matrix.dist
       run: |
+        set -o pipefail
         meson dist -C builddir
         dist="openslide-java-dist-$GITHUB_RUN_NUMBER-$(echo $GITHUB_SHA | cut -c-10)"
         echo "dist-base=$dist" >> $GITHUB_OUTPUT
         mkdir -p "artifacts/$dist"
         mv builddir/meson-dist/*.tar.xz "artifacts/$dist"
+        version=$(meson introspect --projectinfo builddir | jq -r .version)
+        mv builddir/openslide.jar \
+            "artifacts/${dist}/openslide-java-${version}.jar"
     - name: Archive dist
       if: matrix.dist
       uses: actions/upload-artifact@v4
