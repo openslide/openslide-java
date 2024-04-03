@@ -2,6 +2,7 @@
  *  OpenSlide, a library for reading whole slide image files
  *
  *  Copyright (c) 2007-2011 Carnegie Mellon University
+ *  Copyright (c) 2024 Benjamin Gilbert
  *  All rights reserved.
  *
  *  OpenSlide is free software: you can redistribute it and/or modify
@@ -417,6 +418,20 @@ public final class OpenSlide implements Closeable {
             return img;
         } finally {
             rl.unlock();
+        }
+    }
+
+    public void setCache(OpenSlideCache cache) {
+        Lock cl = cache.getLock();
+        Lock rl = lock.readLock();
+        cl.lock();
+        rl.lock();
+        try {
+            checkDisposed();
+            OpenSlideFFM.openslide_set_cache(osr, cache.getSegment());
+        } finally {
+            rl.unlock();
+            cl.unlock();
         }
     }
 

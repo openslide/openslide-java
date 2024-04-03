@@ -34,6 +34,9 @@ class OpenSlideFFM {
     private static final AddressLayout C_POINTER = ADDRESS.withTargetLayout(
             MemoryLayout.sequenceLayout(Long.MAX_VALUE, JAVA_BYTE));
 
+    private static final MemoryLayout SIZE_T = Linker.nativeLinker()
+            .canonicalLayouts().get("size_t");
+
     private OpenSlideFFM() {
     }
 
@@ -302,6 +305,39 @@ class OpenSlideFFM {
                 throw new AssertionError("Invalid call", ex);
             }
             MemorySegment.copy(buf, JAVA_INT, 0, dest, 0, dest.length);
+        }
+    }
+
+    private static final MethodHandle cache_create = function(
+            C_POINTER, "openslide_cache_create", SIZE_T);
+
+    static MemorySegment openslide_cache_create(long capacity) {
+        try {
+            return (MemorySegment) cache_create.invokeExact(capacity);
+        } catch (Throwable ex) {
+            throw new AssertionError("Invalid call", ex);
+        }
+    }
+
+    private static final MethodHandle set_cache = function(
+            null, "openslide_set_cache", C_POINTER, C_POINTER);
+
+    static void openslide_set_cache(MemorySegment osr, MemorySegment cache) {
+        try {
+            set_cache.invokeExact(osr, cache);
+        } catch (Throwable ex) {
+            throw new AssertionError("Invalid call", ex);
+        }
+    }
+
+    private static final MethodHandle cache_release = function(
+            null, "openslide_cache_release", C_POINTER);
+
+    static void openslide_cache_release(MemorySegment cache) {
+        try {
+            cache_release.invokeExact(cache);
+        } catch (Throwable ex) {
+            throw new AssertionError("Invalid call", ex);
         }
     }
 
