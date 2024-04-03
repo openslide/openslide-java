@@ -64,6 +64,8 @@ public final class OpenSlide implements Closeable {
 
     final public static String PROPERTY_NAME_COMMENT = "openslide.comment";
 
+    final public static String PROPERTY_NAME_ICC_SIZE = "openslide.icc-size";
+
     final public static String PROPERTY_NAME_MPP_X = "openslide.mpp-x";
 
     final public static String PROPERTY_NAME_MPP_Y = "openslide.mpp-y";
