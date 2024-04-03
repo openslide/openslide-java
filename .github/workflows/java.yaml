@@ -25,6 +25,11 @@ jobs:
     steps:
     - name: Check out repo
       uses: actions/checkout@v4
+    - name: Install Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: oracle
+        java-version: 22
     - name: Install dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
