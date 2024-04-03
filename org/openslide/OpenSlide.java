@@ -52,27 +52,27 @@ public final class OpenSlide implements Closeable {
     private static final String LIBRARY_VERSION = OpenSlideFFM
             .openslide_get_version();
 
-    final public static String PROPERTY_NAME_COMMENT = "openslide.comment";
-
-    final public static String PROPERTY_NAME_VENDOR = "openslide.vendor";
-
-    final public static String PROPERTY_NAME_QUICKHASH1 = "openslide.quickhash-1";
-
     final public static String PROPERTY_NAME_BACKGROUND_COLOR = "openslide.background-color";
 
-    final public static String PROPERTY_NAME_OBJECTIVE_POWER = "openslide.objective-power";
+    final public static String PROPERTY_NAME_BOUNDS_HEIGHT = "openslide.bounds-height";
 
-    final public static String PROPERTY_NAME_MPP_X = "openslide.mpp-x";
-
-    final public static String PROPERTY_NAME_MPP_Y = "openslide.mpp-y";
+    final public static String PROPERTY_NAME_BOUNDS_WIDTH = "openslide.bounds-width";
 
     final public static String PROPERTY_NAME_BOUNDS_X = "openslide.bounds-x";
 
     final public static String PROPERTY_NAME_BOUNDS_Y = "openslide.bounds-y";
 
-    final public static String PROPERTY_NAME_BOUNDS_WIDTH = "openslide.bounds-width";
+    final public static String PROPERTY_NAME_COMMENT = "openslide.comment";
 
-    final public static String PROPERTY_NAME_BOUNDS_HEIGHT = "openslide.bounds-height";
+    final public static String PROPERTY_NAME_MPP_X = "openslide.mpp-x";
+
+    final public static String PROPERTY_NAME_MPP_Y = "openslide.mpp-y";
+
+    final public static String PROPERTY_NAME_OBJECTIVE_POWER = "openslide.objective-power";
+
+    final public static String PROPERTY_NAME_QUICKHASH1 = "openslide.quickhash-1";
+
+    final public static String PROPERTY_NAME_VENDOR = "openslide.vendor";
 
     private java.lang.foreign.MemorySegment osr;
 
