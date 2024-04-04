@@ -14,9 +14,14 @@ jobs:
   build:
     name: Build
     runs-on: ${{ matrix.os }}
+    outputs:
+      dist-base: ${{ steps.dist.outputs.dist-base }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            dist: dist
     steps:
     - name: Check out repo
       uses: actions/checkout@v4
@@ -36,3 +41,50 @@ jobs:
         meson install -C builddir
     - name: Smoke test
       run: java -cp builddir/openslide.jar org.openslide.TestCLI fixtures/small.svs
+    - name: Dist
+      id: dist
+      if: matrix.dist
+      run: |
+        meson dist -C builddir
+        dist="openslide-java-dist-$GITHUB_RUN_NUMBER-$(echo $GITHUB_SHA | cut -c-10)"
+        echo "dist-base=$dist" >> $GITHUB_OUTPUT
+        mkdir -p "artifacts/$dist"
+        mv builddir/meson-dist/*.tar.xz "artifacts/$dist"
+    - name: Archive dist
+      if: matrix.dist
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.dist.outputs.dist-base }}
+        path: artifacts
+        compression-level: 0
+
+  release:
+    name: Release
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency: release-${{ github.ref }}
+    permissions:
+      contents: write
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: ${{ needs.build.outputs.dist-base }}
+        merge-multiple: true
+    - name: Release to GitHub
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        version=$(echo "${{ github.ref_name }}" | sed "s/^v//")
+        tar xf "${{ needs.build.outputs.dist-base }}/openslide-java-${version}.tar.xz"
+        awk -e '/^## / && ok {exit}' \
+            -e '/^## / {ok=1; next}' \
+            -e 'ok {print}' \
+            "openslide-java-${version}/CHANGELOG.md" > changes
+        gh release create --prerelease --verify-tag \
+            --repo "${{ github.repository }}" \
+            --title "OpenSlide Java $version" \
+            --notes-file changes \
+            "${{ github.ref_name }}" \
+            "${{ needs.build.outputs.dist-base }}/"*
