@@ -33,16 +33,15 @@ jobs:
       with:
         distribution: oracle
         java-version: 22
+        cache: maven
     - name: Install dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        sudo apt-get install libopenslide0 ninja-build
-        # Ubuntu 22.04 packages Meson 0.61
-        pip install --user meson
+        sudo apt-get install libopenslide0
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-14'
       run: |
-        brew install meson openslide
+        brew install openslide
         # allow smoke test to find OpenSlide
         echo "DYLD_LIBRARY_PATH=/opt/homebrew/lib" >> $GITHUB_ENV
     - name: Install dependencies (Windows)
@@ -50,7 +49,6 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        pip install meson ninja
         mkdir -p "c:\\openslide"
         cd "c:\\openslide"
         release=$(gh release list -R openslide/openslide-bin -L 1 \
@@ -64,24 +62,20 @@ jobs:
         # allow smoke test to find OpenSlide
         echo "PATH=c:\\openslide\\${zipname}\\bin;$PATH" >> $GITHUB_ENV
     - name: Build
-      run: |
-        meson setup builddir
-        meson compile -C builddir
+      run: mvn -Dmaven.compiler.failOnWarning=true
     - name: Smoke test
       run: |
-        java --enable-native-access=ALL-UNNAMED -cp builddir/openslide.jar \
-            org.openslide.TestCLI fixtures/small.svs
+        java --enable-native-access=ALL-UNNAMED \
+            -cp target/openslide-java-*.jar org.openslide.TestCLI \
+            fixtures/small.svs
     - name: Dist
       id: dist
       if: matrix.dist
       run: |
-        set -o pipefail
         dist="openslide-java-dist-$GITHUB_RUN_NUMBER-$(echo $GITHUB_SHA | cut -c-10)"
         echo "dist-base=$dist" >> $GITHUB_OUTPUT
         mkdir -p "artifacts/$dist"
-        version=$(meson introspect --projectinfo builddir | jq -r .version)
-        mv builddir/openslide.jar \
-            "artifacts/${dist}/openslide-java-${version}.jar"
+        mv target/openslide-java-*.jar "artifacts/${dist}"
     - name: Archive dist
       if: matrix.dist
       uses: actions/upload-artifact@v4

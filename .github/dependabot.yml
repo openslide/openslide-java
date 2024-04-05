@@ -1,0 +1,9 @@
+version: 2
+updates:
+  # Periodically check for Maven plugin updates
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: maven
