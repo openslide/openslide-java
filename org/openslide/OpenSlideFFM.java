@@ -25,6 +25,7 @@ import java.lang.foreign.*;
 import static java.lang.foreign.ValueLayout.*;
 import java.lang.invoke.*;
 
+@SuppressWarnings("restricted")
 class OpenSlideFFM {
     private static final Arena LIBRARY_ARENA = Arena.ofAuto();
 

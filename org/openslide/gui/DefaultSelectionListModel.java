@@ -27,8 +27,8 @@ import java.util.List;
 
 import javax.swing.AbstractListModel;
 
-public class DefaultSelectionListModel extends AbstractListModel implements
-        SelectionListModel {
+public class DefaultSelectionListModel extends AbstractListModel<Annotation>
+        implements SelectionListModel {
 
     private final List<Annotation> list = new ArrayList<Annotation>();
 

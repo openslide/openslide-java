@@ -23,7 +23,8 @@ package org.openslide.gui;
 
 import javax.swing.ListModel;
 
-public interface SelectionListModel extends ListModel, Iterable<Annotation> {
+public interface SelectionListModel extends ListModel<Annotation>,
+        Iterable<Annotation> {
     void add(Annotation annotation);
 
     boolean isEmpty();
