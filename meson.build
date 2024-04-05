@@ -8,11 +8,6 @@ project(
   meson_version : '>=0.62',
   version : '0.12.4',
 )
-if not meson.is_subproject()
-  meson.add_dist_script(
-    'scripts/dist.py'
-  )
-endif
 java_ver = '1.8'
 
 # options
