@@ -27,7 +27,7 @@ jar = find_program(
 add_project_arguments(
   '-source', java_ver,
   '-target', java_ver,
-  '-Xlint:-options',
+  '-Xlint:all,-serial',
   language : 'java',
 )
 

@@ -84,6 +84,7 @@ public class OpenSlideView extends JPanel {
         this(w, 1.2, 40, startWithZoomFit);
     }
 
+    @SuppressWarnings("this-escape")
     public OpenSlideView(OpenSlide w, double downsampleBase,
             int maxDownsampleExponent, boolean startWithZoomFit) {
         // TODO support w > 2^31 and h > 2^31
