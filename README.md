@@ -5,10 +5,15 @@ This is a Java binding to [OpenSlide](https://openslide.org/).
 
 ## Build requirements
 
-- JDK
+- JDK ≥ 22
 - Meson &ge; 0.62
-- OpenSlide &ge; 3.4.0
-- pkg-config
+
+
+## Runtime requirements
+
+- JRE ≥ 22
+- OpenSlide ≥ 3.4.0, in the system's library search path or preloaded with
+  `System.load()` or `System.loadLibrary()`
 
 
 ## Building
@@ -16,8 +21,9 @@ This is a Java binding to [OpenSlide](https://openslide.org/).
 ```
 meson setup builddir
 meson compile -C builddir
-meson install -C builddir
 ```
+
+The JAR will be in `builddir/openslide.jar`.
 
 
 ## License
