@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <version>0.12.4</version>
+
+  <groupId>org.openslide</groupId>
+  <artifactId>openslide-java</artifactId>
+  <name>OpenSlide Java</name>
+  <description>Java interface to OpenSlide</description>
+  <url>https://openslide.org</url>
+  <inceptionYear>2007</inceptionYear>
+  <organization>
+    <name>OpenSlide project</name>
+    <url>https://openslide.org</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>LGPL-2.1-only</name>
+      <url>https://raw.githubusercontent.com/openslide/openslide-java/main/COPYING.LESSER</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>22</maven.compiler.source>
+    <maven.compiler.target>22</maven.compiler.target>
+  </properties>
+
+  <build>
+    <defaultGoal>package</defaultGoal>
+    <sourceDirectory>.</sourceDirectory>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <showWarnings>true</showWarnings>
+          <compilerArgs>
+            <arg>-Xlint:all,-serial</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <mainClass>org.openslide.gui.Demo</mainClass>
+            </manifest>
+            <manifestEntries>
+              <Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <distributionManagement>
+    <downloadUrl>https://openslide.org/download/#source</downloadUrl>
+  </distributionManagement>
+
+  <scm>
+    <connection>scm:git:https://github.com/openslide/openslide-java</connection>
+    <url>https://github.com/openslide/openslide-java</url>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/openslide/openslide-java/issues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>GitHub</system>
+    <url>https://github.com/openslide/openslide-java/actions</url>
+  </ciManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>openslide-announce</name>
+      <subscribe>https://lists.andrew.cmu.edu/mailman/listinfo/openslide-announce</subscribe>
+      <unsubscribe>https://lists.andrew.cmu.edu/mailman/listinfo/openslide-announce</unsubscribe>
+      <archive>https://lists.andrew.cmu.edu/pipermail/openslide-announce/</archive>
+      <otherArchives>
+        <otherArchive>https://marc.info/?l=openslide-announce</otherArchive>
+      </otherArchives>
+    </mailingList>
+    <mailingList>
+      <name>openslide-users</name>
+      <subscribe>https://lists.andrew.cmu.edu/mailman/listinfo/openslide-users</subscribe>
+      <unsubscribe>https://lists.andrew.cmu.edu/mailman/listinfo/openslide-users</unsubscribe>
+      <post>openslide-users@lists.andrew.cmu.edu</post>
+      <archive>https://lists.andrew.cmu.edu/pipermail/openslide-users/</archive>
+      <otherArchives>
+        <otherArchive>https://marc.info/?l=openslide-users</otherArchive>
+      </otherArchives>
+    </mailingList>
+  </mailingLists>
+</project>

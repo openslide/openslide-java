@@ -6,7 +6,7 @@ This is a Java binding to [OpenSlide](https://openslide.org/).
 ## Build requirements
 
 - JDK ≥ 22
-- Meson &ge; 0.62
+- Maven
 
 
 ## Runtime requirements
@@ -19,11 +19,17 @@ This is a Java binding to [OpenSlide](https://openslide.org/).
 ## Building
 
 ```
-meson setup builddir
-meson compile -C builddir
+mvn
 ```
 
-The JAR will be in `builddir/openslide.jar`.
+The JAR will be in `target/openslide-java-*.jar`.
+
+If you have multiple JVMs on your system, and Maven defaults to a version
+older than 22, you might need to set `JAVA_HOME`.  For exmaple, on Fedora:
+
+```
+JAVA_HOME=/usr/lib/jvm/java-22 mvn
+```
 
 
 ## License
