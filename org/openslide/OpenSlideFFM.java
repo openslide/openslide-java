@@ -25,8 +25,12 @@ import java.lang.foreign.*;
 import static java.lang.foreign.ValueLayout.*;
 import java.lang.invoke.*;
 import java.lang.ref.Cleaner;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-@SuppressWarnings("restricted")
+// restricted method calls are expected
+// we take locks with try-with-resources that aren't accessed inside the block
+@SuppressWarnings({"restricted", "try"})
 class OpenSlideFFM {
     private static final Arena LIBRARY_ARENA = Arena.ofAuto();
 
@@ -95,23 +99,67 @@ class OpenSlideFFM {
             }
         }
 
+        static class ScopedLock implements AutoCloseable {
+            private final Lock lock;
+
+            ScopedLock(Lock lock) {
+                this.lock = lock;
+            }
+
+            void lock() {
+                lock.lock();
+            }
+
+            @Override
+            public void close() {
+                lock.unlock();
+            }
+        }
+
         private static final Cleaner cleaner = Cleaner.create();
 
-        private final Wrapper wrapper;
+        private Wrapper wrapper;
 
         private final Cleaner.Cleanable cleanable;
+
+        private final ReentrantReadWriteLock lock =
+                new ReentrantReadWriteLock();
+
+        private final ScopedLock readLock = new ScopedLock(lock.readLock());
+
+        private final ScopedLock writeLock = new ScopedLock(lock.writeLock());
 
         Ref(Wrapper wrapper) {
             this.wrapper = wrapper;
             cleanable = cleaner.register(this, wrapper);
         }
 
+        ScopedLock lock() {
+            readLock.lock();
+            return readLock;
+        }
+
+        private ScopedLock writeLock() {
+            writeLock.lock();
+            return writeLock;
+        }
+
         MemorySegment getSegment() {
+            if (lock.getReadHoldCount() == 0) {
+                throw new IllegalStateException("Reference lock not held");
+            }
+            if (wrapper == null) {
+                throw new OpenSlideDisposedException(
+                        this.getClass().getSimpleName());
+            }
             return wrapper.getSegment();
         }
 
         void close() {
-            cleanable.clean();
+            try (ScopedLock l = writeLock()) {
+                cleanable.clean();
+                wrapper = null;
+            }
         }
     }
 
@@ -226,7 +274,7 @@ class OpenSlideFFM {
             JAVA_INT, "openslide_get_level_count", C_POINTER);
 
     static int openslide_get_level_count(OpenSlideRef osr) {
-        try {
+        try (Ref.ScopedLock l = osr.lock()) {
             return (int) get_level_count.invokeExact(osr.getSegment());
         } catch (Throwable ex) {
             throw wrapException(ex);
@@ -242,7 +290,7 @@ class OpenSlideFFM {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment w = arena.allocateFrom(JAVA_LONG, 0);
             MemorySegment h = arena.allocateFrom(JAVA_LONG, 0);
-            try {
+            try (Ref.ScopedLock l = osr.lock()) {
                 get_level_dimensions.invokeExact(osr.getSegment(), level, w, h);
             } catch (Throwable ex) {
                 throw wrapException(ex);
@@ -256,7 +304,7 @@ class OpenSlideFFM {
             JAVA_DOUBLE, "openslide_get_level_downsample", C_POINTER, JAVA_INT);
 
     static double openslide_get_level_downsample(OpenSlideRef osr, int level) {
-        try {
+        try (Ref.ScopedLock l = osr.lock()) {
             return (double) get_level_downsample.invokeExact(osr.getSegment(),
                     level);
         } catch (Throwable ex) {
@@ -272,7 +320,7 @@ class OpenSlideFFM {
             long x, long y, int level, long w, long h) {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf = arena.allocate(JAVA_INT, dest.length);
-            try {
+            try (Ref.ScopedLock l = osr.lock()) {
                 read_region.invokeExact(osr.getSegment(), buf, x, y,
                         level, w, h);
             } catch (Throwable ex) {
@@ -287,7 +335,7 @@ class OpenSlideFFM {
 
     static String openslide_get_error(OpenSlideRef osr) {
         MemorySegment ret;
-        try {
+        try (Ref.ScopedLock l = osr.lock()) {
             ret = (MemorySegment) get_error.invokeExact(osr.getSegment());
         } catch (Throwable ex) {
             throw wrapException(ex);
@@ -303,7 +351,7 @@ class OpenSlideFFM {
 
     static String[] openslide_get_property_names(OpenSlideRef osr) {
         MemorySegment ret;
-        try {
+        try (Ref.ScopedLock l = osr.lock()) {
             ret = (MemorySegment) get_property_names.invokeExact(
                     osr.getSegment());
         } catch (Throwable ex) {
@@ -320,7 +368,7 @@ class OpenSlideFFM {
             return null;
         }
         MemorySegment ret;
-        try (Arena arena = Arena.ofConfined()) {
+        try (Arena arena = Arena.ofConfined(); Ref.ScopedLock l = osr.lock()) {
             ret = (MemorySegment) get_property_value.invokeExact(
                     osr.getSegment(), arena.allocateFrom(name));
         } catch (Throwable ex) {
@@ -337,7 +385,7 @@ class OpenSlideFFM {
 
     static String[] openslide_get_associated_image_names(OpenSlideRef osr) {
         MemorySegment ret;
-        try {
+        try (Ref.ScopedLock l = osr.lock()) {
             ret = (MemorySegment) get_associated_image_names.invokeExact(
                     osr.getSegment());
         } catch (Throwable ex) {
@@ -358,7 +406,7 @@ class OpenSlideFFM {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment w = arena.allocateFrom(JAVA_LONG, 0);
             MemorySegment h = arena.allocateFrom(JAVA_LONG, 0);
-            try {
+            try (Ref.ScopedLock l = osr.lock()) {
                 get_associated_image_dimensions.invokeExact(osr.getSegment(),
                         arena.allocateFrom(name), w, h);
             } catch (Throwable ex) {
@@ -380,7 +428,7 @@ class OpenSlideFFM {
         }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf = arena.allocate(JAVA_INT, dest.length);
-            try {
+            try (Ref.ScopedLock l = osr.lock()) {
                 read_associated_image.invokeExact(osr.getSegment(),
                         arena.allocateFrom(name), buf);
             } catch (Throwable ex) {
@@ -407,7 +455,7 @@ class OpenSlideFFM {
             null, "openslide_set_cache", C_POINTER, C_POINTER);
 
     static void openslide_set_cache(OpenSlideRef osr, OpenSlideCacheRef cache) {
-        try {
+        try (Ref.ScopedLock cl = cache.lock(); Ref.ScopedLock ol = osr.lock()) {
             set_cache.invokeExact(osr.getSegment(), cache.getSegment());
         } catch (Throwable ex) {
             throw wrapException(ex);

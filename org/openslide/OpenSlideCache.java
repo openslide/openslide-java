@@ -22,41 +22,19 @@
 
 package org.openslide;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 public final class OpenSlideCache implements AutoCloseable {
-    private final Lock lock = new ReentrantLock();
-
-    private OpenSlideFFM.OpenSlideCacheRef cache;
+    private final OpenSlideFFM.OpenSlideCacheRef cache;
 
     public OpenSlideCache(long capacity) {
         cache = OpenSlideFFM.openslide_cache_create(capacity);
     }
 
-    Lock getLock() {
-        return lock;
-    }
-
-    // call, and use result, with lock held
     OpenSlideFFM.OpenSlideCacheRef getRef() {
-        if (cache == null) {
-            throw new OpenSlideDisposedException("OpenSlideCache");
-        }
         return cache;
     }
 
-    // takes the lock
     @Override
     public void close() {
-        lock.lock();
-        try {
-            if (cache != null) {
-                cache.close();
-                cache = null;
-            }
-        } finally {
-            lock.unlock();
-        }
+        cache.close();
     }
 }

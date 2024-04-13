@@ -31,9 +31,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.filechooser.FileFilter;
 
@@ -77,9 +74,7 @@ public final class OpenSlide implements Closeable {
 
     final public static String PROPERTY_NAME_VENDOR = "openslide.vendor";
 
-    private OpenSlideFFM.OpenSlideRef osr;
-
-    final private ReadWriteLock lock = new ReentrantReadWriteLock();
+    final private OpenSlideFFM.OpenSlideRef osr;
 
     final private long levelWidths[];
 
@@ -174,7 +169,6 @@ public final class OpenSlide implements Closeable {
         }
     }
 
-    // call with the reader lock held, or from the constructor
     private void checkError() throws IOException {
         String msg = OpenSlideFFM.openslide_get_error(osr);
 
@@ -183,29 +177,12 @@ public final class OpenSlide implements Closeable {
         }
     }
 
-    // takes the writer lock
     public void dispose() {
-        Lock wl = lock.writeLock();
-        wl.lock();
-        try {
-            if (osr != null) {
-                osr.close();
-                osr = null;
-            }
-        } finally {
-            wl.unlock();
-        }
+        osr.close();
     }
 
     public int getLevelCount() {
         return levelCount;
-    }
-
-    // call with the reader lock held
-    private void checkDisposed() {
-        if (osr == null) {
-            throw new OpenSlideDisposedException();
-        }
     }
 
     public long getLevel0Width() {
@@ -229,7 +206,6 @@ public final class OpenSlide implements Closeable {
         paintRegion(g, dx, dy, sx, sy, w, h, levelDownsamples[level]);
     }
 
-    // takes the reader lock
     public void paintRegionARGB(int dest[], long x, long y, int level, int w,
             int h) throws IOException {
         if ((long) w * (long) h > dest.length) {
@@ -241,15 +217,8 @@ public final class OpenSlide implements Closeable {
             throw new IllegalArgumentException("w and h must be nonnegative");
         }
 
-        Lock rl = lock.readLock();
-        rl.lock();
-        try {
-            checkDisposed();
-            OpenSlideFFM.openslide_read_region(osr, dest, x, y, level, w, h);
-            checkError();
-        } finally {
-            rl.unlock();
-        }
+        OpenSlideFFM.openslide_read_region(osr, dest, x, y, level, w, h);
+        checkError();
     }
 
     public void paintRegion(Graphics2D g, int dx, int dy, long sx, long sy,
@@ -391,48 +360,28 @@ public final class OpenSlide implements Closeable {
         return associatedImages;
     }
 
-    // takes the reader lock
     BufferedImage getAssociatedImage(String name) throws IOException {
-        Lock rl = lock.readLock();
-        rl.lock();
-        try {
-            checkDisposed();
-
-            long dim[] = new long[2];
-            OpenSlideFFM.openslide_get_associated_image_dimensions(osr, name,
-                    dim);
-            checkError();
-            if (dim[0] == -1) {
-                // non-terminal error
-                throw new IOException("Failure reading associated image");
-            }
-
-            BufferedImage img = new BufferedImage((int) dim[0], (int) dim[1],
-                    BufferedImage.TYPE_INT_ARGB_PRE);
-
-            int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
-                    .getData();
-
-            OpenSlideFFM.openslide_read_associated_image(osr, name, data);
-            checkError();
-            return img;
-        } finally {
-            rl.unlock();
+        long dim[] = new long[2];
+        OpenSlideFFM.openslide_get_associated_image_dimensions(osr, name, dim);
+        checkError();
+        if (dim[0] == -1) {
+            // non-terminal error
+            throw new IOException("Failure reading associated image");
         }
+
+        BufferedImage img = new BufferedImage((int) dim[0], (int) dim[1],
+                BufferedImage.TYPE_INT_ARGB_PRE);
+
+        int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
+                .getData();
+
+        OpenSlideFFM.openslide_read_associated_image(osr, name, data);
+        checkError();
+        return img;
     }
 
     public void setCache(OpenSlideCache cache) {
-        Lock cl = cache.getLock();
-        Lock rl = lock.readLock();
-        cl.lock();
-        rl.lock();
-        try {
-            checkDisposed();
-            OpenSlideFFM.openslide_set_cache(osr, cache.getRef());
-        } finally {
-            rl.unlock();
-            cl.unlock();
-        }
+        OpenSlideFFM.openslide_set_cache(osr, cache.getRef());
     }
 
     public static String getLibraryVersion() {
