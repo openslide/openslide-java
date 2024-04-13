@@ -129,7 +129,7 @@ class OpenSlideFFM {
                 try {
                     close.invokeExact(getSegment());
                 } catch (Throwable ex) {
-                    throw new AssertionError("Invalid call", ex);
+                    throw wrapException(ex);
                 }
             }
         }
@@ -153,7 +153,7 @@ class OpenSlideFFM {
                 try {
                     cache_release.invokeExact(getSegment());
                 } catch (Throwable ex) {
-                    throw new AssertionError("Invalid call", ex);
+                    throw wrapException(ex);
                 }
             }
         }
@@ -175,6 +175,13 @@ class OpenSlideFFM {
         return ret;
     }
 
+    private static RuntimeException wrapException(Throwable ex) {
+        if (ex instanceof RuntimeException) {
+            return (RuntimeException) ex;
+        }
+        return new IllegalArgumentException("Invalid call", ex);
+    }
+
     private static final MethodHandle detect_vendor = function(
             C_POINTER, "openslide_detect_vendor", C_POINTER);
 
@@ -187,7 +194,7 @@ class OpenSlideFFM {
             ret = (MemorySegment) detect_vendor.invokeExact(
                     arena.allocateFrom(filename));
         } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
+            throw wrapException(ex);
         }
         if (ret.equals(MemorySegment.NULL)) {
             return null;
@@ -207,7 +214,7 @@ class OpenSlideFFM {
             ret = (MemorySegment) open.invokeExact(
                     arena.allocateFrom(filename));
         } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
+            throw wrapException(ex);
         }
         if (ret.equals(MemorySegment.NULL)) {
             return null;
@@ -222,7 +229,7 @@ class OpenSlideFFM {
         try {
             return (int) get_level_count.invokeExact(osr.getSegment());
         } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
+            throw wrapException(ex);
         }
     }
 
@@ -238,7 +245,7 @@ class OpenSlideFFM {
             try {
                 get_level_dimensions.invokeExact(osr.getSegment(), level, w, h);
             } catch (Throwable ex) {
-                throw new AssertionError("Invalid call", ex);
+                throw wrapException(ex);
             }
             dim[0] = w.get(JAVA_LONG, 0);
             dim[1] = h.get(JAVA_LONG, 0);
@@ -253,7 +260,7 @@ class OpenSlideFFM {
             return (double) get_level_downsample.invokeExact(osr.getSegment(),
                     level);
         } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
+            throw wrapException(ex);
         }
     }
 
@@ -269,7 +276,7 @@ class OpenSlideFFM {
                 read_region.invokeExact(osr.getSegment(), buf, x, y,
                         level, w, h);
             } catch (Throwable ex) {
-                throw new AssertionError("Invalid call", ex);
+                throw wrapException(ex);
             }
             MemorySegment.copy(buf, JAVA_INT, 0, dest, 0, dest.length);
         }
@@ -283,7 +290,7 @@ class OpenSlideFFM {
         try {
             ret = (MemorySegment) get_error.invokeExact(osr.getSegment());
         } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
+            throw wrapException(ex);
         }
         if (ret.equals(MemorySegment.NULL)) {
             return null;
@@ -300,7 +307,7 @@ class OpenSlideFFM {
             ret = (MemorySegment) get_property_names.invokeExact(
                     osr.getSegment());
         } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
+            throw wrapException(ex);
         }
         return segment_to_string_array(ret);
     }
@@ -317,7 +324,7 @@ class OpenSlideFFM {
             ret = (MemorySegment) get_property_value.invokeExact(
                     osr.getSegment(), arena.allocateFrom(name));
         } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
+            throw wrapException(ex);
         }
         if (ret.equals(MemorySegment.NULL)) {
             return null;
@@ -334,7 +341,7 @@ class OpenSlideFFM {
             ret = (MemorySegment) get_associated_image_names.invokeExact(
                     osr.getSegment());
         } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
+            throw wrapException(ex);
         }
         return segment_to_string_array(ret);
     }
@@ -355,7 +362,7 @@ class OpenSlideFFM {
                 get_associated_image_dimensions.invokeExact(osr.getSegment(),
                         arena.allocateFrom(name), w, h);
             } catch (Throwable ex) {
-                throw new AssertionError("Invalid call", ex);
+                throw wrapException(ex);
             }
             dim[0] = w.get(JAVA_LONG, 0);
             dim[1] = h.get(JAVA_LONG, 0);
@@ -377,7 +384,7 @@ class OpenSlideFFM {
                 read_associated_image.invokeExact(osr.getSegment(),
                         arena.allocateFrom(name), buf);
             } catch (Throwable ex) {
-                throw new AssertionError("Invalid call", ex);
+                throw wrapException(ex);
             }
             MemorySegment.copy(buf, JAVA_INT, 0, dest, 0, dest.length);
         }
@@ -391,7 +398,7 @@ class OpenSlideFFM {
         try {
             ret = (MemorySegment) cache_create.invokeExact(capacity);
         } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
+            throw wrapException(ex);
         }
         return new OpenSlideCacheRef(ret);
     }
@@ -403,7 +410,7 @@ class OpenSlideFFM {
         try {
             set_cache.invokeExact(osr.getSegment(), cache.getSegment());
         } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
+            throw wrapException(ex);
         }
     }
 
@@ -415,7 +422,7 @@ class OpenSlideFFM {
         try {
             ret = (MemorySegment) get_version.invokeExact();
         } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
+            throw wrapException(ex);
         }
         return ret.getString(0);
     }
