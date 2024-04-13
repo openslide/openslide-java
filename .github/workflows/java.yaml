@@ -37,7 +37,8 @@ jobs:
     - name: Install dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        sudo apt-get install libopenslide0
+        sudo add-apt-repository "ppa:openslide/openslide"
+        sudo apt-get install libopenslide1
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-14'
       run: |
@@ -65,9 +66,8 @@ jobs:
       run: mvn -Dmaven.compiler.failOnWarning=true
     - name: Smoke test
       run: |
-        java --enable-native-access=ALL-UNNAMED \
-            -cp target/openslide-java-*.jar org.openslide.TestCLI \
-            fixtures/small.svs
+        OPENSLIDE_DEBUG=synthetic java --enable-native-access=ALL-UNNAMED \
+            -cp target/openslide-java-*.jar org.openslide.TestCLI ""
     - name: Dist
       id: dist
       if: matrix.dist
