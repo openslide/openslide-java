@@ -188,14 +188,20 @@ public final class OpenSlide implements Closeable {
                 hashCodeVal = canonicalFile.hashCode();
             }
         } catch (IOException e) {
-            // dispose, we are in the constructor
-            dispose();
+            // close, we are in the constructor
+            close();
             throw e;
         }
     }
 
-    public void dispose() {
+    @Override
+    public void close() {
         errorCtx.getOsr().close();
+    }
+
+    @Deprecated
+    public void dispose() {
+        close();
     }
 
     public int getLevelCount() {
@@ -444,10 +450,5 @@ public final class OpenSlide implements Closeable {
         }
 
         return false;
-    }
-
-    @Override
-    public void close() {
-        dispose();
     }
 }

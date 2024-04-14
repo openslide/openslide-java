@@ -54,7 +54,7 @@ public class TestCLI {
 
         long w, h;
 
-        osr.dispose();
+        osr.close();
 
         try (OpenSlideCache cache = new OpenSlideCache(64 << 20)) {
             osr = new OpenSlide(f);
@@ -83,6 +83,6 @@ public class TestCLI {
         test_next_biggest(osr, 1000);
         test_next_biggest(osr, 10000);
 
-        osr.dispose();
+        osr.close();
     }
 }
