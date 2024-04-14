@@ -189,7 +189,7 @@ public final class OpenSlide implements Closeable {
         wl.lock();
         try {
             if (osr != null) {
-                OpenSlideFFM.openslide_close(osr);
+                osr.close();
                 osr = null;
             }
         } finally {

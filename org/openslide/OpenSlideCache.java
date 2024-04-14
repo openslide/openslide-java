@@ -52,7 +52,7 @@ public final class OpenSlideCache implements AutoCloseable {
         lock.lock();
         try {
             if (cache != null) {
-                OpenSlideFFM.openslide_cache_release(cache);
+                cache.close();
                 cache = null;
             }
         } finally {

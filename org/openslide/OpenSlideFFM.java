@@ -24,6 +24,7 @@ package org.openslide;
 import java.lang.foreign.*;
 import static java.lang.foreign.ValueLayout.*;
 import java.lang.invoke.*;
+import java.lang.ref.Cleaner;
 
 @SuppressWarnings("restricted")
 class OpenSlideFFM {
@@ -82,26 +83,83 @@ class OpenSlideFFM {
     }
 
     private static abstract class Ref {
-        private final MemorySegment segment;
+        static abstract class Wrapper implements Runnable {
+            private final MemorySegment segment;
 
-        Ref(MemorySegment segment) {
-            this.segment = segment;
+            Wrapper(MemorySegment segment) {
+                this.segment = segment;
+            }
+
+            MemorySegment getSegment() {
+                return segment;
+            }
+        }
+
+        private static final Cleaner cleaner = Cleaner.create();
+
+        private final Wrapper wrapper;
+
+        private final Cleaner.Cleanable cleanable;
+
+        Ref(Wrapper wrapper) {
+            this.wrapper = wrapper;
+            cleanable = cleaner.register(this, wrapper);
         }
 
         MemorySegment getSegment() {
-            return segment;
+            return wrapper.getSegment();
+        }
+
+        void close() {
+            cleanable.clean();
         }
     }
 
     static class OpenSlideRef extends Ref {
+        private static class Wrapper extends Ref.Wrapper {
+            private static final MethodHandle close = function(
+                    null, "openslide_close", C_POINTER);
+
+            Wrapper(MemorySegment segment) {
+                super(segment);
+            }
+
+            @Override
+            public void run() {
+                try {
+                    close.invokeExact(getSegment());
+                } catch (Throwable ex) {
+                    throw new AssertionError("Invalid call", ex);
+                }
+            }
+        }
+
         OpenSlideRef(MemorySegment segment) {
-            super(segment);
+            super(new Wrapper(segment));
         }
     }
 
     static class OpenSlideCacheRef extends Ref {
+        private static class Wrapper extends Ref.Wrapper {
+            private static final MethodHandle cache_release = function(
+                    null, "openslide_cache_release", C_POINTER);
+
+            Wrapper(MemorySegment segment) {
+                super(segment);
+            }
+
+            @Override
+            public void run() {
+                try {
+                    cache_release.invokeExact(getSegment());
+                } catch (Throwable ex) {
+                    throw new AssertionError("Invalid call", ex);
+                }
+            }
+        }
+
         OpenSlideCacheRef(MemorySegment segment) {
-            super(segment);
+            super(new Wrapper(segment));
         }
     }
 
@@ -214,17 +272,6 @@ class OpenSlideFFM {
                 throw new AssertionError("Invalid call", ex);
             }
             MemorySegment.copy(buf, JAVA_INT, 0, dest, 0, dest.length);
-        }
-    }
-
-    private static final MethodHandle close = function(
-            null, "openslide_close", C_POINTER);
-
-    static void openslide_close(OpenSlideRef osr) {
-        try {
-            close.invokeExact(osr.getSegment());
-        } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
         }
     }
 
@@ -355,17 +402,6 @@ class OpenSlideFFM {
     static void openslide_set_cache(OpenSlideRef osr, OpenSlideCacheRef cache) {
         try {
             set_cache.invokeExact(osr.getSegment(), cache.getSegment());
-        } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
-        }
-    }
-
-    private static final MethodHandle cache_release = function(
-            null, "openslide_cache_release", C_POINTER);
-
-    static void openslide_cache_release(OpenSlideCacheRef cache) {
-        try {
-            cache_release.invokeExact(cache.getSegment());
         } catch (Throwable ex) {
             throw new AssertionError("Invalid call", ex);
         }
