@@ -56,7 +56,10 @@ public class TestCLI {
 
         osr.dispose();
 
-        osr = new OpenSlide(f);
+        try (OpenSlideCache cache = new OpenSlideCache(64 << 20)) {
+            osr = new OpenSlide(f);
+            osr.setCache(cache);
+        }
 
         w = osr.getLevel0Width();
         h = osr.getLevel0Height();

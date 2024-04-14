@@ -22,9 +22,13 @@
 package org.openslide;
 
 public class OpenSlideDisposedException extends RuntimeException {
-    private static final String MSG = "OpenSlide object has been disposed";
+    private static final String MSG = " object has been closed";
 
     public OpenSlideDisposedException() {
-        super(MSG);
+        this("OpenSlide");
+    }
+
+    public OpenSlideDisposedException(String what) {
+        super(what + MSG);
     }
 }
