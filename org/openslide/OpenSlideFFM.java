@@ -24,6 +24,7 @@ package org.openslide;
 import java.lang.foreign.*;
 import static java.lang.foreign.ValueLayout.*;
 import java.lang.invoke.*;
+import java.lang.ref.Cleaner;
 
 @SuppressWarnings("restricted")
 class OpenSlideFFM {
@@ -81,6 +82,87 @@ class OpenSlideFFM {
         return Linker.nativeLinker().downcallHandle(symbol, desc);
     }
 
+    private static abstract class Ref {
+        static abstract class Wrapper implements Runnable {
+            private final MemorySegment segment;
+
+            Wrapper(MemorySegment segment) {
+                this.segment = segment;
+            }
+
+            MemorySegment getSegment() {
+                return segment;
+            }
+        }
+
+        private static final Cleaner cleaner = Cleaner.create();
+
+        private final Wrapper wrapper;
+
+        private final Cleaner.Cleanable cleanable;
+
+        Ref(Wrapper wrapper) {
+            this.wrapper = wrapper;
+            cleanable = cleaner.register(this, wrapper);
+        }
+
+        MemorySegment getSegment() {
+            return wrapper.getSegment();
+        }
+
+        void close() {
+            cleanable.clean();
+        }
+    }
+
+    static class OpenSlideRef extends Ref {
+        private static class Wrapper extends Ref.Wrapper {
+            private static final MethodHandle close = function(
+                    null, "openslide_close", C_POINTER);
+
+            Wrapper(MemorySegment segment) {
+                super(segment);
+            }
+
+            @Override
+            public void run() {
+                try {
+                    close.invokeExact(getSegment());
+                } catch (Throwable ex) {
+                    throw new AssertionError("Invalid call", ex);
+                }
+            }
+        }
+
+        OpenSlideRef(MemorySegment segment) {
+            super(new Wrapper(segment));
+        }
+    }
+
+    static class OpenSlideCacheRef extends Ref {
+        private static class Wrapper extends Ref.Wrapper {
+            private static final MethodHandle cache_release = function(
+                    null, "openslide_cache_release", C_POINTER);
+
+            Wrapper(MemorySegment segment) {
+                super(segment);
+            }
+
+            @Override
+            public void run() {
+                try {
+                    cache_release.invokeExact(getSegment());
+                } catch (Throwable ex) {
+                    throw new AssertionError("Invalid call", ex);
+                }
+            }
+        }
+
+        OpenSlideCacheRef(MemorySegment segment) {
+            super(new Wrapper(segment));
+        }
+    }
+
     private static String[] segment_to_string_array(MemorySegment seg) {
         int length = 0;
         while (!seg.getAtIndex(C_POINTER, length).equals(MemorySegment.NULL)) {
@@ -116,7 +198,7 @@ class OpenSlideFFM {
     private static final MethodHandle open = function(
             C_POINTER, "openslide_open", C_POINTER);
 
-    static MemorySegment openslide_open(String filename) {
+    static OpenSlideRef openslide_open(String filename) {
         if (filename == null) {
             return null;
         }
@@ -130,15 +212,15 @@ class OpenSlideFFM {
         if (ret.equals(MemorySegment.NULL)) {
             return null;
         }
-        return ret;
+        return new OpenSlideRef(ret);
     }
 
     private static final MethodHandle get_level_count = function(
             JAVA_INT, "openslide_get_level_count", C_POINTER);
 
-    static int openslide_get_level_count(MemorySegment osr) {
+    static int openslide_get_level_count(OpenSlideRef osr) {
         try {
-            return (int) get_level_count.invokeExact(osr);
+            return (int) get_level_count.invokeExact(osr.getSegment());
         } catch (Throwable ex) {
             throw new AssertionError("Invalid call", ex);
         }
@@ -148,13 +230,13 @@ class OpenSlideFFM {
             null, "openslide_get_level_dimensions", C_POINTER, JAVA_INT,
             C_POINTER, C_POINTER);
 
-    static void openslide_get_level_dimensions(MemorySegment osr, int level,
+    static void openslide_get_level_dimensions(OpenSlideRef osr, int level,
             long dim[]) {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment w = arena.allocateFrom(JAVA_LONG, 0);
             MemorySegment h = arena.allocateFrom(JAVA_LONG, 0);
             try {
-                get_level_dimensions.invokeExact(osr, level, w, h);
+                get_level_dimensions.invokeExact(osr.getSegment(), level, w, h);
             } catch (Throwable ex) {
                 throw new AssertionError("Invalid call", ex);
             }
@@ -166,9 +248,10 @@ class OpenSlideFFM {
     private static final MethodHandle get_level_downsample = function(
             JAVA_DOUBLE, "openslide_get_level_downsample", C_POINTER, JAVA_INT);
 
-    static double openslide_get_level_downsample(MemorySegment osr, int level) {
+    static double openslide_get_level_downsample(OpenSlideRef osr, int level) {
         try {
-            return (double) get_level_downsample.invokeExact(osr, level);
+            return (double) get_level_downsample.invokeExact(osr.getSegment(),
+                    level);
         } catch (Throwable ex) {
             throw new AssertionError("Invalid call", ex);
         }
@@ -178,12 +261,13 @@ class OpenSlideFFM {
             null, "openslide_read_region", C_POINTER, C_POINTER,
             JAVA_LONG, JAVA_LONG, JAVA_INT, JAVA_LONG, JAVA_LONG);
 
-    static void openslide_read_region(MemorySegment osr, int dest[],
+    static void openslide_read_region(OpenSlideRef osr, int dest[],
             long x, long y, int level, long w, long h) {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf = arena.allocate(JAVA_INT, dest.length);
             try {
-                read_region.invokeExact(osr, buf, x, y, level, w, h);
+                read_region.invokeExact(osr.getSegment(), buf, x, y,
+                        level, w, h);
             } catch (Throwable ex) {
                 throw new AssertionError("Invalid call", ex);
             }
@@ -191,24 +275,13 @@ class OpenSlideFFM {
         }
     }
 
-    private static final MethodHandle close = function(
-            null, "openslide_close", C_POINTER);
-
-    static void openslide_close(MemorySegment osr) {
-        try {
-            close.invokeExact(osr);
-        } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
-        }
-    }
-
     private static final MethodHandle get_error = function(
             C_POINTER, "openslide_get_error", C_POINTER);
 
-    static String openslide_get_error(MemorySegment osr) {
+    static String openslide_get_error(OpenSlideRef osr) {
         MemorySegment ret;
         try {
-            ret = (MemorySegment) get_error.invokeExact(osr);
+            ret = (MemorySegment) get_error.invokeExact(osr.getSegment());
         } catch (Throwable ex) {
             throw new AssertionError("Invalid call", ex);
         }
@@ -221,10 +294,11 @@ class OpenSlideFFM {
     private static final MethodHandle get_property_names = function(
             C_POINTER, "openslide_get_property_names", C_POINTER);
 
-    static String[] openslide_get_property_names(MemorySegment osr) {
+    static String[] openslide_get_property_names(OpenSlideRef osr) {
         MemorySegment ret;
         try {
-            ret = (MemorySegment) get_property_names.invokeExact(osr);
+            ret = (MemorySegment) get_property_names.invokeExact(
+                    osr.getSegment());
         } catch (Throwable ex) {
             throw new AssertionError("Invalid call", ex);
         }
@@ -234,14 +308,14 @@ class OpenSlideFFM {
     private static final MethodHandle get_property_value = function(
             C_POINTER, "openslide_get_property_value", C_POINTER, C_POINTER);
 
-    static String openslide_get_property_value(MemorySegment osr, String name) {
+    static String openslide_get_property_value(OpenSlideRef osr, String name) {
         if (name == null) {
             return null;
         }
         MemorySegment ret;
         try (Arena arena = Arena.ofConfined()) {
-            ret = (MemorySegment) get_property_value.invokeExact(osr,
-                    arena.allocateFrom(name));
+            ret = (MemorySegment) get_property_value.invokeExact(
+                    osr.getSegment(), arena.allocateFrom(name));
         } catch (Throwable ex) {
             throw new AssertionError("Invalid call", ex);
         }
@@ -254,10 +328,11 @@ class OpenSlideFFM {
     private static final MethodHandle get_associated_image_names = function(
             C_POINTER, "openslide_get_associated_image_names", C_POINTER);
 
-    static String[] openslide_get_associated_image_names(MemorySegment osr) {
+    static String[] openslide_get_associated_image_names(OpenSlideRef osr) {
         MemorySegment ret;
         try {
-            ret = (MemorySegment) get_associated_image_names.invokeExact(osr);
+            ret = (MemorySegment) get_associated_image_names.invokeExact(
+                    osr.getSegment());
         } catch (Throwable ex) {
             throw new AssertionError("Invalid call", ex);
         }
@@ -268,7 +343,7 @@ class OpenSlideFFM {
             null, "openslide_get_associated_image_dimensions", C_POINTER,
             C_POINTER, C_POINTER, C_POINTER);
 
-    static void openslide_get_associated_image_dimensions(MemorySegment osr,
+    static void openslide_get_associated_image_dimensions(OpenSlideRef osr,
             String name, long dim[]) {
         if (name == null) {
             return;
@@ -277,7 +352,7 @@ class OpenSlideFFM {
             MemorySegment w = arena.allocateFrom(JAVA_LONG, 0);
             MemorySegment h = arena.allocateFrom(JAVA_LONG, 0);
             try {
-                get_associated_image_dimensions.invokeExact(osr,
+                get_associated_image_dimensions.invokeExact(osr.getSegment(),
                         arena.allocateFrom(name), w, h);
             } catch (Throwable ex) {
                 throw new AssertionError("Invalid call", ex);
@@ -291,7 +366,7 @@ class OpenSlideFFM {
             null, "openslide_read_associated_image", C_POINTER, C_POINTER,
             C_POINTER);
 
-    static void openslide_read_associated_image(MemorySegment osr, String name,
+    static void openslide_read_associated_image(OpenSlideRef osr, String name,
             int dest[]) {
         if (name == null) {
             return;
@@ -299,8 +374,8 @@ class OpenSlideFFM {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf = arena.allocate(JAVA_INT, dest.length);
             try {
-                read_associated_image.invokeExact(osr, arena.allocateFrom(name),
-                        buf);
+                read_associated_image.invokeExact(osr.getSegment(),
+                        arena.allocateFrom(name), buf);
             } catch (Throwable ex) {
                 throw new AssertionError("Invalid call", ex);
             }
@@ -311,31 +386,22 @@ class OpenSlideFFM {
     private static final MethodHandle cache_create = function(
             C_POINTER, "openslide_cache_create", SIZE_T);
 
-    static MemorySegment openslide_cache_create(long capacity) {
+    static OpenSlideCacheRef openslide_cache_create(long capacity) {
+        MemorySegment ret;
         try {
-            return (MemorySegment) cache_create.invokeExact(capacity);
+            ret = (MemorySegment) cache_create.invokeExact(capacity);
         } catch (Throwable ex) {
             throw new AssertionError("Invalid call", ex);
         }
+        return new OpenSlideCacheRef(ret);
     }
 
     private static final MethodHandle set_cache = function(
             null, "openslide_set_cache", C_POINTER, C_POINTER);
 
-    static void openslide_set_cache(MemorySegment osr, MemorySegment cache) {
+    static void openslide_set_cache(OpenSlideRef osr, OpenSlideCacheRef cache) {
         try {
-            set_cache.invokeExact(osr, cache);
-        } catch (Throwable ex) {
-            throw new AssertionError("Invalid call", ex);
-        }
-    }
-
-    private static final MethodHandle cache_release = function(
-            null, "openslide_cache_release", C_POINTER);
-
-    static void openslide_cache_release(MemorySegment cache) {
-        try {
-            cache_release.invokeExact(cache);
+            set_cache.invokeExact(osr.getSegment(), cache.getSegment());
         } catch (Throwable ex) {
             throw new AssertionError("Invalid call", ex);
         }

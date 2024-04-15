@@ -77,7 +77,7 @@ public final class OpenSlide implements Closeable {
 
     final public static String PROPERTY_NAME_VENDOR = "openslide.vendor";
 
-    private java.lang.foreign.MemorySegment osr;
+    private OpenSlideFFM.OpenSlideRef osr;
 
     final private ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -189,7 +189,7 @@ public final class OpenSlide implements Closeable {
         wl.lock();
         try {
             if (osr != null) {
-                OpenSlideFFM.openslide_close(osr);
+                osr.close();
                 osr = null;
             }
         } finally {
@@ -428,7 +428,7 @@ public final class OpenSlide implements Closeable {
         rl.lock();
         try {
             checkDisposed();
-            OpenSlideFFM.openslide_set_cache(osr, cache.getSegment());
+            OpenSlideFFM.openslide_set_cache(osr, cache.getRef());
         } finally {
             rl.unlock();
             cl.unlock();

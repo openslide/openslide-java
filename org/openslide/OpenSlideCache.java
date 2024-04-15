@@ -22,14 +22,13 @@
 
 package org.openslide;
 
-import java.lang.foreign.MemorySegment;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public final class OpenSlideCache implements AutoCloseable {
     private final Lock lock = new ReentrantLock();
 
-    private MemorySegment cache;
+    private OpenSlideFFM.OpenSlideCacheRef cache;
 
     public OpenSlideCache(long capacity) {
         cache = OpenSlideFFM.openslide_cache_create(capacity);
@@ -40,7 +39,7 @@ public final class OpenSlideCache implements AutoCloseable {
     }
 
     // call, and use result, with lock held
-    MemorySegment getSegment() {
+    OpenSlideFFM.OpenSlideCacheRef getRef() {
         if (cache == null) {
             throw new OpenSlideDisposedException("OpenSlideCache");
         }
@@ -53,7 +52,7 @@ public final class OpenSlideCache implements AutoCloseable {
         lock.lock();
         try {
             if (cache != null) {
-                OpenSlideFFM.openslide_cache_release(cache);
+                cache.close();
                 cache = null;
             }
         } finally {
