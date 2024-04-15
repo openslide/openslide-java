@@ -288,11 +288,8 @@ public final class OpenSlide implements Closeable {
             return;
         }
 
-        BufferedImage img = new BufferedImage(levelW, levelH,
-                BufferedImage.TYPE_INT_ARGB_PRE);
-
-        int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
-                .getData();
+        BufferedImage img = createARGBBufferedImage(levelW, levelH);
+        int data[] = getARGBPixels(img);
 
         paintRegionARGB(data, baseX, baseY, level, img.getWidth(), img
                 .getHeight());
@@ -396,11 +393,8 @@ public final class OpenSlide implements Closeable {
             throw new IOException("Failure reading associated image");
         }
 
-        BufferedImage img = new BufferedImage((int) dim[0], (int) dim[1],
-                BufferedImage.TYPE_INT_ARGB_PRE);
-
-        int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
-                .getData();
+        BufferedImage img = createARGBBufferedImage((int) dim[0], (int) dim[1]);
+        int data[] = getARGBPixels(img);
 
         try (errorCtx) {
             OpenSlideFFM.openslide_read_associated_image(errorCtx.getOsr(),
@@ -450,5 +444,14 @@ public final class OpenSlide implements Closeable {
         }
 
         return false;
+    }
+
+    private static BufferedImage createARGBBufferedImage(int w, int h) {
+        return new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB_PRE);
+    }
+
+    private static int[] getARGBPixels(BufferedImage img) {
+        DataBufferInt buf = (DataBufferInt) img.getRaster().getDataBuffer();
+        return buf.getData();
     }
 }
