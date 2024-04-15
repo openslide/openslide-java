@@ -246,6 +246,14 @@ public final class OpenSlide implements Closeable {
         }
     }
 
+    public BufferedImage readRegion(long x, long y, int level, int w, int h)
+            throws IOException {
+        BufferedImage img = createARGBBufferedImage(w, h);
+        int data[] = getARGBPixels(img);
+        paintRegionARGB(data, x, y, level, w, h);
+        return img;
+    }
+
     public void paintRegion(Graphics2D g, int dx, int dy, long sx, long sy,
             int w, int h, double downsample) throws IOException {
         if (downsample < 1.0) {
@@ -288,11 +296,7 @@ public final class OpenSlide implements Closeable {
             return;
         }
 
-        BufferedImage img = createARGBBufferedImage(levelW, levelH);
-        int data[] = getARGBPixels(img);
-
-        paintRegionARGB(data, baseX, baseY, level, img.getWidth(), img
-                .getHeight());
+        BufferedImage img = readRegion(baseX, baseY, level, levelW, levelH);
 
         // g.scale(1.0 / relativeDS, 1.0 / relativeDS);
         g.drawImage(img, dx, dy, w, h, null);
