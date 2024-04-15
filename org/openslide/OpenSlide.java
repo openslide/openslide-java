@@ -23,9 +23,17 @@
 package org.openslide;
 
 import java.awt.Color;
+import java.awt.color.ColorSpace;
+import java.awt.color.ICC_ColorSpace;
+import java.awt.color.ICC_Profile;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferInt;
+import java.awt.image.DirectColorModel;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -113,6 +121,8 @@ public final class OpenSlide implements Closeable {
 
     final private Map<String, AssociatedImage> associatedImages;
 
+    final private ColorModel colorModel;
+
     final private File canonicalFile;
 
     final private int hashCodeVal;
@@ -178,6 +188,8 @@ public final class OpenSlide implements Closeable {
 
             associatedImages = Collections.unmodifiableMap(associated);
 
+            colorModel = readColorModel(null);
+
             // store info for hash and equals
             canonicalFile = file.getCanonicalFile();
             String quickhash1 = getProperties().get(PROPERTY_NAME_QUICKHASH1);
@@ -224,6 +236,10 @@ public final class OpenSlide implements Closeable {
         return levelHeights[level];
     }
 
+    public ColorModel getColorModel() {
+        return colorModel;
+    }
+
     public void paintRegionOfLevel(Graphics2D g, int dx, int dy, int sx,
             int sy, int w, int h, int level) throws IOException {
         paintRegion(g, dx, dy, sx, sy, w, h, levelDownsamples[level]);
@@ -248,7 +264,7 @@ public final class OpenSlide implements Closeable {
 
     public BufferedImage readRegion(long x, long y, int level, int w, int h)
             throws IOException {
-        BufferedImage img = createARGBBufferedImage(w, h);
+        BufferedImage img = createARGBBufferedImage(colorModel, w, h);
         int data[] = getARGBPixels(img);
         paintRegionARGB(data, x, y, level, w, h);
         return img;
@@ -397,7 +413,9 @@ public final class OpenSlide implements Closeable {
             throw new IOException("Failure reading associated image");
         }
 
-        BufferedImage img = createARGBBufferedImage((int) dim[0], (int) dim[1]);
+        ColorModel cm = readColorModel(name);
+        BufferedImage img = createARGBBufferedImage(cm, (int) dim[0],
+                (int) dim[1]);
         int data[] = getARGBPixels(img);
 
         try (errorCtx) {
@@ -450,12 +468,56 @@ public final class OpenSlide implements Closeable {
         return false;
     }
 
-    private static BufferedImage createARGBBufferedImage(int w, int h) {
-        return new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB_PRE);
+    private static BufferedImage createARGBBufferedImage(ColorModel cm, int w,
+            int h) {
+        WritableRaster raster = Raster.createWritableRaster(
+                cm.createCompatibleSampleModel(w, h), null);
+        return new BufferedImage(cm, raster, true, null);
     }
 
     private static int[] getARGBPixels(BufferedImage img) {
         DataBufferInt buf = (DataBufferInt) img.getRaster().getDataBuffer();
         return buf.getData();
+    }
+
+    private ColorModel readColorModel(String associated) throws IOException {
+        ColorSpace space = readColorSpace(associated);
+        return new DirectColorModel(space, 32,
+                0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000, true,
+                DataBuffer.TYPE_INT);
+    }
+
+    private ColorSpace readColorSpace(String associated) throws IOException {
+        long size;
+        try (errorCtx) {
+            if (associated != null) {
+                size = OpenSlideFFM.openslide_get_associated_image_icc_profile_size(
+                        errorCtx.getOsr(), associated);
+            } else {
+                size = OpenSlideFFM.openslide_get_icc_profile_size(
+                        errorCtx.getOsr());
+            }
+        }
+        if (size <= 0) {
+            return ColorSpace.getInstance(ColorSpace.CS_sRGB);
+        } else if (size > Integer.MAX_VALUE) {
+            throw new IOException("ICC profile too large");
+        }
+
+        byte[] data = new byte[(int) size];
+        try (errorCtx) {
+            if (associated != null) {
+                OpenSlideFFM.openslide_read_associated_image_icc_profile(
+                        errorCtx.getOsr(), associated, data);
+            } else {
+                OpenSlideFFM.openslide_read_icc_profile(errorCtx.getOsr(),
+                        data);
+            }
+        }
+        try {
+            return new ICC_ColorSpace(ICC_Profile.getInstance(data));
+        } catch (IllegalArgumentException ex) {
+            throw new IOException("Invalid ICC profile", ex);
+        }
     }
 }

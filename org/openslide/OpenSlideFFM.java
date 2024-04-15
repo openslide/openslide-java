@@ -330,6 +330,32 @@ class OpenSlideFFM {
         }
     }
 
+    private static final MethodHandle get_icc_profile_size = function(
+            JAVA_LONG, "openslide_get_icc_profile_size", C_POINTER);
+
+    static long openslide_get_icc_profile_size(OpenSlideRef osr) {
+        try (Ref.ScopedLock l = osr.lock()) {
+            return (long) get_icc_profile_size.invokeExact(osr.getSegment());
+        } catch (Throwable ex) {
+            throw wrapException(ex);
+        }
+    }
+
+    private static final MethodHandle read_icc_profile = function(
+            null, "openslide_read_icc_profile", C_POINTER, C_POINTER);
+
+    static void openslide_read_icc_profile(OpenSlideRef osr, byte dest[]) {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment buf = arena.allocate(JAVA_BYTE, dest.length);
+            try (Ref.ScopedLock l = osr.lock()) {
+                read_icc_profile.invokeExact(osr.getSegment(), buf);
+            } catch (Throwable ex) {
+                throw wrapException(ex);
+            }
+            MemorySegment.copy(buf, JAVA_BYTE, 0, dest, 0, dest.length);
+        }
+    }
+
     private static final MethodHandle get_error = function(
             C_POINTER, "openslide_get_error", C_POINTER);
 
@@ -435,6 +461,44 @@ class OpenSlideFFM {
                 throw wrapException(ex);
             }
             MemorySegment.copy(buf, JAVA_INT, 0, dest, 0, dest.length);
+        }
+    }
+
+    private static final MethodHandle get_associated_image_icc_profile_size = function(
+            JAVA_LONG, "openslide_get_associated_image_icc_profile_size",
+            C_POINTER, C_POINTER);
+
+    static long openslide_get_associated_image_icc_profile_size(
+            OpenSlideRef osr, String name) {
+        if (name == null) {
+            return -1;
+        }
+        try (Arena arena = Arena.ofConfined(); Ref.ScopedLock l = osr.lock()) {
+            return (long) get_associated_image_icc_profile_size.invokeExact(
+                    osr.getSegment(), arena.allocateFrom(name));
+        } catch (Throwable ex) {
+            throw wrapException(ex);
+        }
+    }
+
+    private static final MethodHandle read_associated_image_icc_profile = function(
+            null, "openslide_read_associated_image_icc_profile", C_POINTER,
+            C_POINTER, C_POINTER);
+
+    static void openslide_read_associated_image_icc_profile(OpenSlideRef osr,
+            String name, byte dest[]) {
+        if (name == null) {
+            return;
+        }
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment buf = arena.allocate(JAVA_BYTE, dest.length);
+            try (Ref.ScopedLock l = osr.lock()) {
+                read_associated_image_icc_profile.invokeExact(osr.getSegment(),
+                        arena.allocateFrom(name), buf);
+            } catch (Throwable ex) {
+                throw wrapException(ex);
+            }
+            MemorySegment.copy(buf, JAVA_BYTE, 0, dest, 0, dest.length);
         }
     }
 
