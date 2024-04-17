@@ -24,6 +24,7 @@ package org.openslide;
 public class OpenSlideDisposedException extends RuntimeException {
     private static final String MSG = " object has been closed";
 
+    @Deprecated
     public OpenSlideDisposedException() {
         this("OpenSlide");
     }

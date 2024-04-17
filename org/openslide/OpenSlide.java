@@ -31,9 +31,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.filechooser.FileFilter;
 
@@ -49,6 +46,30 @@ public final class OpenSlide implements Closeable {
             return "Virtual slide";
         }
     };
+
+    private static class ErrorCtx implements AutoCloseable {
+        private final OpenSlideFFM.OpenSlideRef osr;
+
+        ErrorCtx(OpenSlideFFM.OpenSlideRef osr) throws IOException {
+            this.osr = osr;
+            // immediately check for errors
+            close();
+        }
+
+        OpenSlideFFM.OpenSlideRef getOsr() {
+            return osr;
+        }
+
+        // doesn't really close; just a convenience wrapper for checking errors
+        // via try-with-resources
+        @Override
+        public void close() throws IOException {
+            String msg = OpenSlideFFM.openslide_get_error(osr);
+            if (msg != null) {
+                throw new IOException(msg);
+            }
+        }
+    }
 
     private static final String LIBRARY_VERSION = OpenSlideFFM
             .openslide_get_version();
@@ -77,9 +98,8 @@ public final class OpenSlide implements Closeable {
 
     final public static String PROPERTY_NAME_VENDOR = "openslide.vendor";
 
-    private OpenSlideFFM.OpenSlideRef osr;
-
-    final private ReadWriteLock lock = new ReentrantReadWriteLock();
+    // should generally be used in a try-with-resources block to detect errors
+    final private ErrorCtx errorCtx;
 
     final private long levelWidths[];
 
@@ -107,105 +127,85 @@ public final class OpenSlide implements Closeable {
             throw new FileNotFoundException(file.toString());
         }
 
-        osr = OpenSlideFFM.openslide_open(file.getPath());
+        OpenSlideFFM.OpenSlideRef osr = OpenSlideFFM.openslide_open(
+                file.getPath());
 
         if (osr == null) {
             throw new IOException(file
                     + ": Not a file that OpenSlide can recognize");
         }
-        // dispose on error, we are in the constructor
         try {
-            checkError();
+            errorCtx = new ErrorCtx(osr);
         } catch (IOException e) {
-            dispose();
+            // close, we are in the constructor
+            osr.close();
             throw e;
         }
 
-        // store level count
-        levelCount = OpenSlideFFM.openslide_get_level_count(osr);
+        try (errorCtx) {
+            // store level count
+            levelCount = OpenSlideFFM.openslide_get_level_count(osr);
 
-        // store dimensions
-        levelWidths = new long[levelCount];
-        levelHeights = new long[levelCount];
-        levelDownsamples = new double[levelCount];
+            // store dimensions
+            levelWidths = new long[levelCount];
+            levelHeights = new long[levelCount];
+            levelDownsamples = new double[levelCount];
 
-        for (int i = 0; i < levelCount; i++) {
-            long dim[] = new long[2];
-            OpenSlideFFM.openslide_get_level_dimensions(osr, i, dim);
-            levelWidths[i] = dim[0];
-            levelHeights[i] = dim[1];
-            levelDownsamples[i] = OpenSlideFFM.openslide_get_level_downsample(
-                    osr, i);
-        }
-
-        // properties
-        HashMap<String, String> props = new HashMap<String, String>();
-        for (String s : OpenSlideFFM.openslide_get_property_names(osr)) {
-            props.put(s, OpenSlideFFM.openslide_get_property_value(osr, s));
-        }
-
-        properties = Collections.unmodifiableMap(props);
-
-        // associated images
-        HashMap<String, AssociatedImage> associated =
-                new HashMap<String, AssociatedImage>();
-        for (String s : OpenSlideFFM
-                .openslide_get_associated_image_names(osr)) {
-            associated.put(s, new AssociatedImage(s, this));
-        }
-
-        associatedImages = Collections.unmodifiableMap(associated);
-
-        // store info for hash and equals
-        canonicalFile = file.getCanonicalFile();
-        String quickhash1 = getProperties().get(PROPERTY_NAME_QUICKHASH1);
-        if (quickhash1 != null) {
-            hashCodeVal = (int) Long.parseLong(quickhash1.substring(0, 8), 16);
-        } else {
-            hashCodeVal = canonicalFile.hashCode();
-        }
-
-        // dispose on error, we are in the constructor
-        try {
-            checkError();
-        } catch (IOException e) {
-            dispose();
-            throw e;
-        }
-    }
-
-    // call with the reader lock held, or from the constructor
-    private void checkError() throws IOException {
-        String msg = OpenSlideFFM.openslide_get_error(osr);
-
-        if (msg != null) {
-            throw new IOException(msg);
-        }
-    }
-
-    // takes the writer lock
-    public void dispose() {
-        Lock wl = lock.writeLock();
-        wl.lock();
-        try {
-            if (osr != null) {
-                osr.close();
-                osr = null;
+            for (int i = 0; i < levelCount; i++) {
+                long dim[] = new long[2];
+                OpenSlideFFM.openslide_get_level_dimensions(osr, i, dim);
+                levelWidths[i] = dim[0];
+                levelHeights[i] = dim[1];
+                levelDownsamples[i] =
+                        OpenSlideFFM.openslide_get_level_downsample(osr, i);
             }
-        } finally {
-            wl.unlock();
+
+            // properties
+            HashMap<String, String> props = new HashMap<String, String>();
+            for (String s : OpenSlideFFM.openslide_get_property_names(osr)) {
+                props.put(s, OpenSlideFFM.openslide_get_property_value(osr, s));
+            }
+
+            properties = Collections.unmodifiableMap(props);
+
+            // associated images
+            HashMap<String, AssociatedImage> associated =
+                    new HashMap<String, AssociatedImage>();
+            for (String s : OpenSlideFFM
+                    .openslide_get_associated_image_names(osr)) {
+                associated.put(s, new AssociatedImage(s, this));
+            }
+
+            associatedImages = Collections.unmodifiableMap(associated);
+
+            // store info for hash and equals
+            canonicalFile = file.getCanonicalFile();
+            String quickhash1 = getProperties().get(PROPERTY_NAME_QUICKHASH1);
+            if (quickhash1 != null) {
+                hashCodeVal = (int) Long.parseLong(quickhash1.substring(0, 8),
+                        16);
+            } else {
+                hashCodeVal = canonicalFile.hashCode();
+            }
+        } catch (IOException e) {
+            // close, we are in the constructor
+            close();
+            throw e;
         }
+    }
+
+    @Override
+    public void close() {
+        errorCtx.getOsr().close();
+    }
+
+    @Deprecated
+    public void dispose() {
+        close();
     }
 
     public int getLevelCount() {
         return levelCount;
-    }
-
-    // call with the reader lock held
-    private void checkDisposed() {
-        if (osr == null) {
-            throw new OpenSlideDisposedException();
-        }
     }
 
     public long getLevel0Width() {
@@ -229,7 +229,6 @@ public final class OpenSlide implements Closeable {
         paintRegion(g, dx, dy, sx, sy, w, h, levelDownsamples[level]);
     }
 
-    // takes the reader lock
     public void paintRegionARGB(int dest[], long x, long y, int level, int w,
             int h) throws IOException {
         if ((long) w * (long) h > dest.length) {
@@ -241,14 +240,9 @@ public final class OpenSlide implements Closeable {
             throw new IllegalArgumentException("w and h must be nonnegative");
         }
 
-        Lock rl = lock.readLock();
-        rl.lock();
-        try {
-            checkDisposed();
-            OpenSlideFFM.openslide_read_region(osr, dest, x, y, level, w, h);
-            checkError();
-        } finally {
-            rl.unlock();
+        try (errorCtx) {
+            OpenSlideFFM.openslide_read_region(errorCtx.getOsr(), dest, x, y,
+                    level, w, h);
         }
     }
 
@@ -391,48 +385,33 @@ public final class OpenSlide implements Closeable {
         return associatedImages;
     }
 
-    // takes the reader lock
     BufferedImage getAssociatedImage(String name) throws IOException {
-        Lock rl = lock.readLock();
-        rl.lock();
-        try {
-            checkDisposed();
-
-            long dim[] = new long[2];
-            OpenSlideFFM.openslide_get_associated_image_dimensions(osr, name,
-                    dim);
-            checkError();
-            if (dim[0] == -1) {
-                // non-terminal error
-                throw new IOException("Failure reading associated image");
-            }
-
-            BufferedImage img = new BufferedImage((int) dim[0], (int) dim[1],
-                    BufferedImage.TYPE_INT_ARGB_PRE);
-
-            int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
-                    .getData();
-
-            OpenSlideFFM.openslide_read_associated_image(osr, name, data);
-            checkError();
-            return img;
-        } finally {
-            rl.unlock();
+        long dim[] = new long[2];
+        try (errorCtx) {
+            OpenSlideFFM.openslide_get_associated_image_dimensions(
+                    errorCtx.getOsr(), name, dim);
         }
+        if (dim[0] == -1) {
+            // non-terminal error
+            throw new IOException("Failure reading associated image");
+        }
+
+        BufferedImage img = new BufferedImage((int) dim[0], (int) dim[1],
+                BufferedImage.TYPE_INT_ARGB_PRE);
+
+        int data[] = ((DataBufferInt) img.getRaster().getDataBuffer())
+                .getData();
+
+        try (errorCtx) {
+            OpenSlideFFM.openslide_read_associated_image(errorCtx.getOsr(),
+                    name, data);
+        }
+        return img;
     }
 
     public void setCache(OpenSlideCache cache) {
-        Lock cl = cache.getLock();
-        Lock rl = lock.readLock();
-        cl.lock();
-        rl.lock();
-        try {
-            checkDisposed();
-            OpenSlideFFM.openslide_set_cache(osr, cache.getRef());
-        } finally {
-            rl.unlock();
-            cl.unlock();
-        }
+        // don't bother checking for OpenSlide errors
+        OpenSlideFFM.openslide_set_cache(errorCtx.getOsr(), cache.getRef());
     }
 
     public static String getLibraryVersion() {
@@ -471,10 +450,5 @@ public final class OpenSlide implements Closeable {
         }
 
         return false;
-    }
-
-    @Override
-    public void close() {
-        dispose();
     }
 }
