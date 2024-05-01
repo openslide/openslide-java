@@ -42,6 +42,7 @@ jobs:
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-14'
       run: |
+        brew update
         brew install openslide
         # allow smoke test to find OpenSlide
         echo "DYLD_LIBRARY_PATH=/opt/homebrew/lib" >> $GITHUB_ENV
