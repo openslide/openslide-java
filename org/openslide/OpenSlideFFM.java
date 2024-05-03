@@ -356,14 +356,16 @@ class OpenSlideFFM {
     static String openslide_get_error(OpenSlideRef osr) {
         MemorySegment ret;
         try (Ref.ScopedLock l = osr.lock()) {
-            ret = (MemorySegment) get_error.invokeExact(osr.getSegment());
-        } catch (Throwable ex) {
-            throw wrapException(ex);
+            try {
+                ret = (MemorySegment) get_error.invokeExact(osr.getSegment());
+            } catch (Throwable ex) {
+                throw wrapException(ex);
+            }
+            if (ret.equals(MemorySegment.NULL)) {
+                return null;
+            }
+            return ret.getString(0);
         }
-        if (ret.equals(MemorySegment.NULL)) {
-            return null;
-        }
-        return ret.getString(0);
     }
 
     private static final MethodHandle get_property_names = function(
@@ -372,12 +374,14 @@ class OpenSlideFFM {
     static String[] openslide_get_property_names(OpenSlideRef osr) {
         MemorySegment ret;
         try (Ref.ScopedLock l = osr.lock()) {
-            ret = (MemorySegment) get_property_names.invokeExact(
-                    osr.getSegment());
-        } catch (Throwable ex) {
-            throw wrapException(ex);
+            try {
+                ret = (MemorySegment) get_property_names.invokeExact(
+                        osr.getSegment());
+            } catch (Throwable ex) {
+                throw wrapException(ex);
+            }
+            return segment_to_string_array(ret);
         }
-        return segment_to_string_array(ret);
     }
 
     private static final MethodHandle get_property_value = function(
@@ -385,16 +389,18 @@ class OpenSlideFFM {
 
     static String openslide_get_property_value(OpenSlideRef osr, String name) {
         MemorySegment ret;
-        try (Arena arena = Arena.ofConfined(); Ref.ScopedLock l = osr.lock()) {
-            ret = (MemorySegment) get_property_value.invokeExact(
-                    osr.getSegment(), arena.allocateFrom(name));
-        } catch (Throwable ex) {
-            throw wrapException(ex);
+        try (Ref.ScopedLock l = osr.lock()) {
+            try (Arena arena = Arena.ofConfined()) {
+                ret = (MemorySegment) get_property_value.invokeExact(
+                        osr.getSegment(), arena.allocateFrom(name));
+            } catch (Throwable ex) {
+                throw wrapException(ex);
+            }
+            if (ret.equals(MemorySegment.NULL)) {
+                return null;
+            }
+            return ret.getString(0);
         }
-        if (ret.equals(MemorySegment.NULL)) {
-            return null;
-        }
-        return ret.getString(0);
     }
 
     private static final MethodHandle get_associated_image_names = function(
@@ -403,12 +409,14 @@ class OpenSlideFFM {
     static String[] openslide_get_associated_image_names(OpenSlideRef osr) {
         MemorySegment ret;
         try (Ref.ScopedLock l = osr.lock()) {
-            ret = (MemorySegment) get_associated_image_names.invokeExact(
-                    osr.getSegment());
-        } catch (Throwable ex) {
-            throw wrapException(ex);
+            try {
+                ret = (MemorySegment) get_associated_image_names.invokeExact(
+                        osr.getSegment());
+            } catch (Throwable ex) {
+                throw wrapException(ex);
+            }
+            return segment_to_string_array(ret);
         }
-        return segment_to_string_array(ret);
     }
 
     private static final MethodHandle get_associated_image_dimensions = function(
