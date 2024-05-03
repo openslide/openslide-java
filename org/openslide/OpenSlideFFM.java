@@ -234,9 +234,6 @@ class OpenSlideFFM {
             C_POINTER, "openslide_detect_vendor", C_POINTER);
 
     static String openslide_detect_vendor(String filename) {
-        if (filename == null) {
-            return null;
-        }
         MemorySegment ret;
         try (Arena arena = Arena.ofConfined()) {
             ret = (MemorySegment) detect_vendor.invokeExact(
@@ -254,9 +251,6 @@ class OpenSlideFFM {
             C_POINTER, "openslide_open", C_POINTER);
 
     static OpenSlideRef openslide_open(String filename) {
-        if (filename == null) {
-            return null;
-        }
         MemorySegment ret;
         try (Arena arena = Arena.ofConfined()) {
             ret = (MemorySegment) open.invokeExact(
@@ -390,9 +384,6 @@ class OpenSlideFFM {
             C_POINTER, "openslide_get_property_value", C_POINTER, C_POINTER);
 
     static String openslide_get_property_value(OpenSlideRef osr, String name) {
-        if (name == null) {
-            return null;
-        }
         MemorySegment ret;
         try (Arena arena = Arena.ofConfined(); Ref.ScopedLock l = osr.lock()) {
             ret = (MemorySegment) get_property_value.invokeExact(
@@ -426,9 +417,6 @@ class OpenSlideFFM {
 
     static void openslide_get_associated_image_dimensions(OpenSlideRef osr,
             String name, long dim[]) {
-        if (name == null) {
-            return;
-        }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment w = arena.allocateFrom(JAVA_LONG, 0);
             MemorySegment h = arena.allocateFrom(JAVA_LONG, 0);
@@ -449,9 +437,6 @@ class OpenSlideFFM {
 
     static void openslide_read_associated_image(OpenSlideRef osr, String name,
             int dest[]) {
-        if (name == null) {
-            return;
-        }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf = arena.allocate(JAVA_INT, dest.length);
             try (Ref.ScopedLock l = osr.lock()) {
@@ -470,9 +455,6 @@ class OpenSlideFFM {
 
     static long openslide_get_associated_image_icc_profile_size(
             OpenSlideRef osr, String name) {
-        if (name == null) {
-            return -1;
-        }
         try (Arena arena = Arena.ofConfined(); Ref.ScopedLock l = osr.lock()) {
             return (long) get_associated_image_icc_profile_size.invokeExact(
                     osr.getSegment(), arena.allocateFrom(name));
@@ -487,9 +469,6 @@ class OpenSlideFFM {
 
     static void openslide_read_associated_image_icc_profile(OpenSlideRef osr,
             String name, byte dest[]) {
-        if (name == null) {
-            return;
-        }
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment buf = arena.allocate(JAVA_BYTE, dest.length);
             try (Ref.ScopedLock l = osr.lock()) {
