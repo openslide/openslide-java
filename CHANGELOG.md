@@ -1,5 +1,33 @@
 # Notable Changes in OpenSlide Java
 
+## Version 0.13.0, 2024-05-04
+
+### Breaking changes
+
+* Require Java ≥ 22
+* Require OpenSlide ≥ 4.0.0
+* Switch from JNI to FFM, making OpenSlide Java builds platform-independent
+* Build with Maven
+* Remove Autotools+Ant and Meson build systems
+* Stop shipping source tarball, in favor of GitHub source archive
+* Rename JAR to `openslide-java-$version.jar`
+
+### New features
+
+* Support OpenSlide cache management API
+* Support reading ICC color profiles from slides and associated images
+* Add `OpenSlide.readRegion()` method returning a `BufferedImage`
+* Add `OpenSlide.PROPERTY_NAME_ICC_SIZE`
+* Automatically close unreferenced `OpenSlide` and `OpenSlideCache` objects
+* Add one-argument `OpenSlideDisposedException` constructor
+* Ship JAR as release artifact
+
+### Deprecations
+
+* Deprecate `OpenSlide.dispose()` in favor of `OpenSlide.close()`
+* Deprecate zero-argument `OpenSlideDisposedException` constructor
+
+
 ## Version 0.12.4, 2023-11-07
 
 * Allow opening the synthetic test slide
