@@ -1,3 +1,10 @@
+---
+link-text: Release checklist
+repo: openslide/openslide-java
+title: Release X.Y.Z
+labels: [release]
+---
+
 # OpenSlide Java release process
 
 - [ ] Update `CHANGELOG.md` and version in `pom.xml`

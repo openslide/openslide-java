@@ -26,3 +26,12 @@ repos:
     hooks:
       - id: check-hooks-apply
       - id: check-useless-excludes
+
+  - repo: local
+    hooks:
+      - id: mkmaintainer
+        name: Sync maintainer issue templates
+        entry: .github/maintainer/mkmaintainer.py
+        files: .github/maintainer/
+        language: python
+        additional_dependencies: [PyYAML]
