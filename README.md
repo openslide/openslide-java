@@ -25,7 +25,7 @@ mvn
 The JAR will be in `target/openslide-java-*.jar`.
 
 If you have multiple JVMs on your system, and Maven defaults to a version
-older than 22, you might need to set `JAVA_HOME`.  For exmaple, on Fedora:
+older than 22, you might need to set `JAVA_HOME`.  For example, on Fedora:
 
 ```
 JAVA_HOME=/usr/lib/jvm/java-22 mvn
