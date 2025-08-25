@@ -1,4 +1,5 @@
-# Don't include Git/GitHub metadata in release tarballs
-.gitattributes	export-ignore
-.gitignore	export-ignore
-/.github	export-ignore
+# Don't include tool metadata in source archive
+.gitattributes			export-ignore
+.gitignore			export-ignore
+/.github			export-ignore
+/.pre-commit-config.yaml	export-ignore
