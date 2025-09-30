@@ -16,13 +16,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
+      - name: Install dependencies
+        run: python -m pip install pre-commit
+      - name: Cache pre-commit environments
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
       - name: Run pre-commit hooks
-        uses: pre-commit/action@v3.0.1
+        run: pre-commit run -a --show-diff-on-failure --color=always
 
   build:
     name: Build
@@ -33,7 +40,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
-        java: [22, 24]
+        java: [22, 25]
         include:
           - os: ubuntu-latest
             java: 22
@@ -43,9 +50,9 @@ jobs:
         shell: bash
     steps:
     - name: Check out repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Install Java
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         distribution: oracle
         java-version: ${{ matrix.java }}
@@ -111,9 +118,9 @@ jobs:
       contents: write
     steps:
     - name: Check out repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Download artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         pattern: ${{ needs.build.outputs.dist-base }}
         merge-multiple: true
