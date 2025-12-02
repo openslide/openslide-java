@@ -1,5 +1,10 @@
 # Notable Changes in OpenSlide Java
 
+## Version 0.13.1, 2025-12-02
+
+* Fix backward compatibility of JARs built with Java \> 22
+
+
 ## Version 0.13.0, 2024-05-04
 
 ### Breaking changes
