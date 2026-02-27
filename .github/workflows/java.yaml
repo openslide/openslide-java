@@ -102,7 +102,7 @@ jobs:
         mv target/openslide-java-*.jar "artifacts/${dist}"
     - name: Archive dist
       if: matrix.dist
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ steps.dist.outputs.dist-base }}
         path: artifacts
@@ -120,7 +120,7 @@ jobs:
     - name: Check out repo
       uses: actions/checkout@v5
     - name: Download artifacts
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v8
       with:
         pattern: ${{ needs.build.outputs.dist-base }}
         merge-multiple: true
