@@ -2,8 +2,10 @@ version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
+    commit-message:
+      prefix: workflows
     groups:
-      github-actions:
+      deps:
         patterns: ["*"]
     labels: ["dependencies"]
     schedule:
@@ -11,8 +13,10 @@ updates:
 
   - package-ecosystem: maven
     directory: /
+    commit-message:
+      prefix: maven
     groups:
-      maven:
+      deps:
         patterns: ["*"]
     labels: ["dependencies"]
     schedule:
@@ -20,8 +24,10 @@ updates:
 
   - package-ecosystem: pre-commit
     directory: /
+    commit-message:
+      prefix: pre-commit
     groups:
-      pre-commit:
+      deps:
         patterns: ["*"]
     labels: ["dependencies"]
     schedule:
