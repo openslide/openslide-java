@@ -1,9 +1,28 @@
 version: 2
 updates:
-  # Periodically check for Maven plugin updates
-  - package-ecosystem: maven
+  - package-ecosystem: github-actions
     directory: /
+    groups:
+      github-actions:
+        patterns: ["*"]
+    labels: ["dependencies"]
     schedule:
       interval: monthly
-    commit-message:
-      prefix: maven
+
+  - package-ecosystem: maven
+    directory: /
+    groups:
+      maven:
+        patterns: ["*"]
+    labels: ["dependencies"]
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: pre-commit
+    directory: /
+    groups:
+      pre-commit:
+        patterns: ["*"]
+    labels: ["dependencies"]
+    schedule:
+      interval: monthly
