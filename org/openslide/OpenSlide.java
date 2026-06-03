@@ -84,6 +84,8 @@ public final class OpenSlide implements Closeable {
 
     final public static String PROPERTY_NAME_BACKGROUND_COLOR = "openslide.background-color";
 
+    final public static String PROPERTY_NAME_BARCODE = "openslide.barcode";
+
     final public static String PROPERTY_NAME_BOUNDS_HEIGHT = "openslide.bounds-height";
 
     final public static String PROPERTY_NAME_BOUNDS_WIDTH = "openslide.bounds-width";
