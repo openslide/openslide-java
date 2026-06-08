@@ -112,7 +112,7 @@ jobs:
     name: Release
     if: github.ref_type == 'tag'
     needs: build
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     concurrency: release-${{ github.ref }}
     permissions:
       contents: write
@@ -129,7 +129,9 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         version=$(echo "${{ github.ref_name }}" | sed "s/^v//")
-        awk '/^## / && ok {exit} /^## / {ok=1; next} ok {print}' \
+        awk -e '/^## / && ok {exit}' \
+            -e '/^## / {ok=1; next}' \
+            -e 'ok {print}' \
             CHANGELOG.md > changes
         gh release create --prerelease --verify-tag \
             --repo "${{ github.repository }}" \
