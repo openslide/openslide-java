@@ -1,6 +1,6 @@
 # Notable Changes in OpenSlide Java
 
-## Version 0.13.2, 2026-06-07
+## Version 0.13.3, 2026-06-07
 
 * Add constant for `openslide.barcode` property
 
